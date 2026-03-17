@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'SDIMS_apps.homesandall',
+    'SDIMS_apps.students',
 ]
 
 MIDDLEWARE = [

@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 
-class Student(models.Model):
+class Trainee(models.Model):
     GENDER_CHOICES = (
         ('M', 'Male'),
         ('F', 'Female'),
@@ -42,5 +42,5 @@ class Student(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
-    def is_active_student(self):
+    def is_active_trainee(self):
         return self.status in ['ENROLLED', 'TRAINING']

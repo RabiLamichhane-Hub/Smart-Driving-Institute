@@ -1,0 +1,23 @@
+<h2>trainee List</h2>
+
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Course</th>
+        <th>Status</th>
+    </tr>
+
+    {% for trainee in trainees %}
+    <tr>
+        <td>{{ trainee.first_name }} {{ trainee.last_name }}</td>
+        <td>{{ trainee.phone }}</td>
+        <td>{{ trainee.course }}</td>
+        <td>{{ trainee.status }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">No trainees found</td>
+    </tr>
+    {% endfor %}
+</table>

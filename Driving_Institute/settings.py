@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'SDIMS_apps.homesandall',
     'SDIMS_apps.trainees',
+    'SDIMS_apps.courses',
 ]
 
 MIDDLEWARE = [

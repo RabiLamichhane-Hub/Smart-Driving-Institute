@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('SDIMS_apps.homesandall.urls')),
     path('trainee/', include('SDIMS_apps.trainees.urls')),
+    path('courses/', include('SDIMS_apps.courses.urls'))
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

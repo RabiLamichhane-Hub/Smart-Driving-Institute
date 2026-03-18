@@ -1,0 +1,79 @@
+
+{% block content %}
+
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h5 class="mb-0">
+        {% if form.instance.pk %}Edit Course{% else %}Add New Course{% endif %}
+      </h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.course_name.label }}</label>
+          {{ form.course_name }}
+          {% if form.course_name.errors %}
+            <div class="text-danger small">{{ form.course_name.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">{{ form.vehicle_type.label }}</label>
+            {{ form.vehicle_type }}
+            {% if form.vehicle_type.errors %}
+              <div class="text-danger small">{{ form.vehicle_type.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ form.level.label }}</label>
+            {{ form.level }}
+            {% if form.level.errors %}
+              <div class="text-danger small">{{ form.level.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.description.label }}</label>
+          {{ form.description }}
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">{{ form.duration_days.label }}</label>
+            {{ form.duration_days }}
+            {% if form.duration_days.errors %}
+              <div class="text-danger small">{{ form.duration_days.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">{{ form.total_lessons.label }}</label>
+            {{ form.total_lessons }}
+            {% if form.total_lessons.errors %}
+              <div class="text-danger small">{{ form.total_lessons.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">{{ form.fee.label }}</label>
+            {{ form.fee }}
+            {% if form.fee.errors %}
+              <div class="text-danger small">{{ form.fee.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3 form-check">
+          {{ form.is_active }}
+          <label class="form-check-label">{{ form.is_active.label }}</label>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

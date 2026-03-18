@@ -8,7 +8,7 @@ def add_course(request):
         form = CourseForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('course_list')
+            return redirect('courses:course_list')
     else:
         form = CourseForm()
     return render(request, 'addcourse.html', {'form': form})
@@ -20,7 +20,7 @@ def edit_course(request, pk):
         form = CourseForm(request.POST, instance=course)
         if form.is_valid():
             form.save()
-            return redirect('course_list')
+            return redirect('courses:course_list')
     else:
         form = CourseForm(instance=course)
     return render(request, 'addcourse.html', {'form': form})

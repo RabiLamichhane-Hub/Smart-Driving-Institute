@@ -7,27 +7,43 @@
 
     <h2>Available Courses</h2>
 
-   <a href="{% url 'courses:add_course' %}" class="nav-item"><i class='bx bx-cart'></i> <span>Add Courses</span></a>        
-
+    <a href="{% url 'courses:add_course' %}">
+        <span>Add Courses</span>
+    </a>        
 
     <hr>
 
-    <!-- Sample Course List -->
-    <div>
-        <h3>Car Driving Course</h3>
-        <p>Learn basic to advanced driving.</p>
-        <p>Duration: 30 days</p>
-        <p>Price: Rs. 5000</p>
-    </div>
+    {% for course in courses %}
+        <div>
+            <h3>{{ course.course_name }}</h3>
 
-    <br>
+            <p><strong>Vehicle:</strong> {{ course.get_vehicle_type_display }}</p>
+            <p><strong>Level:</strong> {{ course.get_level_display }}</p>
 
-    <div>
-        <h3>Bike Riding Course</h3>
-        <p>Learn safe bike riding.</p>
-        <p>Duration: 15 days</p>
-        <p>Price: Rs. 3000</p>
-    </div>
+            {% if course.description %}
+                <p>{{ course.description }}</p>
+            {% endif %}
+
+            <p><strong>Duration:</strong> {{ course.duration_days }} days</p>
+            <p><strong>Total Lessons:</strong> {{ course.total_lessons }}</p>
+            <p><strong>Price:</strong> Rs. {{ course.fee }}</p>
+
+            <p><strong>Status:</strong> 
+                {% if course.is_active %}
+                    Active
+                {% else %}
+                    Inactive
+                {% endif %}
+            </p>
+
+            <!-- Edit Button -->
+            <a href="{% url 'courses:edit_course' course.id %}">Edit</a>
+
+        </div>
+        <hr>
+    {% empty %}
+        <p>No courses available.</p>
+    {% endfor %}
 
 </body>
 </html>

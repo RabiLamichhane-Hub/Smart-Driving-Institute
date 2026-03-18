@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'SDIMS_apps.homesandall',
     'SDIMS_apps.trainees',
     'SDIMS_apps.courses',
+    'SDIMS_apps.accounts',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +131,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+AUTH_USER_MODEL = 'accounts.User'

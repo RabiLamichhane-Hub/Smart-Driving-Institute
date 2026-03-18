@@ -7,9 +7,9 @@
 
     <h2>Available Courses</h2>
 
-    <a href="{% url 'courses:add_course' %}">
-        <span>Add Courses</span>
-    </a>        
+    {% if user.role == 'admin' %}
+        <a href="{% url 'courses:add_course' %}">Add Course</a>
+    {% endif %}       
 
     <hr>
 
@@ -37,7 +37,9 @@
             </p>
 
             <!-- Edit Button -->
-            <a href="{% url 'courses:edit_course' course.id %}">Edit</a>
+            {% if user.role == 'admin' %}
+                <a href="{% url 'courses:edit_course' course.id %}">Edit</a>
+            {% endif %}
 
         </div>
         <hr>

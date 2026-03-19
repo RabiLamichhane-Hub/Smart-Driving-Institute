@@ -19,6 +19,12 @@ class Vehicle(models.Model):
         ('maintenance', 'Maintenance'),
     ]
 
+    FUEL_TYPE_CHOICES = [
+        ('petrol', 'Petrol'),
+        ('diesel', 'Diesel'),
+        ('electric', 'Electric')
+    ]
+
     name = models.CharField(max_length=100)
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
@@ -31,7 +37,7 @@ class Vehicle(models.Model):
     engine_number = models.CharField(max_length=50)
     chassis_number = models.CharField(max_length=50)
 
-    fuel_type = models.CharField(max_length=20)
+    fuel_type = models.CharField(max_length=20, choices=FUEL_TYPE_CHOICES)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
 

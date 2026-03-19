@@ -18,10 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('SDIMS_apps.homesandall.urls')),
+    path('', include('SDIMS_apps.accounts.urls')),  # ✅ ADD THIS
     path('trainee/', include('SDIMS_apps.trainees.urls')),
-    path('courses/', include('SDIMS_apps.courses.urls'))
-] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+    path('courses/', include('SDIMS_apps.courses.urls')),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('accounts/', include('SDIMS_apps.accounts.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

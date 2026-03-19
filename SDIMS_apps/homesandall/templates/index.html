@@ -7,7 +7,10 @@
     <title>Document</title>
 </head>
 <body>
-    <a href="{% url 'trainees:register' %}" class="nav-item"><i class='bx bx-cart'></i> <span>Register New Student</span></a>
-    <a href="{% url 'courses:course_list' %}" class="nav-item"><i class='bx bx-cart'></i> <span>View Courses Availble</span></a>        
+    <a href="{% url 'courses:course_list' %}" class="nav-item"><i class='bx bx-cart'></i> <span>View Available Courses</span></a>
+    {% if user.role == 'admin' %}
+        <a href="{% url 'trainees:register' %}">Register New Trainee</a>
+    {% endif %}
+
 </body>
 </html>

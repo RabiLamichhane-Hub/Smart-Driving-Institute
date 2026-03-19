@@ -10,8 +10,17 @@ class CustomLoginView(LoginView):
 
 def redirect_user(request):
     if request.user.role == 'admin':
-        return redirect('admin_dashboard')
+        return redirect('accounts:admin_dashboard')
     elif request.user.role == 'instructor':
-        return redirect('instructor_dashboard')
+        return redirect('accounts:instructor_dashboard')
     else:
-        return redirect('student_dashboard')
+        return redirect('accounts:trainee_dashboard')
+
+def admin_dashboard(request):
+    return render(request, 'admin_dashboard.html')
+
+def instructor_dashboard(request):
+    return render(request, 'instructor_dashboard.html')
+
+def trainee_dashboard(request):
+    return render(request, 'trainee_dashboard.html')

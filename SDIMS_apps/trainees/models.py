@@ -1,6 +1,5 @@
 from django.db import models
-#from courses.models import Course
-# Create your models here.
+from SDIMS_apps.courses.models import Course
 
 
 class Trainee(models.Model):
@@ -28,14 +27,20 @@ class Trainee(models.Model):
     email = models.EmailField(unique=True)
     address = models.CharField(max_length=50)
 
-    # Course Info
-    #course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True)
-    #enrollment_date = models.DateField(auto_now_add=True)
+    # 🔥 COURSE INFO (ADD THIS)
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='trainees'
+    )
+    enrollment_date = models.DateField(auto_now_add=True)
 
     # Progress Tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ENROLLED')
 
-    # Optional (useful but not overkill)
+    # Optional
     guardian_name = models.CharField(max_length=150, blank=True, null=True)
     guardian_phone = models.CharField(max_length=15, blank=True, null=True)
 

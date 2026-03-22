@@ -80,8 +80,12 @@ WSGI_APPLICATION = 'Driving_Institute.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'driving_institute_db',
+        'USER': 'rabi',
+        'PASSWORD': 'letitallworkout',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

@@ -9,6 +9,10 @@
         <a href="{% url 'trainees:register' %}">Register New Trainee</a>
     {% endif %}
 
+    {% if user.role == 'admin' %}
+        <a href="{% url 'trainees:trainee_list' %}">See trainees list</a>
+    {% endif %}
+
     <h2>Available Courses</h2>
 
     {% if user.role == 'admin' %}
@@ -23,6 +27,13 @@
 
             <p><strong>Vehicle:</strong> {{ course.get_vehicle_type_display }}</p>
             <p><strong>Level:</strong> {{ course.get_level_display }}</p>
+            <p><strong>Assigned Vehicles:</strong>
+            {% for vehicle in course.vehicles.all %}
+                {{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.registration_number }}){% if not forloop.last %}, {% endif %}
+            {% empty %}
+                None
+            {% endfor %}
+            </p>
 
             {% if course.description %}
                 <p>{{ course.description }}</p>

@@ -4,6 +4,9 @@
     <title>All Vehicles</title>
 </head>
 <body>
+    {% if user.role == 'admin' %}
+        <a href="{% url 'vehicles:add_vehicle' %}">Add New Vehicle</a>
+    {% endif %}
     <h1>All Vehicles</h1>
     
     <table border="1" cellpadding="5" cellspacing="0">

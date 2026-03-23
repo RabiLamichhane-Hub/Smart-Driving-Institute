@@ -2,7 +2,7 @@
 
 <div class="container mt-4">
   <div class="card shadow-sm">
-    
+
     <div class="card-header">
       <h5 class="mb-0">
         {% if form.instance.pk %}Edit Course{% else %}Add New Course{% endif %}
@@ -15,75 +15,87 @@
 
         <!-- Course Name -->
         <div class="mb-3">
-          <label class="form-label">{{ form.course_name.label }}</label>
+          {{ form.course_name.label_tag }}
           {{ form.course_name }}
-          <div class="text-danger small">{{ form.course_name.errors }}</div>
+          {% if form.course_name.errors %}
+            <div class="text-danger small">{{ form.course_name.errors }}</div>
+          {% endif %}
         </div>
 
         <!-- Vehicle Type & Level -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <label class="form-label">{{ form.vehicle_type.label }}</label>
+            {{ form.vehicle_type.label_tag }}
             {{ form.vehicle_type }}
-            <div class="text-danger small">{{ form.vehicle_type.errors }}</div>
+            {% if form.vehicle_type.errors %}
+              <div class="text-danger small">{{ form.vehicle_type.errors }}</div>
+            {% endif %}
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">{{ form.level.label }}</label>
+            {{ form.level.label_tag }}
             {{ form.level }}
-            <div class="text-danger small">{{ form.level.errors }}</div>
+            {% if form.level.errors %}
+              <div class="text-danger small">{{ form.level.errors }}</div>
+            {% endif %}
           </div>
         </div>
 
-        <!-- 🔥 Vehicles -->
+        <!-- Vehicles -->
         <div class="mb-3">
-          <label class="form-label">{{ form.vehicles.label }}</label>
+          {{ form.vehicles.label_tag }}
           {{ form.vehicles }}
-          <div class="text-danger small">{{ form.vehicles.errors }}</div>
+          {% if form.vehicles.errors %}
+            <div class="text-danger small">{{ form.vehicles.errors }}</div>
+          {% endif %}
         </div>
 
         <!-- Description -->
         <div class="mb-3">
-          <label class="form-label">{{ form.description.label }}</label>
+          {{ form.description.label_tag }}
           {{ form.description }}
+          {% if form.description.errors %}
+            <div class="text-danger small">{{ form.description.errors }}</div>
+          {% endif %}
         </div>
 
         <!-- Duration / Lessons / Fee -->
         <div class="row mb-3">
           <div class="col-md-4">
-            <label class="form-label">{{ form.duration_days.label }}</label>
+            {{ form.duration_days.label_tag }}
             {{ form.duration_days }}
-            <div class="text-danger small">{{ form.duration_days.errors }}</div>
+            {% if form.duration_days.errors %}
+              <div class="text-danger small">{{ form.duration_days.errors }}</div>
+            {% endif %}
           </div>
 
           <div class="col-md-4">
-            <label class="form-label">{{ form.total_lessons.label }}</label>
+            {{ form.total_lessons.label_tag }}
             {{ form.total_lessons }}
-            <div class="text-danger small">{{ form.total_lessons.errors }}</div>
+            {% if form.total_lessons.errors %}
+              <div class="text-danger small">{{ form.total_lessons.errors }}</div>
+            {% endif %}
           </div>
 
           <div class="col-md-4">
-            <label class="form-label">{{ form.fee.label }}</label>
+            {{ form.fee.label_tag }}
             {{ form.fee }}
-            <div class="text-danger small">{{ form.fee.errors }}</div>
+            {% if form.fee.errors %}
+              <div class="text-danger small">{{ form.fee.errors }}</div>
+            {% endif %}
           </div>
         </div>
 
         <!-- Active -->
         <div class="mb-3 form-check">
           {{ form.is_active }}
-          <label class="form-check-label">{{ form.is_active.label }}</label>
+          {{ form.is_active.label_tag }}
         </div>
 
         <!-- Buttons -->
         <div class="d-flex justify-content-between">
-          <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">
-            Cancel
-          </a>
-
-          <button type="submit" class="btn btn-primary">
-            Save Course
-          </button>
+          <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save Course</button>
         </div>
 
       </form>
@@ -91,11 +103,5 @@
 
   </div>
 </div>
-
-<script>
-  document.getElementById("id_vehicle_type").addEventListener("change", function() {
-      this.form.submit();
-  });
-</script>
 
 {% endblock %}

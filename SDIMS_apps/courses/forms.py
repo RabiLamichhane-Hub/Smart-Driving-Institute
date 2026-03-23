@@ -27,12 +27,10 @@ class CourseForm(forms.ModelForm):
             'vehicle_type': forms.Select(attrs={
                 'class': 'form-select',
             }),
-
-            # 🔥 VEHICLE FIELD UI
-            'vehicles': forms.SelectMultiple(attrs={
+            # 🔥 VEHICLE FIELD UI (simple dropdown)
+            'vehicles': forms.Select(attrs={
                 'class': 'form-select',
             }),
-
             'level': forms.Select(attrs={
                 'class': 'form-select',
             }),
@@ -65,7 +63,7 @@ class CourseForm(forms.ModelForm):
         labels = {
             'course_name': 'Course Name',
             'vehicle_type': 'Vehicle Type',
-            'vehicles': 'Select Vehicles',  # 🔥 ADDED
+            'vehicles': 'Select Vehicle',  # 🔥 single dropdown
             'level': 'Course Level',
             'description': 'Description',
             'duration_days': 'Duration (Days)',
@@ -74,39 +72,19 @@ class CourseForm(forms.ModelForm):
             'is_active': 'Active Course',
         }
 
-    # 🔥 DYNAMIC FILTERING
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['vehicles'].queryset = Vehicle.objects.none()
+        # Show all available vehicles in dropdown
+        self.fields['vehicles'].queryset = Vehicle.objects.filter(status='available')
+        self.fields['vehicles'].empty_label = "Select a vehicle"
 
-        # When form is submitted (POST)
-        if 'vehicle_type' in self.data:
-            vehicle_type = self.data.get('vehicle_type')
-            self.fields['vehicles'].queryset = Vehicle.objects.filter(
-                status='available',
-                vehicle_type=vehicle_type
-            )
-
-        # When editing existing instance
-        elif self.instance.pk:
-            self.fields['vehicles'].queryset = Vehicle.objects.filter(
-                status='available',
-                vehicle_type=self.instance.vehicle_type
-            )
-
-    # 🔒 VALIDATION (VERY IMPORTANT)
+    # 🔒 VALIDATION
     def clean_vehicles(self):
-        vehicles = self.cleaned_data.get('vehicles')
-        vehicle_type = self.cleaned_data.get('vehicle_type')
-
-        for vehicle in vehicles:
-            if vehicle.vehicle_type != vehicle_type:
-                raise forms.ValidationError(
-                    f"{vehicle} does not match selected vehicle type."
-                )
-
-        return vehicles
+        vehicle = self.cleaned_data.get('vehicles')
+        if vehicle and vehicle.status != 'available':
+            raise forms.ValidationError(f"{vehicle} is not available.")
+        return vehicle
 
     def clean_fee(self):
         fee = self.cleaned_data.get('fee')

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Vehicles</title>
+</head>
+<body>
+    <h1>All Vehicles</h1>
+    
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Type</th>
+                <th>Transmission</th>
+                <th>Registration Number</th>
+                <th>Bluebook Number</th>
+                <th>Engine Number</th>
+                <th>Chassis Number</th>
+                <th>Fuel Type</th>
+                <th>Status</th>
+                <th>Last Service</th>
+                <th>Insurance Expiry</th>
+                <th>Dual Control</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles %}
+            <tr>
+                <td>{{ vehicle.name }}</td>
+                <td>{{ vehicle.brand }}</td>
+                <td>{{ vehicle.model }}</td>
+                <td>{{ vehicle.get_vehicle_type_display }}</td>
+                <td>{{ vehicle.get_transmission_display }}</td>
+                <td>{{ vehicle.registration_number }}</td>
+                <td>{{ vehicle.bluebook_number }}</td>
+                <td>{{ vehicle.engine_number }}</td>
+                <td>{{ vehicle.chassis_number }}</td>
+                <td>{{ vehicle.get_fuel_type_display }}</td>
+                <td>{{ vehicle.get_status_display }}</td>
+                <td>{{ vehicle.last_service_date }}</td>
+                <td>{{ vehicle.insurance_expiry }}</td>
+                <td>{{ vehicle.dual_control|yesno:"Yes,No" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="14">No vehicles found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

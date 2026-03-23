@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instructor Form</title>
+</head>
+<body>
+    <h1>Instructor Form</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'instructors:instructor_list' %}">Back to list</a>
+</body>
+</html>

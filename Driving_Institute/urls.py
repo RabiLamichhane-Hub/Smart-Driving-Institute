@@ -29,4 +29,5 @@ urlpatterns = [
     path('accounts/', include('SDIMS_apps.accounts.urls')),
     path('vehicles/',include('SDIMS_apps.vehicles.urls')),
     path('instructors/', include('SDIMS_apps.instructors.urls')),
+    path('training/', include('SDIMS_apps.training.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

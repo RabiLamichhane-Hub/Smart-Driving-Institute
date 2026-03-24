@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'SDIMS_apps.accounts',
     'SDIMS_apps.vehicles',
     'SDIMS_apps.instructors',
+    'SDIMS_apps.training',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Training Sessions</title>
+</head>
+<body>
+
+<h1>Training Sessions</h1>
+
+<a href="{% url 'training:session_create' %}">Add Session</a>
+
+<table border="1">
+    <tr>
+        <th>Student</th>
+        <th>Instructor</th>
+        <th>Vehicle</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for session in sessions %}
+    <tr>
+        <td>{{ session.trainee }}</td>
+        <td>{{ session.instructor }}</td>
+        <td>{{ session.vehicle }}</td>
+        <td>{{ session.session_date }}</td>
+        <td>{{ session.start_time }} - {{ session.end_time }}</td>
+        <td>{{ session.get_status_display }}</td>
+        <td>
+            <a href="{% url 'training:session_update' session.pk %}">Edit</a>
+            <a href="{% url 'training:session_delete' session.pk %}">Delete</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7">No sessions found</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

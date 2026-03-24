@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Session</title>
+</head>
+<body>
+
+<h1>Delete Session</h1>
+
+<p>Are you sure you want to delete this session?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Yes</button>
+</form>
+
+<a href="{% url 'session_list' %}">Cancel</a>
+
+</body>
+</html>

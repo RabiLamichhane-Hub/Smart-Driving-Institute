@@ -10,6 +10,7 @@ class Course(models.Model):
         ('bike', 'Bike / Motorcycle'),
         ('heavy', 'Heavy Vehicle'),
         ('tempo', 'Tempo / Mini Truck'),
+        ('scooter', 'Scooter'),
     ]
 
     LEVEL_CHOICES = [

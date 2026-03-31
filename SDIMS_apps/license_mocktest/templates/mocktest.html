@@ -1,0 +1,22 @@
+<form method="post" action="{% url 'license_mocktest:mocktest_result' %}">
+    {% csrf_token %}
+
+    {% for q in mocktest %}
+    <div class="question-block">
+        <p><strong>Q{{ forloop.counter }}:</strong> {{ q.question }}</p>
+        <ul>
+            {% for key, val in q.options.items %}
+            <li>
+                <label>
+                    <input type="radio" name="{{ q.id }}" value="{{ key }}" required>
+                    {{ key }}. {{ val }}
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <hr>
+    {% endfor %}
+
+    <button type="submit">Submit</button>
+</form>

@@ -1,0 +1,37 @@
+<h2>Score: {{ score }}/{{ total }}</h2>
+
+{% for q in details %}
+<div style="margin-bottom:20px; padding:10px; border:1px solid #ccc;">
+
+    <p><strong>Q{{ forloop.counter }}:</strong> {{ q.question }}</p>
+
+    <ul>
+        {% for key, val in q.options.items %}
+        <li
+            {% if key == q.correct %}
+                style="color: green; font-weight: bold;"
+            {% elif key == q.selected and not q.is_correct %}
+                style="color: red;"
+            {% endif %}
+        >
+            {{ key }}. {{ val }}
+
+            {% if key == q.selected %}
+                (Your answer)
+            {% endif %}
+
+            {% if key == q.correct %}
+                (Correct answer)
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% if q.is_correct %}
+        <p style="color: green;">✔ Correct</p>
+    {% else %}
+        <p style="color: red;">✘ Wrong</p>
+    {% endif %}
+
+</div>
+{% endfor %}

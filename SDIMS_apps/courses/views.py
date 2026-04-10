@@ -1,21 +1,20 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from SDIMS_apps.accounts.decorators import role_required
+from SDIMS_apps.accounts.decorators import admin_required
+from SDIMS_apps.vehicles.models import Vehicle
 from .forms import CourseForm
 from .models import Course
 from django.contrib import messages
+from django.http import JsonResponse
 
 @login_required
-@role_required(['admin'])
+@admin_required
 def add_course(request):
     if request.method == 'POST':
         form = CourseForm(request.POST)
 
         if form.is_valid():
-            course = form.save(commit=False)  # 🔥 important
-            course.save()
-            form.save_m2m()  # 🔥 required for ManyToMany (vehicles)
-
+            form.save()  
             messages.success(request, "Course added successfully!")
             return redirect('courses:course_list')
 
@@ -27,9 +26,8 @@ def add_course(request):
 
     return render(request, 'addcourse.html', {'form': form})
 
-
 @login_required
-@role_required(['admin'])
+@admin_required
 def edit_course(request, pk):
     course = Course.objects.get(pk=pk)
     if request.method == 'POST':
@@ -47,3 +45,11 @@ def course_list(request):
     return render(request, 'course_list.html', {
         'courses': courses
     })
+
+def ajax_vehicles_by_type(request):
+    vehicle_type = request.GET.get('vehicle_type')
+    vehicles = Vehicle.objects.filter(vehicle_type=vehicle_type)
+    data = {
+        'vehicles': [{'id': v.id, 'brand': v.brand, 'model': v.model, 'registration_number': v.registration_number} for v in vehicles]
+    }
+    return JsonResponse(data)

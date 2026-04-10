@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f6fa;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 28px;
+            color: #2c3e50;
+        }
+
+        .card p {
+            margin: 5px 0 0;
+            color: gray;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .buttons a {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 15px;
+            text-decoration: none;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .buttons a:hover {
+            background-color: #2980b9;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        .logout {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .logout a {
+            color: red;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Admin Dashboard</h1>
+    <p style="text-align:center;">Welcome, {{ request.user.full_name }}</p>
+
+    <!-- 📊 STATS CARDS -->
+    <div class="cards">
+        <div class="card">
+            <h2>{{ total_users }}</h2>
+            <p>Total Users</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_instructors }}</h2>
+            <p>Instructors</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ total_trainees }}</h2>
+            <p>Trainees</p>
+        </div>
+
+        <div class="card">
+            <h2>{{ active_trainees }}</h2>
+            <p>Active Trainees</p>
+        </div>
+    </div>
+
+    <!-- ⚙️ MANAGEMENT BUTTONS -->
+    <div class="section">
+        <h2>Management</h2>
+
+        <div class="buttons">
+            <a href="{% url 'instructors:instructor_list' %}">View Instructors</a>
+            <a href="{% url 'trainees:trainee_list' %}">View Trainees</a>
+            <a href="{% url 'courses:course_list' %}">View Courses</a>
+            <a href="{% url 'vehicles:vehicles_list' %}">View Vehicles</a>
+        </div>
+    </div>
+
+    <!-- 🆕 RECENT USERS -->
+    <div class="section">
+        <h2>Recent Users</h2>
+
+        <ul>
+            {% for user in recent_users %}
+                <li>
+                    {{ user.username }} ({{ user.role }})
+                </li>
+            {% empty %}
+                <li>No users found</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 🚪 LOGOUT -->
+    <div class="logout">
+        <a href="{% url 'accounts:logout' %}">Logout</a>
+    </div>
+
+</div>
+
+</body>
+</html>

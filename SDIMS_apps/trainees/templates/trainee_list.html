@@ -1,23 +1,51 @@
-<h2>trainee List</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainee List</title>
+</head>
+<body>
 
-<table border="1">
-    <tr>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Course</th>
-        <th>Status</th>
-    </tr>
+    <h2>Trainee List</h2>
 
-    {% for trainee in trainees %}
-    <tr>
-        <td>{{ trainee.first_name }} {{ trainee.last_name }}</td>
-        <td>{{ trainee.phone }}</td>
-        <td>{{ trainee.course }}</td>
-        <td>{{ trainee.status }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="4">No trainees found</td>
-    </tr>
-    {% endfor %}
-</table>
+    {% if user.role == 'admin' %}
+        <a href="{% url 'trainees:register' %}">Register New Trainee</a>
+    {% endif %}
+
+    <br><br>
+
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Course</th>
+            <th>Status</th>
+            {% if user.role == 'admin' or user.role == 'instructor' %}
+                <th>Actions</th>
+            {% endif %}
+        </tr>
+
+        {% for trainee in trainees %}
+        <tr>
+            <td>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</td>
+            <td>{{ trainee.user.phone }}</td>
+            <td>{{ trainee.course.course_name|default:"N/A" }}</td>
+            <td>{{ trainee.get_status_display }}</td>
+            {% if user.role == 'admin' or user.role == 'instructor' %}
+            <td>
+                <a href="{% url 'trainees:trainee_edit' trainee.pk %}">Edit</a>
+                {% if user.role == 'admin' %}
+                    | <a href="{% url 'trainees:trainee_delete' trainee.pk %}">Delete</a>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No trainees found.</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</body>
+</html>

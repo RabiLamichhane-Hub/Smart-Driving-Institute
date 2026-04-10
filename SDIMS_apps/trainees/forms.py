@@ -4,4 +4,11 @@ from .models import Trainee
 class TraineeForm(forms.ModelForm):
     class Meta:
         model = Trainee
-        fields = '__all__'
+        fields = [
+            'gender',
+            'date_of_birth',
+            'course',
+            'status',
+            'guardian_name',
+            'guardian_phone',
+        ]

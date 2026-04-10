@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Trainee</title>
+</head>
+<body>
+
+    <h2>Edit Trainee</h2>
+    <p>Editing: <strong>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</strong></p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for field in trainee_form %}
+        <div>
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+                <span>{{ field.errors }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <br>
+        <button type="submit">Save Changes</button>
+        <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
+
+    </form>
+
+</body>
+</html>

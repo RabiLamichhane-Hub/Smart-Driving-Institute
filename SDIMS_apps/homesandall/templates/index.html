@@ -1,21 +1,52 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Driving Institute</title>
 </head>
 <body>
-    <a href="{% url 'courses:course_list' %}" class="nav-item"><i class='bx bx-cart'></i> <span>View Available Courses</span></a>
-    {% if user.role == 'admin' %}
-        <a href="{% url 'trainees:register' %}">Register New Trainee</a>
-    {% endif %}
 
-    <a href="{% url 'vehicles:vehicles_list' %}">See Available List</a>
-    <a href="{% url 'instructors:instructor_list' %}">See Available Instructors</a>
-    <a href="{% url 'training:session_list' %}">See Training Sessions</a>
-    <a href="{% url 'license_mocktest:mocktest' %}">Try Mock Test</a>
+    <h1>Welcome to Smart Driving Institute</h1>
+
+    <!-- LOGIN BUTTON -->
+    <a href="{% url 'accounts:login' %}">Login</a>
+
+    <hr>
+
+    <!-- COURSES -->
+    <h2>Available Courses</h2>
+    {% for course in courses %}
+        <div>
+            <h3>{{ course.name }}</h3>
+            <p>{{ course.description }}</p>
+        </div>
+    {% empty %}
+        <p>No courses available</p>
+    {% endfor %}
+
+    <hr>
+
+    <!-- INSTRUCTORS -->
+    <h2>Our Trainers</h2>
+    {% for instructor in instructors %}
+        <div>
+            <p><strong>{{ instructor.user.full_name }}</strong></p>
+            <p>Status: {{ instructor.status }}</p>
+        </div>
+    {% empty %}
+        <p>No instructors available</p>
+    {% endfor %}
+
+    <hr>
+
+    <!-- VEHICLES -->
+    <h2>Vehicles</h2>
+    {% for vehicle in vehicles %}
+        <div>
+            <p>{{ vehicle.name }}</p>
+        </div>
+    {% empty %}
+        <p>No vehicles available</p>
+    {% endfor %}
 
 </body>
 </html>

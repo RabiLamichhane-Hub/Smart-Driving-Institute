@@ -10,7 +10,7 @@
     </div>
 
     <div class="card-body">
-      <form method="POST">
+      <form method="POST" id="courseForm">
         {% csrf_token %}
 
         <!-- Course Name -->
@@ -41,13 +41,11 @@
           </div>
         </div>
 
-        <!-- Vehicles -->
+        <!-- Vehicles Dropdown -->
         <div class="mb-3">
-          {{ form.vehicles.label_tag }}
-          {{ form.vehicles }}
-          {% if form.vehicles.errors %}
-            <div class="text-danger small">{{ form.vehicles.errors }}</div>
-          {% endif %}
+            {{ form.vehicle.label_tag }}
+            {{ form.vehicle }}
+            <small class="form-text text-muted">Only vehicles matching the selected type are shown.</small>
         </div>
 
         <!-- Description -->
@@ -103,5 +101,67 @@
 
   </div>
 </div>
+
+<!-- Dynamic vehicles dropdown via AJAX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const vehicleTypeSelect = document.getElementById('id_vehicle_type');
+    const vehicleSelect = document.getElementById('id_vehicle');
+
+    function resetVehicleDropdown(message = 'Select vehicle type first') {
+        vehicleSelect.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.textContent = message;
+        defaultOption.value = '';
+        defaultOption.disabled = true;   // can't select it
+        defaultOption.selected = true;   // shown by default
+        vehicleSelect.appendChild(defaultOption);
+    }
+
+    // Start empty on page load (add course)
+    resetVehicleDropdown();
+
+    vehicleTypeSelect.addEventListener('change', function() {
+        const type = this.value;
+
+        // If nothing selected, reset and stop
+        if (!type) {
+            resetVehicleDropdown();
+            return;
+        }
+
+        // Show loading state while fetching
+        resetVehicleDropdown('Loading...');
+
+        fetch("{% url 'courses:ajax_vehicles_by_type' %}?vehicle_type=" + type)
+        .then(response => response.json())
+        .then(data => {
+            if (data.vehicles.length === 0) {
+                resetVehicleDropdown('No vehicles available for this type');
+                return;
+            }
+
+            vehicleSelect.innerHTML = '';
+
+            const defaultOption = document.createElement('option');
+            defaultOption.textContent = 'Select a vehicle';
+            defaultOption.value = '';
+            defaultOption.disabled = true;    // unselectable
+            defaultOption.selected = true;    // shown until user picks
+            vehicleSelect.appendChild(defaultOption);
+
+            data.vehicles.forEach(v => {
+                const option = document.createElement('option');
+                option.value = v.id;
+                option.textContent = `${v.brand} ${v.model} (${v.registration_number})`;
+                vehicleSelect.appendChild(option);
+            });
+        })
+        .catch(() => {
+            resetVehicleDropdown('Error loading vehicles');
+        });
+    });
+});
+</script>
 
 {% endblock %}

@@ -25,10 +25,9 @@ urlpatterns = [
     path('', include('SDIMS_apps.homesandall.urls')),
     path('trainee/', include('SDIMS_apps.trainees.urls')),
     path('courses/', include('SDIMS_apps.courses.urls')),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/', include('SDIMS_apps.accounts.urls')),
     path('vehicles/',include('SDIMS_apps.vehicles.urls')),
     path('instructors/', include('SDIMS_apps.instructors.urls')),
     path('training/', include('SDIMS_apps.training.urls')),
     path('mocktest/', include('SDIMS_apps.license_mocktest.urls')),
+    path('accounts/', include('SDIMS_apps.accounts.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

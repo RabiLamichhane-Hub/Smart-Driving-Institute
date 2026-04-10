@@ -17,7 +17,7 @@
 
     {% if user.role == 'admin' %}
         <a href="{% url 'courses:add_course' %}">Add Course</a>
-    {% endif %}       
+    {% endif %}
 
     <hr>
 
@@ -25,14 +25,15 @@
         <div>
             <h3>{{ course.course_name }}</h3>
 
-            <p><strong>Vehicle:</strong> {{ course.get_vehicle_type_display }}</p>
+            <p><strong>Vehicle Type:</strong> {{ course.get_vehicle_type_display }}</p>
             <p><strong>Level:</strong> {{ course.get_level_display }}</p>
-            <p><strong>Assigned Vehicles:</strong>
-            {% for vehicle in course.vehicles.all %}
-                {{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.registration_number }}){% if not forloop.last %}, {% endif %}
-            {% empty %}
-                None
-            {% endfor %}
+
+            <p><strong>Assigned Vehicle:</strong>
+                {% if course.vehicle %}
+                    {{ course.vehicle.brand }} {{ course.vehicle.model }} ({{ course.vehicle.registration_number }})
+                {% else %}
+                    No vehicle assigned
+                {% endif %}
             </p>
 
             {% if course.description %}
@@ -43,7 +44,7 @@
             <p><strong>Total Lessons:</strong> {{ course.total_lessons }}</p>
             <p><strong>Price:</strong> Rs. {{ course.fee }}</p>
 
-            <p><strong>Status:</strong> 
+            <p><strong>Status:</strong>
                 {% if course.is_active %}
                     Active
                 {% else %}
@@ -51,13 +52,13 @@
                 {% endif %}
             </p>
 
-            <!-- Edit Button -->
             {% if user.role == 'admin' %}
                 <a href="{% url 'courses:edit_course' course.id %}">Edit</a>
             {% endif %}
 
         </div>
         <hr>
+
     {% empty %}
         <p>No courses available.</p>
     {% endfor %}

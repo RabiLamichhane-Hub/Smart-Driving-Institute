@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create User</title>
+</head>
+<body>
+
+    <h2>Create New User</h2>
+
+    <form method="POST">
+    {% csrf_token %}
+
+    <label>Full Name:</label>
+    {{ form.full_name }}
+
+    <label>Phone:</label>
+    {{ form.phone }}
+
+    <label>Email:</label>
+    {{ form.email }}
+
+    <label>Address:</label>
+    {{ form.address }}
+
+    <label>Role:</label>
+    {{ form.role }}
+
+    <br><br>
+    <button type="submit">Create User</button>
+</form>
+
+</body>
+</html>

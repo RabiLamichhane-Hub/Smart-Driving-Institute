@@ -1,15 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Instructor Form</title>
+    <title>Create Instructor</title>
 </head>
 <body>
-    <h1>Instructor Form</h1>
+
+    <h1>Create Instructor</h1>
+
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
+
+        <!-- 👤 USER INFO -->
+        <h3>User Information</h3>
+        {{ user_form.as_p }}
+
+        <hr>
+
+        <!-- 👨‍🏫 INSTRUCTOR INFO -->
+        <h3>Instructor Information</h3>
+        {{ instructor_form.as_p }}
+
+        <br>
+        <button type="submit">Create Instructor</button>
     </form>
+
+    <br>
     <a href="{% url 'instructors:instructor_list' %}">Back to list</a>
+
+    <!-- ❗ ERROR DISPLAY -->
+    {% if user_form.errors or instructor_form.errors %}
+        <div style="color:red;">
+            <h4>Errors:</h4>
+            {{ user_form.errors }}
+            {{ instructor_form.errors }}
+        </div>
+    {% endif %}
+
 </body>
 </html>

@@ -1,15 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Register Trainee</title>
 </head>
 <body>
+
+    <h2>Register New Trainee</h2>
+    
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
+
+        <h3>Account Details</h3>
+
+        {% for field in user_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <span>{{ field.errors }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <h3>Trainee Details</h3>
+
+        {% for field in trainee_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <span>{{ field.errors }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <br>
+        <button type="submit">Register Trainee</button>
+        <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
+
     </form>
+
 </body>
 </html>

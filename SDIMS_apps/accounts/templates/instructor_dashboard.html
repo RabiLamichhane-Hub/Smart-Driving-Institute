@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Instructor Dashboard</title>
+</head>
+<body>
+
+```
+<h1>Instructor Dashboard</h1>
+
+<p>Welcome, {{ instructor.user.full_name }}</p>
+
+<hr>
+
+<h2>Your Details</h2>
+<ul>
+    <li><strong>License Number:</strong> {{ instructor.license_number }}</li>
+    <li><strong>Status:</strong> {{ instructor.status }}</li>
+    <li><strong>Date Joined:</strong> {{ instructor.date_joined }}</li>
+</ul>
+
+<hr>
+
+<h2>Trainees</h2>
+
+<a href="{% url 'trainees:register' %}">
+    <button>Add Trainee</button>
+</a>
+
+<br><br>
+
+<table border="1" cellpadding="10">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Course</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trainee in trainees %}
+        <tr>
+            <td>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</td>
+            <td>{{ trainee.user.email }}</td>
+            <td>{{ trainee.course.course_name|default:"N/A" }}</td>
+            <td>{{ trainee.status }}</td>
+            <td>
+            {% comment%}
+                <a href="{% url 'trainees:trainee_detail' trainee.id %}">View</a> |
+                <a href="{% url 'trainees:trainee_update' trainee.id %}">Edit</a> |
+                <a href="{% url 'trainees:trainee_delete' trainee.id %}">Delete</a>
+            
+            {% endcomment %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No trainees available.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h2>Schedule (Optional)</h2>
+
+<table border="1" cellpadding="10">
+    <thead>
+        <tr>
+            <th>Trainee</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+        <tr>
+            <td>{{ session.trainee.user.full_name }}</td>
+            <td>{{ session.date }}</td>
+            <td>{{ session.time }}</td>
+            <td>{{ session.status }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No sessions scheduled.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h2>Account</h2>
+<a href="{% url 'accounts:logout' %}">Logout</a>
+```
+
+</body>
+</html>

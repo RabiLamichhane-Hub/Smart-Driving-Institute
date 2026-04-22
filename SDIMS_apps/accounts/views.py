@@ -52,46 +52,6 @@ def logout_view(request):
     logout(request)
     return redirect('accounts:login')
 
-@login_required
-def create_user(request):
-    if request.method == "POST":
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-
-            username = generate_username(data['phone'])
-            password = generate_password()
-
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                role=data['role'],
-                full_name=data['full_name'],
-                phone=data['phone'],
-                address=data['address'],
-                email=data['email']
-            )
-
-            # 🔥 THIS IS WHAT YOU WERE MISSING
-            if user.role == 'instructor':
-                Instructor.objects.create(
-                    user=user,
-                    license_number="TEMP123"   # you should replace this later
-                )
-
-            elif user.role == 'student':
-                Trainee.objects.create(
-                    user=user
-                )
-
-            return render(request, 'user_created.html', {
-                'username': username,
-                'password': password
-            })
-    else:
-        form = CreateUserForm()
-
-    return render(request, 'create_user.html', {'form': form})
 
 def generate_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
@@ -106,13 +66,13 @@ def admin_dashboard(request):
     if request.user.role != 'admin':
         return redirect('accounts:login')
 
-    # 📊 Stats
+    # Stats
     total_users = User.objects.count()
     total_instructors = Instructor.objects.count()
     total_trainees = Trainee.objects.count()
     active_trainees = Trainee.objects.filter(status__in=['ENROLLED', 'TRAINING']).count()
 
-    # 🆕 Recent users (last 5)
+    # Recent users (last 5)
     recent_users = User.objects.order_by('-id')[:5]
 
     context = {
@@ -150,6 +110,18 @@ def trainee_dashboard(request):
 
     trainee = request.user.trainee
 
+    fee_record = getattr(trainee, 'fee_record', None)
+
+    paid = fee_record.total_paid() if fee_record else 0
+    remaining = fee_record.remaining() if fee_record else 0
+    discount = fee_record.discount_amount if fee_record else 0
+    final_fee = fee_record.final_fee() if fee_record else 0
+
     return render(request, 'trainee_dashboard.html', {
         'trainee': trainee,
+        'fee_record': fee_record,
+        'paid': paid,
+        'remaining': remaining,
+        'discount': discount,
+        'final_fee': final_fee,
     })

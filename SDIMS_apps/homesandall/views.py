@@ -15,7 +15,7 @@ def index(request):
             return redirect('accounts:instructor_dashboard')
 
         # Trainee (default fallback)
-        return redirect('accounts:dashboard')
+        return redirect('accounts:trainee_dashboard')
 
     # Not logged in → show landing page
     courses = Course.objects.all()

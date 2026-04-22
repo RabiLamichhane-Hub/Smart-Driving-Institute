@@ -1,3 +1,8 @@
+<a href="{% url 'license_mocktest:new_mocktest' %}"
+   onclick="return confirm('Are you sure? Your current progress will be lost.')">
+    New Test
+</a>
+<p>Total questions: {{ mocktest|length }}</p>
 <form method="post" action="{% url 'license_mocktest:mocktest_result' %}">
     {% csrf_token %}
 

@@ -1,7 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainee Registered</title>
+</head>
+<body>
 
-<h2>User Created Successfully</h2>
+<h2>Trainee Registered Successfully</h2>
 
-<p>Username: {{ username }}</p>
-<p>Password: {{ password }}</p>
+<p>Share these credentials with the trainee. <strong>This page will not be shown again.</strong></p>
 
-<p>⚠️ Save this. It won't be shown again.</p>
+<hr>
+
+<h3>Login Credentials</h3>
+<p><strong>Username:</strong> {{ username }}</p>
+<p><strong>Password:</strong> {{ password }}</p>
+
+<hr>
+
+<h3>Personal Information</h3>
+<p><strong>Full Name:</strong> {{ trainee.user.first_name }} {{ trainee.user.last_name }}</p>
+<p><strong>Phone:</strong> {{ trainee.user.phone }}</p>
+<p><strong>Email:</strong> {{ trainee.user.email }}</p>
+<p><strong>Gender:</strong> {{ trainee.get_gender_display }}</p>
+<p><strong>Date of Birth:</strong> {{ trainee.date_of_birth }}</p>
+
+<hr>
+
+<h3>Course & Fee</h3>
+{% if trainee.course %}
+    <p><strong>Course:</strong> {{ trainee.course.course_name }}</p>
+    <p><strong>Vehicle Type:</strong> {{ trainee.course.get_vehicle_type_display }}</p>
+    <p><strong>Level:</strong> {{ trainee.course.get_level_display }}</p>
+    <p><strong>Course Fee:</strong> Rs. {{ trainee.course.fee }}</p>
+    <p><strong>Discount:</strong> Rs. {{ trainee.discount }}</p>
+    <p><strong>Final Fee:</strong> Rs. {{ trainee.final_fee }}</p>
+{% else %}
+    <p>No course assigned.</p>
+{% endif %}
+
+<hr>
+
+{% if trainee.guardian_name %}
+<h3>Guardian Information</h3>
+<p><strong>Guardian Name:</strong> {{ trainee.guardian_name }}</p>
+<p><strong>Guardian Phone:</strong> {{ trainee.guardian_phone }}</p>
+<hr>
+{% endif %}
+
+<a href="{% url 'trainees:trainee_list' %}">← Back to Trainee List</a>
+| <a href="{% url 'trainees:register' %}">Register Another Trainee</a>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!-- add_payment.html -->
+
+<h2>Add Payment</h2>
+
+<p><strong>Trainee:</strong> {{ trainee }}</p>
+<p><strong>Total Fee:</strong> Rs. {{ fee_record.final_fee }}</p>
+<p><strong>Paid:</strong> Rs. {{ paid }}</p>
+<p><strong>Remaining:</strong> Rs. {{ remaining }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Payment</button>
+</form>

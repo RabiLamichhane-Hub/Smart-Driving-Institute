@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'SDIMS_apps.instructors',
     'SDIMS_apps.training',
     'SDIMS_apps.license_mocktest',
+    'SDIMS_apps.accounting',
 ]
 
 MIDDLEWARE = [

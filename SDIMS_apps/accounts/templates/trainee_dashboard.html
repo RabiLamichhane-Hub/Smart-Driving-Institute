@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Trainee Dashboard</title>
+    <title>{{ trainee.user.first_name }} {{ trainee.user.last_name }} Dashboard</title>
 </head>
 <body>
 
     <h1>Trainee Dashboard</h1>
     <p>Welcome, {{ trainee.user.first_name }} {{ trainee.user.last_name }}</p>
-
     <a href="{% url 'accounts:logout' %}">Logout</a>
 
     <hr>
@@ -26,6 +25,7 @@
     <hr>
 
     <h2>My Course</h2>
+
     {% if trainee.course %}
         <ul>
             <li><strong>Course:</strong> {{ trainee.course.course_name }}</li>
@@ -33,8 +33,53 @@
             <li><strong>Level:</strong> {{ trainee.course.get_level_display }}</li>
             <li><strong>Duration:</strong> {{ trainee.course.duration_days }} days</li>
             <li><strong>Total Lessons:</strong> {{ trainee.course.total_lessons }}</li>
-            <li><strong>Fee:</strong> Rs. {{ trainee.course.fee }}</li>
         </ul>
+
+        <hr>
+
+        <h2>My Payments</h2>
+
+        {% if fee_record %}
+            <ul>
+                <li><strong>Total Fee:</strong> Rs. {{ fee_record.total_fee }}</li>
+                <li><strong>Discount:</strong> Rs. {{ discount }}</li>
+                <li><strong>Final Fee:</strong> Rs. {{ final_fee }}</li>
+
+                <li><strong>Paid Amount:</strong> Rs. {{ paid }}</li>
+                <li><strong>Remaining Amount:</strong> Rs. {{ remaining }}</li>
+
+                <li><strong>Status:</strong> {{ fee_record.get_status_display }}</li>
+            </ul>
+
+            <h3>Payment History</h3>
+
+            {% if fee_record.payments.all %}
+                <table border="1" cellpadding="10">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in fee_record.payments.all %}
+                        <tr>
+                            <td>{{ payment.date }}</td>
+                            <td>Rs. {{ payment.amount }}</td>
+                            <td>{{ payment.get_method_display }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No payments made yet.</p>
+            {% endif %}
+
+        {% else %}
+            <p>No payment record available.</p>
+        {% endif %}
+
     {% else %}
         <p>No course enrolled yet.</p>
     {% endif %}
@@ -42,6 +87,7 @@
     <hr>
 
     <h2>My Lesson Schedule</h2>
+
     <table border="1" cellpadding="10">
         <thead>
             <tr>
@@ -85,31 +131,14 @@
 
     <hr>
 
-    <h2>My Test Results</h2>
-    <table border="1" cellpadding="10">
-        <thead>
-            <tr>
-                <th>Test</th>
-                <th>Date</th>
-                <th>Score</th>
-                <th>Result</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in trainee.test_results.all %}
-            <tr>
-                <td>{{ result.test.test_title }}</td>
-                <td>{{ result.date }}</td>
-                <td>{{ result.score }}</td>
-                <td>{{ result.result_status }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No test results yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2>Mock Test</h2>
+    <p>Practice your theory knowledge before the real test.</p>
+    <a href="{% url 'license_mocktest:mocktest' %}">Take Mock Test</a>
+
+    <hr>
+
+    <h2>Previous Test Results</h2>
+    <a href="{% url 'license_mocktest:test_history' %}">My Test History</a>
 
 </body>
 </html>

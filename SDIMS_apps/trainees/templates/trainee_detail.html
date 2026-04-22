@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ trainee.user.first_name }} {{ trainee.user.last_name }} Details</title>
+</head>
+<body>
+
+    <h2>Trainee Details</h2>
+
+    <a href="{% url 'trainees:trainee_list' %}">← Back to List</a>
+
+    <hr>
+
+    <h3>Personal Information</h3>
+    <p><strong>Full Name:</strong> {{ trainee.user.first_name }} {{ trainee.user.last_name }}</p>
+    <p><strong>Phone:</strong> {{ trainee.user.phone }}</p>
+    <p><strong>Email:</strong> {{ trainee.user.email }}</p>
+    <p><strong>Address:</strong> {{ trainee.user.address|default:"N/A" }}</p>
+    <p><strong>Gender:</strong> {{ trainee.get_gender_display }}</p>
+    <p><strong>Date of Birth:</strong> {{ trainee.date_of_birth|default:"N/A" }}</p>
+
+    <hr>
+
+    <h3>Guardian Information</h3>
+    <p><strong>Guardian Name:</strong> {{ trainee.guardian_name|default:"N/A" }}</p>
+    <p><strong>Guardian Phone:</strong> {{ trainee.guardian_phone|default:"N/A" }}</p>
+
+    <hr>
+
+    <h3>Course Information</h3>
+    {% if trainee.course %}
+        <p><strong>Course Name:</strong> {{ trainee.course.course_name }}</p>
+        <p><strong>Vehicle Type:</strong> {{ trainee.course.get_vehicle_type_display }}</p>
+        <p><strong>Level:</strong> {{ trainee.course.get_level_display }}</p>
+        <p><strong>Duration:</strong> {{ trainee.course.duration_days }} days</p>
+        <p><strong>Total Lessons:</strong> {{ trainee.course.total_lessons }}</p>
+        <hr>
+        <h3>Payment Information</h3>
+
+        {% if fee_record %}
+            <p><strong>Total Fee:</strong> Rs. {{ fee_record.total_fee }}</p>
+            <p><strong>Discount:</strong> Rs. {{ discount }}</p>
+            <p><strong>Final Fee:</strong> Rs. {{ final_fee }}</p>
+
+            <p><strong>Paid Amount:</strong> Rs. {{ paid }}</p>
+            <p><strong>Remaining Amount:</strong> Rs. {{ remaining }}</p>
+
+            <p><strong>Status:</strong> {{ fee_record.get_status_display }}</p>
+
+            <br>
+
+            <a href="{% url 'accounting:add_payment' trainee.pk %}">Add Payment</a>
+
+        {% else %}
+            <p>No payment record available.</p>
+        {% endif %}
+    {% else %}
+        <p>No course enrolled yet.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Enrollment Information</h3>
+    <p><strong>Status:</strong> {{ trainee.get_status_display }}</p>
+    <p><strong>Enrollment Date:</strong> {{ trainee.enrollment_date }}</p>
+
+    <hr>
+
+    {% if user.role == 'admin' %}
+        <a href="{% url 'trainees:trainee_edit' trainee.pk %}">Edit</a>
+        | <a href="{% url 'trainees:trainee_delete' trainee.pk %}">Delete</a>
+    {% endif %}
+
+</body>
+</html>

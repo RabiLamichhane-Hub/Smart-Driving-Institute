@@ -5,40 +5,155 @@
 </head>
 <body>
 
-    <h2>Register New Trainee</h2>
-    
-    <form method="POST">
-        {% csrf_token %}
+<h2>Register New Trainee</h2>
 
-        <h3>Account Details</h3>
+<form method="POST">
+    {% csrf_token %}
 
-        {% for field in user_form %}
-            <div>
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.errors %}
-                    <span>{{ field.errors }}</span>
-                {% endif %}
-            </div>
-        {% endfor %}
+    <h3>Account Details</h3>
+    {% for field in user_form %}
+        <div>
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+                <span>{{ field.errors }}</span>
+            {% endif %}
+        </div>
+    {% endfor %}
 
-        <h3>Trainee Details</h3>
+    <h3>Trainee Details</h3>
 
-        {% for field in trainee_form %}
-            <div>
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.errors %}
-                    <span>{{ field.errors }}</span>
-                {% endif %}
-            </div>
-        {% endfor %}
+    <div>
+        {{ trainee_form.gender.label_tag }}
+        {{ trainee_form.gender }}
+        {% if trainee_form.gender.errors %}
+            <span>{{ trainee_form.gender.errors }}</span>
+        {% endif %}
+    </div>
 
-        <br>
-        <button type="submit">Register Trainee</button>
-        <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
+    <div>
+        {{ trainee_form.date_of_birth.label_tag }}
+        {{ trainee_form.date_of_birth }}
+        {% if trainee_form.date_of_birth.errors %}
+            <span>{{ trainee_form.date_of_birth.errors }}</span>
+        {% endif %}
+    </div>
 
-    </form>
+    <div>
+        {{ trainee_form.course.label_tag }}
+        {{ trainee_form.course }}
+        {% if trainee_form.course.errors %}
+            <span>{{ trainee_form.course.errors }}</span>
+        {% endif %}
+    </div>
+
+    <!-- Fee summary -->
+    <div id="fee-summary" style="display:none; border:1px solid #ccc; padding:12px; margin:10px 0;">
+        <strong>Fee Summary</strong>
+        <table>
+            <tr>
+                <td>Course Fee:</td>
+                <td>Rs. <span id="course_fee_display">0</span></td>
+            </tr>
+
+            <tr>
+                <td>Discount (Rs.):</td>
+                <td>
+                    {{ trainee_form.discount }}
+                    {% if trainee_form.discount.errors %}
+                        <span>{{ trainee_form.discount.errors }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td><strong>Final Fee:</strong></td>
+                <td><strong>Rs. <span id="final_fee_display">0</span></strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <div>
+        {{ trainee_form.status.label_tag }}
+        {{ trainee_form.status }}
+        {% if trainee_form.status.errors %}
+            <span>{{ trainee_form.status.errors }}</span>
+        {% endif %}
+    </div>
+
+    <div>
+        {{ trainee_form.guardian_name.label_tag }}
+        {{ trainee_form.guardian_name }}
+        {% if trainee_form.guardian_name.errors %}
+            <span>{{ trainee_form.guardian_name.errors }}</span>
+        {% endif %}
+    </div>
+
+    <div>
+        {{ trainee_form.guardian_phone.label_tag }}
+        {{ trainee_form.guardian_phone }}
+        {% if trainee_form.guardian_phone.errors %}
+            <span>{{ trainee_form.guardian_phone.errors }}</span>
+        {% endif %}
+    </div>
+
+    <br>
+
+    <button type="submit">Register Trainee</button>
+    <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const courseSelect = document.getElementById('id_course');
+    const discountInput = document.getElementById('id_discount');
+    const feeSummary  = document.getElementById('fee-summary');
+    const courseFeeDisplay = document.getElementById('course_fee_display');
+    const finalFeeDisplay  = document.getElementById('final_fee_display');
+
+    let courseFee = 0;
+
+    function updateFinalFee() {
+        if (!discountInput) return;
+
+        const discount = parseFloat(discountInput.value) || 0;
+        const final = Math.max(courseFee - discount, 0);
+        finalFeeDisplay.textContent = final.toFixed(2);
+    }
+
+    if (courseSelect) {
+        courseSelect.addEventListener('change', function () {
+            const courseId = this.value;
+
+            if (!courseId) {
+                feeSummary.style.display = 'none';
+                courseFee = 0;
+                if (discountInput) discountInput.value = 0;
+                return;
+            }
+
+            fetch(`/trainee/ajax/course-fee/?course_id=${courseId}`)
+                .then(res => res.json())
+                .then(data => {
+                    courseFee = parseFloat(data.fee) || 0;
+                    courseFeeDisplay.textContent = courseFee.toFixed(2);
+                    feeSummary.style.display = 'block';
+                    updateFinalFee();
+                })
+                .catch(err => {
+                    console.error("Fee fetch error:", err);
+                    feeSummary.style.display = 'none';
+                });
+        });
+    }
+
+    if (discountInput) {
+        discountInput.addEventListener('input', updateFinalFee);
+    }
+
+});
+</script>
 
 </body>
 </html>

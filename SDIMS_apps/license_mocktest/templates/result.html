@@ -1,37 +1,67 @@
-<h2>Score: {{ score }}/{{ total }}</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mock Test Result</title>
+</head>
+<body>
 
-{% for q in details %}
-<div style="margin-bottom:20px; padding:10px; border:1px solid #ccc;">
+    <h1>Mock Test Result</h1>
 
-    <p><strong>Q{{ forloop.counter }}:</strong> {{ q.question }}</p>
+    <h2>Score: {{ result.score }} / {{ result.total }}</h2>
+    <p>Pass mark: {{ result.pass_mark }} / {{ result.total }}</p>
 
-    <ul>
-        {% for key, val in q.options.items %}
-        <li
-            {% if key == q.correct %}
-                style="color: green; font-weight: bold;"
-            {% elif key == q.selected and not q.is_correct %}
-                style="color: red;"
-            {% endif %}
-        >
-            {{ key }}. {{ val }}
-
-            {% if key == q.selected %}
-                (Your answer)
-            {% endif %}
-
-            {% if key == q.correct %}
-                (Correct answer)
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-
-    {% if q.is_correct %}
-        <p style="color: green;">✔ Correct</p>
+    {% if result.passed %}
+        <p style="color: green;"><strong>Congratulations! You passed.</strong></p>
     {% else %}
-        <p style="color: red;">✘ Wrong</p>
+        <p style="color: red;"><strong>You did not pass. Better luck next time.</strong></p>
     {% endif %}
 
-</div>
-{% endfor %}
+    <a href="{% url 'license_mocktest:mocktest' %}">Take Another Test</a>
+    <a href="{% url 'accounts:trainee_dashboard' %}">Back to Dashboard</a>
+
+    <hr>
+
+    <h2>Detailed Results</h2>
+
+    {% for q in result.details %}
+    <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+
+        <p><strong>Q{{ forloop.counter }}:</strong> {{ q.question }}</p>
+
+        <ul>
+            {% for key, val in q.options.items %}
+            <li
+                {% if key == q.correct %}
+                    style="color: green; font-weight: bold;"
+                {% elif key == q.selected and not q.is_correct %}
+                    style="color: red;"
+                {% endif %}
+            >
+                {{ key }}. {{ val }}
+
+                {% if key == q.selected %}
+                    (Your answer)
+                {% endif %}
+
+                {% if key == q.correct %}
+                    (Correct answer)
+                {% endif %}
+
+            </li>
+            {% endfor %}
+        </ul>
+
+        {% if q.is_correct %}
+            <p style="color: green;">✔ Correct</p>
+        {% else %}
+            <p style="color: red;">✘ Wrong</p>
+        {% endif %}
+
+    </div>
+    {% endfor %}
+
+    <a href="{% url 'license_mocktest:mocktest' %}">Take Another Test</a>
+    <a href="{% url 'accounts:trainee_dashboard' %}">Back to Dashboard</a>
+
+</body>
+</html>

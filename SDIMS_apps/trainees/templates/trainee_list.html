@@ -26,14 +26,21 @@
 
         {% for trainee in trainees %}
         <tr>
-            <td>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</td>
+            
+            <td>
+                <a href={% url "trainees:details" trainee.pk %}>
+                    {{ trainee.user.first_name }} {{ trainee.user.last_name }}
+                </a>
+            </td>
             <td>{{ trainee.user.phone }}</td>
             <td>{{ trainee.course.course_name|default:"N/A" }}</td>
             <td>{{ trainee.get_status_display }}</td>
+
             {% if user.role == 'admin' or user.role == 'instructor' %}
             <td>
-                <a href="{% url 'trainees:trainee_edit' trainee.pk %}">Edit</a>
+                <a href="{% url 'accounting:add_payment' trainee.pk %}">Add Payment</a>
                 {% if user.role == 'admin' %}
+                    <a href="{% url 'trainees:trainee_edit' trainee.pk %}">Edit</a>
                     | <a href="{% url 'trainees:trainee_delete' trainee.pk %}">Delete</a>
                 {% endif %}
             </td>

@@ -19,7 +19,7 @@ class Trainee(models.Model):
         ('FAILED', 'Failed'),
     )
 
-    #LINK TO USER
+    # LINK TO USER
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     # KEEP ONLY trainee-specific data
@@ -41,8 +41,24 @@ class Trainee(models.Model):
     guardian_name = models.CharField(max_length=150, blank=True, null=True)
     guardian_phone = models.CharField(max_length=15, blank=True, null=True)
 
+    # Discount
+    discount = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0,
+        help_text="Flat discount amount in Rs."
+    )
+
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
 
     def is_active_trainee(self):
         return self.status in ['ENROLLED', 'TRAINING']
+
+    @property
+    def final_fee(self):
+        """Returns the course fee after applying the flat discount.
+        Returns 0 if no course is assigned."""
+        if self.course and self.course.fee:
+            return max(self.course.fee - self.discount, 0)
+        return 0

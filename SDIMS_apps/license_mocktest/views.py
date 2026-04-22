@@ -1,16 +1,28 @@
 from django.shortcuts import render, redirect
 from .utils import generate_random_mocktest
+from django.contrib.auth.decorators import login_required
+from .models import TestAttempt
 
 def mocktest(request):
     if request.method != "GET":
         return redirect('license_mocktest:mocktest')
 
-    mocktest_data = generate_random_mocktest()  # no argument needed
-    request.session['mocktest_data'] = mocktest_data
+    # If test already in progress, reuse it — don't generate new ones
+    mocktest_data = request.session.get('mocktest_data')
+
+    if not mocktest_data:
+        mocktest_data = generate_random_mocktest()
+        request.session['mocktest_data'] = mocktest_data
 
     return render(request, "mocktest.html", {"mocktest": mocktest_data})
 
+def new_mocktest(request):
+    # Clear existing session data and start fresh
+    if 'mocktest_data' in request.session:
+        del request.session['mocktest_data']
+    return redirect('license_mocktest:mocktest')
 
+@login_required
 def result(request):
     if request.method == "POST":
         mocktest_data = request.session.get('mocktest_data', [])
@@ -23,14 +35,8 @@ def result(request):
 
         for q in mocktest_data:
             selected = request.POST.get(str(q['id']))
-            correct_full = q['answer']  # e.g. "Option_B"
-
-            # Extract correct option letter
-            correct = correct_full.split("_")[-1]  # "B"
-
-            # Normalize selected
+            correct = q['answer'].strip().split('_')[-1].upper()
             selected_clean = selected.strip().upper() if selected else None
-
             is_correct = selected_clean == correct
 
             if is_correct:
@@ -44,20 +50,38 @@ def result(request):
                 "is_correct": is_correct
             })
 
-        # Store result with details
+        passed = score >= 16
+
+        # Save attempt to database
+        TestAttempt.objects.create(
+            user=request.user,
+            score=score,
+            total=len(mocktest_data),
+            pass_mark=16,
+            passed=passed,
+        )
+
         request.session['result'] = {
             'score': score,
             'total': len(mocktest_data),
             'pass_mark': 16,
-            'details': result_list   # 🔥 added
+            'passed': passed,
+            'details': result_list,
         }
 
         del request.session['mocktest_data']
         return redirect('license_mocktest:mocktest_result')
 
-    # GET — show stored result
     result_data = request.session.pop('result', None)
     if not result_data:
         return redirect('license_mocktest:mocktest')
 
-    return render(request, "result.html", result_data)
+    return render(request, "result.html", {'result': result_data})
+
+@login_required
+def test_history(request):
+    attempts = TestAttempt.objects.filter(
+        user=request.user
+    ).order_by('-taken_at')
+
+    return render(request, 'test_history.html', {'attempts': attempts})

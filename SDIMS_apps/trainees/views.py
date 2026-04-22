@@ -1,27 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 from SDIMS_apps.accounts.forms import CreateUserForm
 from SDIMS_apps.accounts.views import generate_username, generate_password
 from .forms import TraineeForm
 from SDIMS_apps.accounts.decorators import admin_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from . models import Trainee
+from .models import Trainee
+from SDIMS_apps.courses.models import Course
 
 User = get_user_model()
 
-# Create your views here.
+
 def register(request):
     if request.method == 'POST':
         user_form = CreateUserForm(request.POST)
         trainee_form = TraineeForm(request.POST)
 
         if user_form.is_valid() and trainee_form.is_valid():
-            # Create user but don't save yet
             user = user_form.save(commit=False)
             user.role = 'student'
 
-            # Generate credentials from cleaned data
             username = generate_username(user_form.cleaned_data['phone'])
             password = generate_password()
 
@@ -29,7 +29,6 @@ def register(request):
             user.set_password(password)
             user.save()
 
-            # Create trainee and link to user
             trainee = trainee_form.save(commit=False)
             trainee.user = user
             trainee.save()
@@ -39,8 +38,6 @@ def register(request):
                 'password': password,
                 'trainee': trainee,
             })
-
-        # If forms invalid, fall through and re-render with errors
 
     else:
         user_form = CreateUserForm()
@@ -54,11 +51,8 @@ def register(request):
 
 def trainee_list(request):
     trainees = Trainee.objects.all()
+    return render(request, 'trainee_list.html', {'trainees': trainees})
 
-    context = {
-        'trainees': trainees
-    }
-    return render(request, 'trainee_list.html', context)
 
 @login_required
 @admin_required
@@ -80,15 +74,50 @@ def trainee_edit(request, pk):
         'trainee': trainee,
     })
 
+
 @login_required
 @admin_required
 def trainee_delete(request, pk):
     trainee = get_object_or_404(Trainee, pk=pk)
     if request.method == 'POST':
-        trainee.user.delete()  # deletes user and trainee together via CASCADE
+        trainee.user.delete()
         messages.success(request, "Trainee deleted successfully.")
         return redirect('trainees:trainee_list')
 
-    return render(request, 'trainee_confirm_delete.html', {
+    return render(request, 'trainee_confirm_delete.html', {'trainee': trainee})
+
+
+@login_required
+def details(request, pk):
+    trainee = get_object_or_404(Trainee, pk=pk)
+
+    fee_record = getattr(trainee, 'fee_record', None)
+
+    paid = fee_record.total_paid() if fee_record else 0
+    remaining = fee_record.remaining() if fee_record else 0
+    discount = fee_record.discount_amount if fee_record else 0
+    final_fee = fee_record.final_fee() if fee_record else 0
+
+    context = {
         'trainee': trainee,
-    })
+        'fee_record': fee_record,
+        'paid': paid,
+        'remaining': remaining,
+        'discount': discount,
+        'final_fee': final_fee,
+    }
+
+    return render(request, 'trainee_details.html', context)
+
+
+# ---- AJAX ----
+def ajax_course_fee(request):
+    """Returns the fee for a given course as JSON. Used by the registration form."""
+    course_id = request.GET.get('course_id')
+    if course_id:
+        try:
+            course = Course.objects.get(pk=course_id)
+            return JsonResponse({'fee': str(course.fee)})
+        except Course.DoesNotExist:
+            pass
+    return JsonResponse({'fee': '0'})

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>Expenses</title></head>
+<body>
+
+<h1>Expenses</h1>
+
+<a href="{% url 'accounting:add_expense' %}">Add Expense</a> |
+<a href="{% url 'accounting:fee_overview' %}">Fee Overview</a>
+
+<table border="1" cellpadding="6">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Recorded By</th>
+            <th>Date</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.title }}</td>
+            <td>Rs.{{ expense.amount }}</td>
+            <td>{{ expense.get_category_display }}</td>
+            <td>{{ expense.recorded_by }}</td>
+            <td>{{ expense.date|date:"Y-m-d H:i" }}</td>
+            <td>{{ expense.notes|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No expenses recorded.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

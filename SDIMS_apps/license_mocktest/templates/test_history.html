@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test History</title>
+</head>
+<body>
+
+    <h1>My Test History</h1>
+    <a href="{% url 'license_mocktest:mocktest' %}">Take New Test</a>
+    <a href="{% url 'accounts:trainee_dashboard' %}">Back to Dashboard</a>
+
+    <hr>
+
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Pass Mark</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in attempts %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ attempt.taken_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ attempt.score }} / {{ attempt.total }}</td>
+                <td>{{ attempt.pass_mark }}</td>
+                <td>
+                    {% if attempt.passed %}
+                        <span style="color: green;">Passed</span>
+                    {% else %}
+                        <span style="color: red;">Failed</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No tests taken yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><title>Fee Overview</title></head>
+<body>
+
+<h1>Fee Overview</h1>
+
+<a href="{% url 'accounting:add_expense' %}">Add Expense</a> |
+<a href="{% url 'accounting:expense_list' %}">Expenses</a>
+
+<table border="1" cellpadding="6">
+    <thead>
+        <tr>
+            <th>Trainee</th>
+            <th>Course</th>
+            <th>Total Fee</th>
+            <th>Discount</th>
+            <th>Final Fee</th>
+            <th>Paid</th>
+            <th>Remaining</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in fee_records %}
+        <tr>
+            <td>{{ record.trainee }}</td>
+            <td>{{ record.course }}</td>
+            <td>Rs.{{ record.total_fee }}</td>
+            <td>Rs.{{ record.discount_amount }}</td>
+            <td>Rs.{{ record.final_fee }}</td>
+            <td>Rs.{{ record.total_paid }}</td>
+            <td>Rs.{{ record.remaining }}</td>
+            <td>{{ record.get_status_display }}</td>
+            <td><a href="{% url 'accounting:add_payment' record.trainee.pk %}">Add Payment</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9">No fee records found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

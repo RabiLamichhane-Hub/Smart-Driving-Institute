@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>Add Expense</title></head>
+<body>
+
+<h1>Add Expense</h1>
+
+<a href="{% url 'accounting:expense_list' %}">View Expenses</a> |
+<a href="{% url 'accounting:fee_overview' %}">Fee Overview</a>
+
+{% if messages %}
+    {% for message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Expense</button>
+</form>
+
+</body>
+</html>

@@ -1,67 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Courses</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-    {% if user.role == 'admin' %}
-        <a href="{% url 'trainees:register' %}">Register New Trainee</a>
-    {% endif %}
+{% block title %}Courses{% endblock %}
 
-    {% if user.role == 'admin' %}
-        <a href="{% url 'trainees:trainee_list' %}">See trainees list</a>
-    {% endif %}
+{% block content %}
 
-    <h2>Available Courses</h2>
+<!-- ADMIN ACTIONS -->
+{% if user.role == 'admin' %}
+    <a href="{% url 'trainees:register' %}">Register New Trainee</a>
+    <a href="{% url 'trainees:trainee_list' %}">See trainees list</a>
+    <a href="{% url 'courses:add_course' %}">Add Course</a>
+{% endif %}
 
-    {% if user.role == 'admin' %}
-        <a href="{% url 'courses:add_course' %}">Add Course</a>
-    {% endif %}
+<hr>
+
+<h2>Available Courses</h2>
+
+{% for course in courses %}
+    <div>
+        <h3>{{ course.course_name }}</h3>
+
+        <p><strong>Vehicle Type:</strong> {{ course.get_vehicle_type_display }}</p>
+        <p><strong>Level:</strong> {{ course.get_level_display }}</p>
+
+        <p><strong>Assigned Vehicle:</strong>
+            {% if course.vehicle %}
+                {{ course.vehicle.brand }} {{ course.vehicle.model }} ({{ course.vehicle.registration_number }})
+            {% else %}
+                No vehicle assigned
+            {% endif %}
+        </p>
+
+        {% if course.description %}
+            <p>{{ course.description }}</p>
+        {% endif %}
+
+        <p><strong>Duration:</strong> {{ course.duration_days }} days</p>
+        <p><strong>Total Lessons:</strong> {{ course.total_lessons }}</p>
+        <p><strong>Price:</strong> Rs. {{ course.fee }}</p>
+
+        <p><strong>Status:</strong>
+            {% if course.is_active %}
+                Active
+            {% else %}
+                Inactive
+            {% endif %}
+        </p>
+
+        {% if user.role == 'admin' %}
+            <a href="{% url 'courses:edit_course' course.id %}">Edit</a>
+        {% endif %}
+    </div>
 
     <hr>
 
-    {% for course in courses %}
-        <div>
-            <h3>{{ course.course_name }}</h3>
+{% empty %}
+    <p>No courses available.</p>
+{% endfor %}
 
-            <p><strong>Vehicle Type:</strong> {{ course.get_vehicle_type_display }}</p>
-            <p><strong>Level:</strong> {{ course.get_level_display }}</p>
-
-            <p><strong>Assigned Vehicle:</strong>
-                {% if course.vehicle %}
-                    {{ course.vehicle.brand }} {{ course.vehicle.model }} ({{ course.vehicle.registration_number }})
-                {% else %}
-                    No vehicle assigned
-                {% endif %}
-            </p>
-
-            {% if course.description %}
-                <p>{{ course.description }}</p>
-            {% endif %}
-
-            <p><strong>Duration:</strong> {{ course.duration_days }} days</p>
-            <p><strong>Total Lessons:</strong> {{ course.total_lessons }}</p>
-            <p><strong>Price:</strong> Rs. {{ course.fee }}</p>
-
-            <p><strong>Status:</strong>
-                {% if course.is_active %}
-                    Active
-                {% else %}
-                    Inactive
-                {% endif %}
-            </p>
-
-            {% if user.role == 'admin' %}
-                <a href="{% url 'courses:edit_course' course.id %}">Edit</a>
-            {% endif %}
-
-        </div>
-        <hr>
-
-    {% empty %}
-        <p>No courses available.</p>
-    {% endfor %}
-
-</body>
-</html>
+{% endblock %}

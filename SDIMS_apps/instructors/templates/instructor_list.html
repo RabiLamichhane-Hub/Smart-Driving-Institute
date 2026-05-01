@@ -1,132 +1,54 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Instructors</title>
+{% extends 'base.html' %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f6f8;
-        }
+{% block title %}Instructors{% endblock %}
 
-        h1 {
-            text-align: center;
-        }
+{% block content %}
 
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
+<h1>Instructor List</h1>
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .top-bar a {
-            padding: 10px 15px;
-            background-color: #2ecc71;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .top-bar a:hover {
-            background-color: #27ae60;
-        }
-
-        .stats {
-            margin-bottom: 15px;
-        }
-
-        .stats span {
-            margin-right: 20px;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #34495e;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .actions a {
-            margin-right: 10px;
-            text-decoration: none;
-        }
-
-        .edit {
-            color: blue;
-        }
-
-        .delete {
-            color: red;
-        }
-
-    </style>
-</head>
-<body>
-
-<div class="container">
-
-    <h1>Instructor List</h1>
-
-    <div class="top-bar">
-        <div class="stats">
-            <span>Total: {{ total_instructors }}</span>
-            <span>Active: {{ active_instructors }}</span>
-        </div>
-
-        <a href="{% url 'instructors:instructor_create' %}">Add Instructor</a>
+<div class="top-bar">
+    <div class="stats">
+        <span>Total: {{ total_instructors }}</span>
+        <span>Active: {{ active_instructors }}</span>
     </div>
 
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>License</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
+    <a href="{% url 'instructors:instructor_create' %}">Add Instructor</a>
+</div>
 
-        {% for instructor in instructors %}
-        <tr>
-            <td>{{ instructor.user.full_name }}</td>
-            <td>{{ instructor.user.email }}</td>
-            <td>{{ instructor.user.phone }}</td>
-            <td>{{ instructor.license_number }}</td>
-            <td>{{ instructor.get_status_display }}</td>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>License</th>
+        <th>Status</th>
+        {% if request.user.role == 'admin' %}
+            <th>Actions</th>
+        {% endif %}
+    </tr>
+
+    {% for instructor in instructors %}
+    <tr>
+        <td>{{ instructor.user.first_name }} {{ instructor.user.last_name }}</td>
+        <td>{{ instructor.user.email }}</td>
+        <td>{{ instructor.user.phone }}</td>
+        <td>{{ instructor.license_number }}</td>
+        <td>{{ instructor.get_status_display }}</td>
+
+
+        {% if request.user.role == 'admin' %}
             <td class="actions">
                 <a class="edit" href="{% url 'instructors:instructor_update' instructor.pk %}">Edit</a>
                 <a class="delete" href="{% url 'instructors:instructor_delete' instructor.pk %}">Delete</a>
             </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No instructors found.</td>
-        </tr>
-        {% endfor %}
-    </table>
+        {% endif %}
+    </tr>
 
-</div>
+    {% empty %}
+    <tr>
+        <td colspan="6">No instructors found.</td>
+    </tr>
+    {% endfor %}
+</table>
 
-</body>
-</html>
+{% endblock %}

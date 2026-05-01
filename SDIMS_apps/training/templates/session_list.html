@@ -31,6 +31,7 @@
         <td>
             <a href="{% url 'training:session_update' session.pk %}">Edit</a>
             <a href="{% url 'training:session_delete' session.pk %}">Delete</a>
+            <a href="{% url 'training:mark_attendance' session.pk %}">Attendence</a>
         </td>
     </tr>
     {% empty %}

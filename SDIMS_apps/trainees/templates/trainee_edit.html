@@ -6,7 +6,9 @@
 <body>
 
     <h2>Edit Trainee</h2>
-    <p>Editing: <strong>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</strong></p>
+    <p>
+        Editing: <strong>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</strong>
+    </p>
 
     {% if messages %}
         {% for message in messages %}
@@ -17,21 +19,74 @@
     <form method="POST">
         {% csrf_token %}
 
+        <!-- Trainee fields -->
         {% for field in trainee_form %}
-        <div>
-            {{ field.label_tag }}
-            {{ field }}
-            {% if field.errors %}
-                <span>{{ field.errors }}</span>
-            {% endif %}
-        </div>
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <span>{{ field.errors }}</span>
+                {% endif %}
+            </div>
         {% endfor %}
 
+        <hr>
+
+        <!-- Billing Section -->
+        <h3>Course Billing</h3>
+
+        {% if trainee.course %}
+            <p><strong>Course:</strong> {{ trainee.course.course_name }}</p>
+
+            <p>
+                <strong>Course Fee:</strong>
+                Rs. <span id="course_fee">{{ course_fee }}</span>
+            </p>
+
+            <p>
+                <strong>Discount:</strong>
+                {{ trainee_form.discount }}
+                {% if trainee_form.discount.errors %}
+                    <span>{{ trainee_form.discount.errors }}</span>
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Final Fee:</strong>
+                Rs. <span id="final_fee">{{ course_fee }}</span>
+            </p>
+
+        {% else %}
+            <p>No course assigned.</p>
+        {% endif %}
+
         <br>
+
         <button type="submit">Save Changes</button>
         <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
 
     </form>
+
+    <!-- JS for live calculation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const discountInput = document.getElementById('id_discount');
+            const courseFee = parseFloat(document.getElementById('course_fee').innerText) || 0;
+            const finalFee = document.getElementById('final_fee');
+
+            function updateFinal() {
+                const discount = parseFloat(discountInput.value) || 0;
+                const final = Math.max(courseFee - discount, 0);
+                finalFee.innerText = final.toFixed(2);
+            }
+
+            if (discountInput) {
+                discountInput.addEventListener('input', updateFinal);
+            }
+
+        });
+    </script>
 
 </body>
 </html>

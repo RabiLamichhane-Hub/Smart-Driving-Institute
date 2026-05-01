@@ -1,4 +1,8 @@
-<!-- add_payment.html -->
+{% extends 'base.html' %}
+
+{% block title %}Add Payment{% endblock %}
+
+{% block content %}
 
 <h2>Add Payment</h2>
 
@@ -7,8 +11,12 @@
 <p><strong>Paid:</strong> Rs. {{ paid }}</p>
 <p><strong>Remaining:</strong> Rs. {{ remaining }}</p>
 
+<hr>
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Submit Payment</button>
 </form>
+
+{% endblock %}

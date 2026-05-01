@@ -1,0 +1,37 @@
+<div class="sidebar">
+    <h2 class="logo">SDIMS</h2>
+
+    <ul class="menu">
+
+        <!-- Dashboard (role-based) -->
+        <li>
+            {% if user.role == 'admin' %}
+                <a href="{% url 'homesandall:admin_dashboard' %}">Dashboard</a>
+            {% elif user.role == 'instructor' %}
+                <a href="{% url 'homesandall:instructor_dashboard' %}">Dashboard</a>
+            {% elif user.role == 'trainee' %}
+                <a href="{% url 'homesandall:trainee_dashboard' %}">Dashboard</a>
+            {% else %}
+                <a href="#">Dashboard</a>
+            {% endif %}
+        </li>
+
+        <!-- TRAINEES (admin + instructor only) -->
+        {% if user.role == 'admin' or user.role == 'instructor' %}
+        <li>
+            <a href="{% url 'trainees:trainee_list' %}">Trainees</a>
+        </li>
+        {% endif %}
+
+        <!-- COURSES (everyone can see) -->
+        <li>
+            <a href="{% url 'courses:course_list' %}">Courses</a>
+        </li>
+
+        <!-- Others (unchanged for now) -->
+        <li><a href="{% url 'instructors:instructor_list' %}">Instructors</a></li>
+        <li><a href="#">Schedules</a></li>
+        <li><a href="#">Payments</a></li>
+
+    </ul>
+</div>

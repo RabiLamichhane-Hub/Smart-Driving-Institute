@@ -1,5 +1,5 @@
 from django import forms
-from .models import TrainingSession
+from .models import TrainingSession, Attendance
 
 class TrainingSessionForm(forms.ModelForm):
     class Meta:
@@ -59,3 +59,17 @@ class TrainingSessionForm(forms.ModelForm):
             raise forms.ValidationError("Vehicle is already in use at this time.")
 
         return cleaned_data
+    
+
+class AttendanceForm(forms.ModelForm):
+    class Meta:
+        model = Attendance
+        fields = ['status', 'notes']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Optional notes...'
+            }),
+        }

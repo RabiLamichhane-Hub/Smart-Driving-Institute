@@ -22,3 +22,24 @@ class TrainingSession(models.Model):
 
     def __str__(self):
         return f"{self.trainee} - {self.session_date}"
+    
+
+class Attendance(models.Model):
+    STATUS_CHOICES = [
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('late', 'Late'),
+        ('excused', 'Excused'),
+    ]
+
+    session = models.OneToOneField(
+        TrainingSession,
+        on_delete=models.CASCADE,
+        related_name='attendance'
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='present')
+    marked_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.session.trainee} — {self.session.session_date} — {self.status}"

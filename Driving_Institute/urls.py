@@ -31,4 +31,5 @@ urlpatterns = [
     path('mocktest/', include('SDIMS_apps.license_mocktest.urls')),
     path('accounts/', include('SDIMS_apps.accounts.urls')),
     path('accounting/', include('SDIMS_apps.accounting.urls')),
+    path('scheduling/', include('SDIMS_apps.scheduling.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

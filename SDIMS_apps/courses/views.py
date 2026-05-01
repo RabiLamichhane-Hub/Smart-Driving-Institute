@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from SDIMS_apps.accounts.decorators import admin_required
+from SDIMS_apps.accounts.decorators import role_required
 from SDIMS_apps.vehicles.models import Vehicle
 from .forms import CourseForm
 from .models import Course
@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 
 @login_required
-@admin_required
+@role_required(['admin'])
 def add_course(request):
     if request.method == 'POST':
         form = CourseForm(request.POST)
@@ -27,7 +27,7 @@ def add_course(request):
     return render(request, 'addcourse.html', {'form': form})
 
 @login_required
-@admin_required
+@role_required(['admin'])
 def edit_course(request, pk):
     course = Course.objects.get(pk=pk)
     if request.method == 'POST':

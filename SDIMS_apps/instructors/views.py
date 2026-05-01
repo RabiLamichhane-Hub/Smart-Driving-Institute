@@ -4,7 +4,7 @@ from .forms import InstructorForm
 from SDIMS_apps.accounts.forms import CreateUserForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from SDIMS_apps.accounts.decorators import admin_required
+from SDIMS_apps.accounts.decorators import role_required
 from SDIMS_apps.accounts.views import generate_password, generate_username
 
 
@@ -31,7 +31,7 @@ def instructor_list(request):
 
 # Add new instructor
 @login_required
-@admin_required
+@role_required(['admin'])
 def instructor_create(request):
     # Only admin can create instructors
     if request.user.role != 'admin':
@@ -65,9 +65,11 @@ def instructor_create(request):
             instructor.user = user
             instructor.save()
 
-            return render(request, 'user_created.html', {
+            return render(request, 'instructor_created.html', {
                 'username': username,
-                'password': password
+                'password': password,
+                'user': user,
+                'instructor': instructor,
             })
 
     else:
@@ -81,21 +83,32 @@ def instructor_create(request):
 
 # Edit existing instructor
 @login_required
-@admin_required
+@role_required(['admin'])
 def instructor_update(request, pk):
     instructor = get_object_or_404(Instructor, pk=pk)
+    user = instructor.user
+
     if request.method == 'POST':
-        form = InstructorForm(request.POST, instance=instructor)
-        if form.is_valid():
-            form.save()
+        user_form = CreateUserForm(request.POST, instance=user)
+        instructor_form = InstructorForm(request.POST, instance=instructor)
+
+        if user_form.is_valid() and instructor_form.is_valid():
+            user_form.save()
+            instructor_form.save()
             return redirect('instructors:instructor_list')
+
     else:
-        form = InstructorForm(instance=instructor)
-    return render(request, 'instructor_form.html', {'form': form})
+        user_form = CreateUserForm(instance=user)
+        instructor_form = InstructorForm(instance=instructor)
+
+    return render(request, 'instructor_form.html', {
+        'user_form': user_form,
+        'instructor_form': instructor_form
+    })
 
 # Delete instructor
 @login_required
-@admin_required
+@role_required(['admin'])
 def instructor_delete(request, pk):
     instructor = get_object_or_404(Instructor, pk=pk)
     if request.method == 'POST':

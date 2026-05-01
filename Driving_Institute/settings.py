@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'SDIMS_apps.training',
     'SDIMS_apps.license_mocktest',
     'SDIMS_apps.accounting',
+    'SDIMS_apps.scheduling',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +147,33 @@ AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'redirect_user'
+
+
+# Redis as broker (install: pip install redis)
+CELERY_BROKER_URL     = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_ACCEPT_CONTENT  = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'daily-scheduler': {
+        'task': 'scheduling.tasks.run_daily_scheduler',
+        'schedule': crontab(hour=22, minute=0),
+    },
+    'mark-ongoing': {
+        'task': 'scheduling.tasks.mark_sessions_ongoing',
+        'schedule': crontab(minute=0),
+    },
+    'mark-completed': {
+        'task': 'scheduling.tasks.mark_sessions_completed',
+        'schedule': crontab(minute=0),
+    },
+    'schedule-reminders': {
+        'task': 'scheduling.tasks.send_schedule_reminders',
+        'schedule': crontab(hour=20, minute=0),
+    },
+}

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from SDIMS_apps.accounts.forms import CreateUserForm
 from SDIMS_apps.accounts.views import generate_username, generate_password
 from .forms import TraineeForm
-from SDIMS_apps.accounts.decorators import admin_required
+from SDIMS_apps.accounts.decorators import role_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Trainee
@@ -20,7 +20,7 @@ def register(request):
 
         if user_form.is_valid() and trainee_form.is_valid():
             user = user_form.save(commit=False)
-            user.role = 'student'
+            user.role = 'trainee'
 
             username = generate_username(user_form.cleaned_data['phone'])
             password = generate_password()
@@ -33,7 +33,7 @@ def register(request):
             trainee.user = user
             trainee.save()
 
-            return render(request, 'user_created.html', {
+            return render(request, 'trainee_created.html', {
                 'username': username,
                 'password': password,
                 'trainee': trainee,
@@ -55,28 +55,31 @@ def trainee_list(request):
 
 
 @login_required
-@admin_required
+@role_required(['admin'])
 def trainee_edit(request, pk):
     trainee = get_object_or_404(Trainee, pk=pk)
+
     if request.method == 'POST':
         trainee_form = TraineeForm(request.POST, instance=trainee)
+
         if trainee_form.is_valid():
             trainee_form.save()
             messages.success(request, "Trainee updated successfully.")
             return redirect('trainees:trainee_list')
-        else:
-            messages.error(request, "Please fix the errors below.")
     else:
         trainee_form = TraineeForm(instance=trainee)
+
+    course_fee = trainee.course.fee if trainee.course else 0
 
     return render(request, 'trainee_edit.html', {
         'trainee_form': trainee_form,
         'trainee': trainee,
+        'course_fee': course_fee,
     })
 
 
 @login_required
-@admin_required
+@role_required(['admin'])
 def trainee_delete(request, pk):
     trainee = get_object_or_404(Trainee, pk=pk)
     if request.method == 'POST':
@@ -93,21 +96,25 @@ def details(request, pk):
 
     fee_record = getattr(trainee, 'fee_record', None)
 
+    base_fee = trainee.course.fee if trainee.course else 0
+
+    # IMPORTANT: adjust this depending on your model
+    discount = getattr(trainee, 'discount', 0)  # most likely correct
+
+    final_fee = max(base_fee - discount, 0)
+
     paid = fee_record.total_paid() if fee_record else 0
     remaining = fee_record.remaining() if fee_record else 0
-    discount = fee_record.discount_amount if fee_record else 0
-    final_fee = fee_record.final_fee() if fee_record else 0
 
-    context = {
+    return render(request, 'trainee_detail.html', {
         'trainee': trainee,
         'fee_record': fee_record,
-        'paid': paid,
-        'remaining': remaining,
+        'base_fee': base_fee,
         'discount': discount,
         'final_fee': final_fee,
-    }
-
-    return render(request, 'trainee_details.html', context)
+        'paid': paid,
+        'remaining': remaining,
+    })
 
 
 # ---- AJAX ----

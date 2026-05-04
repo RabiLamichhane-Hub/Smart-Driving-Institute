@@ -98,13 +98,14 @@ def details(request, pk):
 
     base_fee = trainee.course.fee if trainee.course else 0
 
-    # IMPORTANT: adjust this depending on your model
-    discount = getattr(trainee, 'discount', 0)  # most likely correct
+    discount = getattr(trainee, 'discount', 0)
 
     final_fee = max(base_fee - discount, 0)
 
     paid = fee_record.total_paid() if fee_record else 0
     remaining = fee_record.remaining() if fee_record else 0
+
+    payments = fee_record.payments.select_related('received_by').all() if fee_record else []
 
     return render(request, 'trainee_detail.html', {
         'trainee': trainee,
@@ -114,6 +115,7 @@ def details(request, pk):
         'final_fee': final_fee,
         'paid': paid,
         'remaining': remaining,
+        'payments': payments,
     })
 
 

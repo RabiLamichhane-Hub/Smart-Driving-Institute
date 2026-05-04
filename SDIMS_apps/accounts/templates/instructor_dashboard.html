@@ -1,101 +1,507 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
+{% load static %}
 
-<html>
-<head>
-    <title>Instructor Dashboard</title>
-</head>
-<body>
+{% block title %}Instructor Dashboard{% endblock %}
 
-```
-<h1>Instructor Dashboard</h1>
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'INSTRUCTOR';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.028);
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
 
-<p>Welcome, {{ instructor.user.full_name }}</p>
+  /* ── Page header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
 
-<hr>
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary {
+    background: var(--yellow);
+    color: #0a0a0a;
+  }
+  .btn-primary:hover { background: var(--yellow-dark); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-sec);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
 
-<h2>Your Details</h2>
-<ul>
-    <li><strong>License Number:</strong> {{ instructor.license_number }}</li>
-    <li><strong>Status:</strong> {{ instructor.status }}</li>
-    <li><strong>Date Joined:</strong> {{ instructor.date_joined }}</li>
-</ul>
+  /* ── Instructor details card ── */
+  .details-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    transition: border-color 0.2s;
+  }
+  .details-card:hover { border-color: rgba(250,204,21,0.18); }
 
-<hr>
+  .instructor-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
 
-<h2>Trainees</h2>
+  .details-info { flex: 1; min-width: 0; }
+  .details-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    line-height: 1.0;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .details-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .meta-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .meta-value {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-sec);
+  }
 
-<a href="{% url 'trainees:register' %}">
-    <button>Add Trainee</button>
-</a>
+  /* Status badge */
+  .status-badge {
+    display: inline-block;
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .status-badge.inactive {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
 
-<br><br>
+  /* ── Section headers ── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
 
-<table border="1" cellpadding="10">
-    <thead>
-        <tr>
+  /* ── Tables ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-card thead {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-card thead th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .table-card tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.15s;
+  }
+  .table-card tbody tr:last-child { border-bottom: none; }
+  .table-card tbody tr:hover { background: rgba(255,255,255,0.025); }
+  .table-card tbody td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+
+  /* Avatar + name cell */
+  .name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .row-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+  .name-link {
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .name-link:hover { color: var(--yellow); }
+
+  /* Status badge in table */
+  .row-badge {
+    display: inline-block;
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .row-badge.neutral {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+
+  /* Date cell */
+  .cell-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Action link */
+  .action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--yellow-border);
+    border-radius: 5px;
+    background: var(--yellow-dim);
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .action-link:hover {
+    background: rgba(250,204,21,0.18);
+    border-color: var(--yellow-focus);
+    transform: translateY(-1px);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state p.empty-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state p.empty-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Section spacing ── */
+  .section { margin-top: 48px; }
+
+  @media (max-width: 700px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-wrapper::before { font-size: 80px; }
+    .page-title { font-size: 36px; }
+    .col-hide { display: none; }
+    .details-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .details-meta { gap: 16px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page header ── #}
+  <p class="page-label">Soch Driving Institute</p>
+  <h1 class="page-title">Instructor Dashboard</h1>
+
+  <div class="action-bar">
+    <a href="{% url 'trainees:register' %}" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Trainee
+    </a>
+    <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Logout
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ──────────────────────────────────────────────── #}
+  {# INSTRUCTOR DETAILS                               #}
+  {# ──────────────────────────────────────────────── #}
+  <p class="section-tag">Your Profile</p>
+  <div class="details-card">
+    <div class="instructor-avatar">
+      {{ instructor.user.first_name|slice:":1" }}{{ instructor.user.last_name|slice:":1" }}
+    </div>
+    <div class="details-info">
+      <p class="details-name">{{ instructor.user.first_name }} {{ instructor.user.last_name }}</p>
+      <div class="details-meta">
+        <div class="meta-item">
+          <span class="meta-label">License No.</span>
+          <span class="meta-value">{{ instructor.license_number }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Date Joined</span>
+          <span class="meta-value">{{ instructor.date_joined }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="status-badge {% if instructor.status != 'active' %}inactive{% endif %}">
+            {{ instructor.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ──────────────────────────────────────────────── #}
+  {# TRAINEES                                         #}
+  {# ──────────────────────────────────────────────── #}
+  <div class="section">
+    <p class="section-tag">Enrolled</p>
+    <p class="section-heading">Trainees</p>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
             <th>Name</th>
-            <th>Email</th>
+            <th class="col-hide">Email</th>
             <th>Course</th>
             <th>Status</th>
             <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for trainee in trainees %}
-        <tr>
-            <td><a href={% url "trainees:details" trainee.pk %}>
-                    {{ trainee.user.first_name }} {{ trainee.user.last_name }}
-                </a>
-            </td>
-            <td>{{ trainee.user.email }}</td>
-            <td>{{ trainee.course.course_name|default:"N/A" }}</td>
-            <td>{{ trainee.status }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for trainee in trainees %}
+          <tr>
             <td>
-                <a href={% url "accounting:add_payment" trainee.pk %}>Add Payment</a>
+              <div class="name-cell">
+                <div class="row-avatar">
+                  {{ trainee.user.first_name|slice:":1" }}{{ trainee.user.last_name|slice:":1" }}
+                </div>
+                <a href="{% url 'trainees:details' trainee.pk %}" class="name-link">
+                  {{ trainee.user.first_name }} {{ trainee.user.last_name }}
+                </a>
+              </div>
             </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">No trainees available.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <td class="col-hide" style="color:var(--text-muted);font-size:13px;">{{ trainee.user.email }}</td>
+            <td>{{ trainee.course.course_name|default:"—" }}</td>
+            <td>
+              <span class="row-badge {% if trainee.status != 'active' %}neutral{% endif %}">
+                {{ trainee.status }}
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'accounting:add_payment' trainee.pk %}" class="action-link">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add Payment
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <p class="empty-label">No Trainees Yet</p>
+                <p class="empty-sub">Trainees assigned to you will appear here.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-<hr>
+  {# ──────────────────────────────────────────────── #}
+  {# SCHEDULE                                         #}
+  {# ──────────────────────────────────────────────── #}
+  <div class="section">
+    <p class="section-tag">Upcoming</p>
+    <p class="section-heading">Schedule</p>
 
-<h2>Schedule (Optional)</h2>
-
-<table border="1" cellpadding="10">
-    <thead>
-        <tr>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
             <th>Trainee</th>
             <th>Date</th>
-            <th>Time</th>
+            <th class="col-hide">Time</th>
             <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for session in sessions %}
-        <tr>
-            <td>{{ session.trainee.user.full_name }}</td>
-            <td>{{ session.date }}</td>
-            <td>{{ session.time }}</td>
-            <td>{{ session.status }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4">No sessions scheduled.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in sessions %}
+          <tr>
+            <td>
+              <div class="name-cell">
+                <div class="row-avatar">
+                  {{ session.trainee.user.first_name|slice:":1" }}{{ session.trainee.user.last_name|slice:":1" }}
+                </div>
+                <span style="font-weight:500;color:var(--text);">
+                  {{ session.trainee.user.first_name }} {{ session.trainee.user.last_name }}
+                </span>
+              </div>
+            </td>
+            <td><span class="cell-date">{{ session.date }}</span></td>
+            <td class="col-hide"><span class="cell-date">{{ session.time }}</span></td>
+            <td>
+              <span class="row-badge {% if session.status != 'scheduled' %}neutral{% endif %}">
+                {{ session.status }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <p class="empty-label">No Sessions Scheduled</p>
+                <p class="empty-sub">Your upcoming training sessions will appear here.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-<hr>
-
-<h2>Account</h2>
-<a href="{% url 'accounts:logout' %}">Logout</a>
-```
-
-</body>
-</html>
+</div>
+{% endblock %}

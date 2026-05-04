@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} ============================================================
+  scheduling/templates/scheduling/run_list.html
+============================================================ {% endcomment %}
+
+{% block title %}Scheduler Run History — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Wrapper ─────────────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'RUNS';
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 220px;
+    color: rgba(255, 255, 255, 0.028);
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    user-select: none;
+  }
+
+  /* ── Page Header ──────────────────────────────────── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 6px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ───────────────────────────────────── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ──────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Table Card ───────────────────────────────────── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    white-space: nowrap;
+  }
+  th.col-sessions {
+    color: rgba(250, 204, 21, 0.7);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+
+  /* Cell variants */
+  td.col-pk {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-date {
+    font-weight: 500;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-time {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-sessions {
+    font-weight: 500;
+    color: var(--yellow);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-sessions .sessions-zero {
+    color: var(--text-muted);
+  }
+  td.col-notes {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    font-style: italic;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Auto badge */
+  .badge-auto {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* In-progress indicator */
+  .in-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--yellow);
+    font-style: normal;
+  }
+  .in-progress::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--yellow);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* ── Empty State ──────────────────────────────────── */
+  .empty-cell {
+    text-align: center;
+    padding: 64px 24px !important;
+  }
+  .empty-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin: 0 0 8px;
+    display: block;
+  }
+  .empty-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: normal;
+  }
+
+  /* ── Pagination ───────────────────────────────────── */
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Mobile ───────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 40px; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Run History</h1>
+
+  <div class="action-bar">
+    <form method="post" action="{% url 'scheduling:run_scheduler' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-primary"
+              onclick="return confirm('Trigger the scheduler now for tomorrow?')">
+        ▶ Run Scheduler Now
+      </button>
+    </form>
+  </div>
+  <hr class="section-divider">
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Target Date</th>
+          <th>Triggered By</th>
+          <th class="hide-mobile">Ran At</th>
+          <th class="hide-mobile">Completed At</th>
+          <th class="col-sessions">Sessions</th>
+          <th class="hide-mobile">Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for run in page %}
+        <tr>
+          <td class="col-pk">{{ run.pk }}</td>
+          <td class="col-date">{{ run.run_date|date:"d M Y" }}</td>
+          <td>
+            {% if run.triggered_by %}
+              {{ run.triggered_by.get_full_name }}
+            {% else %}
+              <span class="badge-auto">Auto · Cron</span>
+            {% endif %}
+          </td>
+          <td class="col-time hide-mobile">{{ run.ran_at|date:"d M · H:i" }}</td>
+          <td class="col-time hide-mobile">
+            {% if run.completed_at %}
+              {{ run.completed_at|date:"d M · H:i" }}
+            {% else %}
+              <span class="in-progress">In progress</span>
+            {% endif %}
+          </td>
+          <td class="col-sessions">
+            {% if run.sessions_created > 0 %}
+              {{ run.sessions_created }}
+            {% else %}
+              <span class="sessions-zero">0</span>
+            {% endif %}
+          </td>
+          <td class="col-notes hide-mobile">
+            {% if run.notes %}{{ run.notes|truncatechars:60 }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'scheduling:run_detail' run.pk %}" class="btn-ghost">
+              View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="empty-cell">
+            <span class="empty-label">No Runs Yet</span>
+            <span class="empty-sub">Trigger the scheduler above to generate your first run.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if page.has_other_pages %}
+    <div class="pagination-bar">
+      {% if page.has_previous %}
+        <a href="?page={{ page.previous_page_number }}" class="btn-ghost">← Prev</a>
+      {% endif %}
+      {% if page.has_next %}
+        <a href="?page={{ page.next_page_number }}" class="btn-ghost">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,53 +1,537 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{% block title %}SDIMS{% endblock %}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SDIMS — Soch Driving Institute{% endblock %}</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            background-color: #f5f6fa;
-        }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
-        .sidebar {
-            width: 220px;
-            height: 100vh;
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px;
-            position: fixed;
-        }
+  <style>
+    /* ── Reset & Tokens ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .content {
-            margin-left: 240px;
-            padding: 20px;
-            width: 100%;
-        }
+    :root {
+      --yellow:        #facc15;
+      --yellow-dark:   #eab308;
+      --yellow-dim:    rgba(250, 204, 21, 0.12);
+      --yellow-border: rgba(250, 204, 21, 0.25);
+      --yellow-focus:  rgba(250, 204, 21, 0.50);
+      --bg:            #0a0a0a;
+      --surface:       #141414;
+      --card:          #1a1a1a;
+      --border:        rgba(255, 255, 255, 0.08);
+      --text:          #ffffff;
+      --text-sec:      rgba(255, 255, 255, 0.72);
+      --text-muted:    rgba(255, 255, 255, 0.40);
+      --danger:        #ef4444;
+      --sidebar-w:     248px;
+      --topbar-h:      36px;
+    }
 
-        .menu a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 8px;
-            border-radius: 5px;
-        }
+    html, body { height: 100%; }
 
-        .menu a:hover {
-            background-color: #34495e;
-        }
-    </style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.7;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Top Bar ─────────────────────────────────── */
+    .sdims-topbar {
+      width: 100%;
+      height: var(--topbar-h);
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 400;
+      flex-shrink: 0;
+    }
+
+    .sdims-topbar span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: #0a0a0a;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sdims-topbar svg { opacity: 0.6; }
+
+    .topbar-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* ── Layout Shell ────────────────────────────── */
+    .sdims-shell {
+      display: flex;
+      flex: 1;
+      padding-top: var(--topbar-h);
+    }
+
+    /* ── Sidebar ─────────────────────────────────── */
+    .sdims-sidebar {
+      position: fixed;
+      top: var(--topbar-h);
+      left: 0;
+      width: var(--sidebar-w);
+      height: calc(100vh - var(--topbar-h));
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0 20px;
+      overflow: hidden;
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Ghost text */
+    .sidebar-ghost {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 130px;
+      color: rgba(255, 255, 255, 0.028);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      position: absolute;
+      bottom: 72px;
+      left: -8px;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Brand */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 18px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-wrap {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid rgba(250, 204, 21, 0.2);
+      background: #0f0f0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .sidebar-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .sidebar-brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .sidebar-institute-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1;
+    }
+
+    .sidebar-tagline {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    /* Section labels */
+    .sidebar-section-label {
+      list-style: none;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 18px 20px 6px;
+    }
+
+    /* Menu */
+    .sidebar-menu {
+      list-style: none;
+      padding: 4px 10px 0;
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar-menu::-webkit-scrollbar { display: none; }
+
+    .sidebar-item { margin-bottom: 2px; }
+
+    .sidebar-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-sec);
+      font-size: 13.5px;
+      font-weight: 400;
+      transition: background 0.18s, color 0.18s;
+      overflow: hidden;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .sidebar-link.active {
+      background: var(--yellow-dim);
+      color: var(--yellow);
+      font-weight: 500;
+    }
+
+    /* Yellow left indicator */
+    .sidebar-active-bar {
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 3px;
+      height: 60%;
+      background: var(--yellow);
+      border-radius: 0 3px 3px 0;
+      transition: transform 0.2s ease;
+    }
+
+    .sidebar-link.active .sidebar-active-bar {
+      transform: translateY(-50%) scaleY(1);
+    }
+
+    .sidebar-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+
+    .sidebar-label { flex: 1; }
+
+    /* Footer */
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding: 14px 14px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-avatar {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--yellow-dim);
+      border: 1.5px solid rgba(250, 204, 21, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--yellow);
+      line-height: 1;
+    }
+
+    .sidebar-user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .sidebar-user-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-user-role {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    /* Footer action buttons (home + logout) */
+    .sidebar-footer-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+
+    .sidebar-icon-btn:hover {
+      background: var(--yellow-dim);
+      color: var(--yellow);
+      border-color: var(--yellow-border);
+    }
+
+    .sidebar-icon-btn--logout:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* ── Mobile Toggle ───────────────────────────── */
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: calc(var(--topbar-h) + 10px);
+      left: 14px;
+      z-index: 300;
+      width: 36px;
+      height: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 0;
+      transition: border-color 0.18s;
+    }
+
+    .sidebar-toggle:hover { border-color: var(--yellow-border); }
+
+    .sidebar-toggle span {
+      display: block;
+      width: 18px;
+      height: 1.5px;
+      background: var(--text-sec);
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.25s ease, background 0.18s ease;
+    }
+
+    .sidebar-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg);  background: var(--yellow); }
+    .sidebar-toggle.open span:nth-child(2) { opacity: 0; }
+    .sidebar-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--yellow); }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 190;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* ── Main Content ────────────────────────────── */
+    .sdims-main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: calc(100vh - var(--topbar-h));
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Django messages */
+    .sdims-messages {
+      padding: 24px 48px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sdims-alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 400;
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sdims-alert.success {
+      background: rgba(250, 204, 21, 0.08);
+      border-color: rgba(250, 204, 21, 0.3);
+      color: var(--yellow);
+    }
+
+    .sdims-alert.error {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .sdims-alert.info {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border);
+      color: var(--text-sec);
+    }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 768px) {
+      .sdims-sidebar { transform: translateX(-100%); }
+      .sdims-sidebar.open { transform: translateX(0); }
+      .sidebar-toggle { display: flex; }
+      .sdims-main { margin-left: 0; }
+      .sdims-topbar .topbar-location { display: none; }
+      .sdims-messages { padding: 16px 20px 0; }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
 </head>
 
 <body>
 
+  <!-- ── Top Bar ──────────────────────────────── -->
+  <div class="sdims-topbar">
+    <span class="topbar-location">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+      </svg>
+      Pokhara, Nepal
+    </span>
+    <div class="topbar-divider"></div>
+    <span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Sun – Fri &nbsp;|&nbsp; 6:00 AM – 8:00 PM
+    </span>
+  </div>
+
+  <!-- ── Layout Shell ─────────────────────────── -->
+  <div class="sdims-shell">
+
+    <!-- Sidebar + mobile toggle live in the partial -->
     {% include 'sidebar.html' %}
 
-    <div class="content">
-        {% block content %}
-        {% endblock %}
-    </div>
+    <!-- ── Main Content ────────────────────────── -->
+    <main class="sdims-main">
 
+      {% if messages %}
+      <div class="sdims-messages">
+        {% for message in messages %}
+        <div class="sdims-alert {{ message.tags }}">
+          {% if message.tags == 'success' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          {% elif message.tags == 'error' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {% else %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {% endif %}
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+
+    </main>
+
+  </div><!-- /.sdims-shell -->
+
+  <!-- ── Scripts ───────────────────────────────── -->
+  <script>
+  (function () {
+    const sidebar = document.getElementById('sdimsSidebar');
+    const toggle  = document.getElementById('sidebarToggle');
+    if (!sidebar || !toggle) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      toggle.classList.add('open');
+      overlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      toggle.classList.remove('open');
+      overlay.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+
+    toggle.addEventListener('click', () =>
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar()
+    );
+    overlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+  })();
+  </script>
+
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

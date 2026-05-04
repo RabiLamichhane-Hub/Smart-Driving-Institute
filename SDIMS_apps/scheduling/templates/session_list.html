@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Sessions — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'SESSIONS';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    transform: translateY(-1px);
+  }
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Filter Bar ── */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+    margin-bottom: 28px;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-input,
+  .filter-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 8px 12px;
+    outline: none;
+    min-width: 140px;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .filter-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+  .filter-input:focus,
+  .filter-select:focus {
+    border-color: var(--yellow-focus);
+  }
+  .filter-input::placeholder {
+    color: var(--text-muted);
+  }
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  /* ── Section Label ── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 4px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.col-amount {
+    color: rgba(250, 204, 21, 0.7);
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+  td.col-primary {
+    font-weight: 500;
+    color: var(--text);
+  }
+  td.col-id {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  td.col-muted {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    font-style: italic;
+  }
+
+  /* ── Slot Badge ── */
+  .slot-badge {
+    display: inline-block;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── Type Badge ── */
+  .type-badge {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .type-course {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    color: var(--yellow);
+  }
+  .type-indep {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* ── Status Pill ── */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .status-pill::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-pending {
+    background: rgba(250, 204, 21, 0.1);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    color: var(--yellow);
+  }
+  .status-pending::before { background: var(--yellow); }
+
+  .status-approved {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #4ade80;
+  }
+  .status-approved::before { background: #4ade80; }
+
+  .status-completed {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    color: #a5b4fc;
+  }
+  .status-completed::before { background: #a5b4fc; }
+
+  .status-cancelled {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+  .status-cancelled::before { background: #f87171; }
+
+  /* ── Avatar + Name pair ── */
+  .avatar-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  /* ── Action buttons in table ── */
+  .row-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn-row {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border: 1px solid;
+    background: transparent;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-row-approve {
+    border-color: rgba(34, 197, 94, 0.35);
+    color: #4ade80;
+  }
+  .btn-row-approve:hover {
+    background: rgba(34, 197, 94, 0.1);
+  }
+  .btn-row-cancel {
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+  }
+  .btn-row-cancel:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Pagination ── */
+  .pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .pagination-info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .pagination-links {
+    display: flex;
+    gap: 6px;
+  }
+  .page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-sec);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .page-btn:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    background: rgba(250, 204, 21, 0.04);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+    .filter-bar { gap: 10px; }
+    .filter-input, .filter-select { min-width: 120px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">All Sessions</h1>
+
+  {# ── Action Bar (hidden for instructors) ── #}
+  {% if request.user.role == 'admin' or request.user.role == 'supervisor' %}
+  <div class="action-bar">
+    <a href="{% url 'scheduling:attendance_today' %}" class="btn-ghost">
+      📋 Mark Attendance
+    </a>
+
+    <a href="{% url 'scheduling:approve' %}" class="btn-primary">
+      ✅ Approve Pending
+    </a>
+
+    <form method="post" action="{% url 'scheduling:run_scheduler' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn-ghost"
+              onclick="return confirm('Run the scheduler now? This will auto-assign sessions.')">
+        ▶ Run Scheduler
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+  <hr class="section-divider">
+
+  {# ── Filters ── #}
+  <p class="section-tag">Filters</p>
+  <form method="get" class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">Date</label>
+      <input type="date" name="date" class="filter-input"
+             value="{{ filter_date|default:'' }}">
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <select name="status" class="filter-select">
+        <option value="">All Statuses</option>
+        {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Slot</label>
+      <select name="slot" class="filter-select">
+        <option value="">All Slots</option>
+        {% for slot in slots %}
+          <option value="{{ slot.id }}"
+            {% if filter_slot == slot.id|stringformat:"s" %}selected{% endif %}>
+            {{ slot.label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Type</label>
+      <select name="trainee_type" class="filter-select">
+        <option value="">All Types</option>
+        {% for val, label in type_choices %}
+          <option value="{{ val }}" {% if filter_type == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="btn-primary">Filter</button>
+      <a href="{% url 'scheduling:session_list' %}" class="btn-ghost">Clear</a>
+    </div>
+  </form>
+
+  <hr class="section-divider">
+
+  {# ── Table ── #}
+  <p class="section-tag">Results</p>
+
+  <div class="table-card">
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Slot</th>
+            <th>Trainee</th>
+            <th class="hide-mobile">Instructor</th>
+            <th class="hide-mobile">Vehicle</th>
+            <th class="hide-mobile">Track</th>
+            <th>Type</th>
+            <th>Status</th>
+            {% if request.user.role == 'admin' or request.user.role == 'supervisor' %}
+            <th>Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in page %}
+          <tr>
+            <td class="col-id">{{ session.pk }}</td>
+
+            <td class="col-date">{{ session.date|date:"d M Y" }}</td>
+
+            <td>
+              <span class="slot-badge">{{ session.slot.slot_number }}</span>
+            </td>
+
+            <td class="col-primary">
+              <div class="avatar-pair">
+                <div class="avatar">
+                  {{ session.trainee.user.first_name|slice:":1" }}{{ session.trainee.user.last_name|slice:":1" }}
+                </div>
+                {{ session.trainee.user.get_full_name }}
+              </div>
+            </td>
+
+            <td class="hide-mobile">
+              {% if session.instructor %}
+                <div class="avatar-pair">
+                  <div class="avatar">
+                    {{ session.instructor.user.first_name|slice:":1" }}{{ session.instructor.user.last_name|slice:":1" }}
+                  </div>
+                  {{ session.instructor.user.get_full_name }}
+                </div>
+              {% else %}
+                <span style="color: var(--text-muted);">—</span>
+              {% endif %}
+            </td>
+
+            <td class="hide-mobile">{{ session.vehicle }}</td>
+            <td class="hide-mobile">{{ session.track }}</td>
+
+            <td>
+              {% if session.trainee_type == 'course' %}
+                <span class="type-badge type-course">Course</span>
+              {% else %}
+                <span class="type-badge type-indep">Indep.</span>
+              {% endif %}
+            </td>
+
+            <td>
+              <span class="status-pill status-{{ session.status }}">
+                {{ session.get_status_display }}
+              </span>
+            </td>
+
+            {% if request.user.role == 'admin' or request.user.role == 'supervisor' %}
+            <td>
+              <div class="row-actions">
+                {% if session.status == 'pending' %}
+                  <form method="post" action="{% url 'scheduling:approve_single' session.pk %}"
+                        style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-row btn-row-approve">Approve</button>
+                  </form>
+                {% endif %}
+
+                {% if session.status not in 'completed,cancelled' %}
+                  <form method="post" action="{% url 'scheduling:cancel_session' session.pk %}"
+                        style="display:inline;"
+                        onsubmit="return confirm('Cancel this session?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn-row btn-row-cancel">Cancel</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+            {% endif %}
+
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if request.user.role == 'admin' or request.user.role == 'supervisor' %}10{% else %}9{% endif %}">
+              <div class="empty-state">
+                <p class="empty-state-label">No Sessions Found</p>
+                <p class="empty-state-sub">No sessions match the selected filters.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {# ── Pagination ── #}
+    {% if page.has_other_pages %}
+    <div class="pagination-bar">
+      <span class="pagination-info">
+        Page {{ page.number }} of {{ page.paginator.num_pages }}
+        &mdash; {{ page.paginator.count }} session{% if page.paginator.count != 1 %}s{% endif %}
+      </span>
+      <div class="pagination-links">
+        {% if page.has_previous %}
+          <a class="page-btn"
+             href="?page={{ page.previous_page_number }}&date={{ filter_date|default:'' }}&status={{ filter_status|default:'' }}&slot={{ filter_slot|default:'' }}&trainee_type={{ filter_type|default:'' }}">
+            ‹
+          </a>
+        {% endif %}
+        {% if page.has_next %}
+          <a class="page-btn"
+             href="?page={{ page.next_page_number }}&date={{ filter_date|default:'' }}&status={{ filter_status|default:'' }}&slot={{ filter_slot|default:'' }}&trainee_type={{ filter_type|default:'' }}">
+            ›
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

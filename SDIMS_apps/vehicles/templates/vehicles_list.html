@@ -1,57 +1,558 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>All Vehicles</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Vehicles{% endblock %}
+
+{% block content %}
+
+<section class="vehicles-section">
+
+  <!-- Ghost background text -->
+  <span class="ghost-text">FLEET</span>
+
+  <!-- Section header -->
+  <div class="section-header">
+    <span class="section-tag">Fleet Management</span>
+    <h1 class="section-title">All Vehicles</h1>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="list-toolbar">
+    <p class="vehicle-count">
+      <span class="count-num">{{ vehicles|length }}</span>
+      vehicle{{ vehicles|length|pluralize }} in fleet
+    </p>
+
     {% if user.role == 'admin' %}
-        <a href="{% url 'vehicles:add_vehicle' %}">Add New Vehicle</a>
+    <a href="{% url 'vehicles:add_vehicle' %}" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add New Vehicle
+    </a>
     {% endif %}
-    <h1>All Vehicles</h1>
-    
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Type</th>
-                <th>Transmission</th>
-                <th>Registration Number</th>
-                <th>Bluebook Number</th>
-                <th>Engine Number</th>
-                <th>Chassis Number</th>
-                <th>Fuel Type</th>
-                <th>Status</th>
-                <th>Last Service</th>
-                <th>Insurance Expiry</th>
-                <th>Dual Control</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for vehicle in vehicles %}
-            <tr>
-                <td>{{ vehicle.name }}</td>
-                <td>{{ vehicle.brand }}</td>
-                <td>{{ vehicle.model }}</td>
-                <td>{{ vehicle.get_vehicle_type_display }}</td>
-                <td>{{ vehicle.get_transmission_display }}</td>
-                <td>{{ vehicle.registration_number }}</td>
-                <td>{{ vehicle.bluebook_number }}</td>
-                <td>{{ vehicle.engine_number }}</td>
-                <td>{{ vehicle.chassis_number }}</td>
-                <td>{{ vehicle.get_fuel_type_display }}</td>
-                <td>{{ vehicle.get_status_display }}</td>
-                <td>{{ vehicle.last_service_date }}</td>
-                <td>{{ vehicle.insurance_expiry }}</td>
-                <td>{{ vehicle.dual_control|yesno:"Yes,No" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="14">No vehicles found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+  </div>
+
+  <!-- Django messages -->
+  {% if messages %}
+    <div class="messages-block">
+      {% for message in messages %}
+        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Vehicle cards -->
+  {% if vehicles %}
+  <div class="vehicles-grid">
+
+    {% for vehicle in vehicles %}
+    <div class="vehicle-card">
+
+      <!-- Top accent bar via ::before -->
+
+      <!-- Card header -->
+      <div class="card-header">
+
+        <!-- Vehicle icon -->
+        <div class="vehicle-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+
+        <div class="header-identity">
+          <h2 class="vehicle-name">{{ vehicle.brand }} {{ vehicle.model }}</h2>
+          {% if vehicle.name %}
+            <span class="vehicle-nickname">{{ vehicle.name }}</span>
+          {% endif %}
+        </div>
+
+        <span class="status-pill status-{{ vehicle.get_status_display|lower|slugify }}">
+          {{ vehicle.get_status_display }}
+        </span>
+
+      </div>
+
+      <!-- Type + transmission badges -->
+      <div class="badge-row">
+        <span class="badge badge-type">{{ vehicle.get_vehicle_type_display }}</span>
+        <span class="badge badge-trans">{{ vehicle.get_transmission_display }}</span>
+        <span class="badge badge-fuel">{{ vehicle.get_fuel_type_display }}</span>
+        {% if vehicle.dual_control %}
+          <span class="badge badge-dual">Dual Control</span>
+        {% endif %}
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- ID numbers -->
+      <div class="id-grid">
+
+        <div class="id-item">
+          <span class="id-label">Reg. Number</span>
+          <span class="id-value id-highlight">{{ vehicle.registration_number }}</span>
+        </div>
+
+        <div class="id-item">
+          <span class="id-label">Bluebook No.</span>
+          <span class="id-value">{{ vehicle.bluebook_number|default:"—" }}</span>
+        </div>
+
+        <div class="id-item">
+          <span class="id-label">Engine No.</span>
+          <span class="id-value">{{ vehicle.engine_number|default:"—" }}</span>
+        </div>
+
+        <div class="id-item">
+          <span class="id-label">Chassis No.</span>
+          <span class="id-value">{{ vehicle.chassis_number|default:"—" }}</span>
+        </div>
+
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Dates row -->
+      <div class="dates-row">
+
+        <div class="date-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <div>
+            <span class="date-label">Last Service</span>
+            <span class="date-value">{{ vehicle.last_service_date|default:"Not recorded" }}</span>
+          </div>
+        </div>
+
+        <div class="date-divider"></div>
+
+        <div class="date-item {% if vehicle.insurance_expiry %}date-insurance{% endif %}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div>
+            <span class="date-label">Insurance Expiry</span>
+            <span class="date-value">{{ vehicle.insurance_expiry|default:"Not recorded" }}</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    </div>
+    <p class="empty-title">No Vehicles Yet</p>
+    <p class="empty-sub">Vehicles added to the fleet will appear here.</p>
+    {% if user.role == 'admin' %}
+      <a href="{% url 'vehicles:add_vehicle' %}" class="btn-primary" style="margin-top: 22px;">Add First Vehicle</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</section>
+
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+  /* ── Section ── */
+  .vehicles-section {
+    position: relative;
+    padding: 56px 48px 80px;
+    min-height: 80vh;
+    overflow: hidden;
+  }
+
+  .ghost-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(100px, 20vw, 240px);
+    color: rgba(255,255,255,0.025);
+    position: absolute;
+    top: 6px;
+    right: -16px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #facc15;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  /* ── Toolbar ── */
+  .list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .vehicle-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.40);
+    margin: 0;
+  }
+
+  .count-num {
+    font-size: 22px;
+    font-weight: 500;
+    color: #facc15;
+    margin-right: 4px;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #facc15;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+
+  .btn-primary:hover {
+    background: #eab308;
+    transform: translateY(-1px);
+  }
+
+  /* ── Messages ── */
+  .messages-block {
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .alert-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ── Grid ── */
+  .vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Vehicle card ── */
+  .vehicle-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 22px 22px 20px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: border-color 0.22s ease, transform 0.22s ease;
+  }
+
+  .vehicle-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #facc15;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s ease;
+  }
+
+  .vehicle-card:hover {
+    border-color: rgba(250,204,21,0.25);
+    transform: translateY(-3px);
+  }
+
+  .vehicle-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* ── Card header ── */
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 14px;
+  }
+
+  .vehicle-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #facc15;
+    flex-shrink: 0;
+  }
+
+  .header-identity {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .vehicle-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    line-height: 1;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .vehicle-nickname {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.38);
+  }
+
+  /* Status pill */
+  .status-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 9px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+
+  .status-available  { background: rgba(34,197,94,0.10);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .status-in-use     { background: rgba(250,204,21,0.10); color: #facc15; border: 1px solid rgba(250,204,21,0.2); }
+  .status-maintenance{ background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.22); }
+  .status-inactive   { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.1); }
+  .status-retired    { background: rgba(255,90,90,0.10);  color: #f87171; border: 1px solid rgba(255,90,90,0.2); }
+
+  /* ── Badges ── */
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .badge-type  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.1); }
+  .badge-trans { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.1); }
+  .badge-fuel  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.1); }
+  .badge-dual  { background: rgba(250,204,21,0.10); color: #facc15; border: 1px solid rgba(250,204,21,0.2); }
+
+  /* ── Divider ── */
+  .card-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin-bottom: 16px;
+  }
+
+  /* ── ID numbers grid ── */
+  .id-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    margin-bottom: 16px;
+  }
+
+  .id-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .id-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.30);
+  }
+
+  .id-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.60);
+    word-break: break-all;
+  }
+
+  .id-highlight {
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 5px;
+    padding: 3px 8px;
+    display: inline-block;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Dates row ── */
+  .dates-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+
+  .date-item {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: rgba(255,255,255,0.30);
+  }
+
+  .date-item svg {
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .date-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .date-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.28);
+  }
+
+  .date-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.65);
+  }
+
+  .date-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.08);
+    margin: 0 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.22);
+    margin-bottom: 20px;
+  }
+
+  .empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.55);
+    margin: 0 0 6px;
+  }
+
+  .empty-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.32);
+    margin: 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .vehicles-section { padding: 36px 20px 60px; }
+    .ghost-text { font-size: 90px; }
+    .list-toolbar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .vehicles-grid { grid-template-columns: 1fr; }
+    .id-grid { grid-template-columns: 1fr; }
+    .dates-row { flex-direction: column; gap: 14px; }
+    .date-divider { width: 100%; height: 1px; margin: 0; }
+  }
+</style>
+
+{% endblock %}

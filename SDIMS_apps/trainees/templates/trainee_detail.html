@@ -1,84 +1,710 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{{ trainee.user.first_name }} {{ trainee.user.last_name }} Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trainee.user.first_name }} {{ trainee.user.last_name }} — Trainee Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --yellow: #facc15;
+            --yellow-dark: #eab308;
+            --yellow-dim: rgba(250,204,21,0.08);
+            --yellow-border: rgba(250,204,21,0.18);
+            --yellow-focus: rgba(250,204,21,0.5);
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --card: #1a1a1a;
+            --border: rgba(255,255,255,0.08);
+            --border-row: rgba(255,255,255,0.05);
+            --text: #ffffff;
+            --text-sec: rgba(255,255,255,0.72);
+            --text-muted: rgba(255,255,255,0.40);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            font-size: 15px;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            background: var(--yellow);
+            color: #000;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 7px 20px;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 64px;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .nav-brand img {
+            height: 36px;
+            border: 1px solid rgba(250,204,21,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+        }
+        .nav-brand-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.06em;
+            color: var(--text);
+        }
+        .nav-tagline {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* ── PAGE WRAPPER ── */
+        .page-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding: 48px 48px 80px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .page-wrapper::before {
+            content: 'TRAINEE';
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(120px, 22vw, 220px);
+            color: rgba(255,255,255,0.028);
+            position: absolute;
+            top: 20px;
+            right: -20px;
+            letter-spacing: 0.04em;
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 32px;
+        }
+        .page-tag {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--yellow);
+            margin-bottom: 8px;
+        }
+        .page-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 58px;
+            letter-spacing: 0.04em;
+            line-height: 0.97;
+            color: var(--text);
+        }
+        .page-subtitle {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ── ACTION BAR ── */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 1;
+        }
+        .btn-primary {
+            background: var(--yellow);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, transform 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); transform: translateY(-1px); }
+        .btn-danger {
+            background: transparent;
+            color: rgba(255,80,80,0.85);
+            border: 1px solid rgba(255,80,80,0.2);
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, transform 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .btn-danger:hover { border-color: rgba(255,80,80,0.5); color: #ff5050; transform: translateY(-1px); }
+
+        hr.divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 0 36px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── GRID ── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .detail-grid .full { grid-column: 1 / -1; }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 28px 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .card:hover { border-color: rgba(250,204,21,0.25); transform: translateY(-3px); }
+
+        .card-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.06em;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--yellow-dim);
+            border: 1px solid var(--yellow-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* ── INFO ROWS ── */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid var(--border-row);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .info-value {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-sec);
+            text-align: right;
+        }
+        .info-value.primary { color: var(--text); font-weight: 500; }
+        .info-value.amount { color: var(--yellow); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+        /* ── STATUS BADGE ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: var(--yellow-dim);
+            border: 1px solid var(--yellow-border);
+            color: var(--yellow);
+        }
+        .badge.green {
+            background: rgba(34,197,94,0.08);
+            border-color: rgba(34,197,94,0.2);
+            color: #4ade80;
+        }
+        .badge.red {
+            background: rgba(239,68,68,0.08);
+            border-color: rgba(239,68,68,0.2);
+            color: #f87171;
+        }
+
+        /* ── TRAINEE AVATAR HEADER ── */
+        .trainee-hero {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .avatar-lg {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(250,204,21,0.12);
+            border: 1.5px solid rgba(250,204,21,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            color: var(--yellow);
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+
+        /* ── FEE SUMMARY ── */
+        .fee-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .fee-cell {
+            background: var(--surface);
+            padding: 18px 20px;
+            text-align: center;
+        }
+        .fee-cell-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .fee-cell-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 26px;
+            letter-spacing: 0.04em;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .fee-cell-value.highlight { color: var(--yellow); }
+        .fee-cell-value.dim { color: rgba(255,255,255,0.45); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+        }
+        .empty-state-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.06em;
+            color: rgba(255,255,255,0.30);
+            margin-bottom: 8px;
+        }
+        .empty-state-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ── TABLE ── */
+        .table-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--card); border-bottom: 1px solid var(--border); }
+        th {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 14px 20px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th.col-amount { color: rgba(250,204,21,0.7); }
+        tbody tr { border-bottom: 1px solid var(--border-row); transition: background 0.15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.025); }
+        td {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-sec);
+            padding: 16px 20px;
+            vertical-align: middle;
+        }
+        .td-date { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .td-amount { color: var(--yellow); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .td-notes { font-size: 13px; color: rgba(255,255,255,0.35); font-style: italic; }
+
+        /* ── AVATAR ROW ── */
+        .avatar-row { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; color: var(--text-sec); }
+        .avatar-sm {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(250,204,21,0.12);
+            border: 1.5px solid rgba(250,204,21,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 12px; color: var(--yellow); flex-shrink: 0;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 768px) {
+            nav { padding: 0 20px; }
+            .page-wrapper { padding: 32px 20px 60px; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .detail-grid .full { grid-column: 1; }
+            .fee-summary { grid-template-columns: 1fr; }
+            .page-title { font-size: 40px; }
+            .action-bar .btn-danger { display: none; }
+            .hide-mobile { display: none; }
+        }
+    </style>
 </head>
 <body>
 
-    <h2>Trainee Details</h2>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        Pokhara, Gandaki Pradesh &nbsp;·&nbsp; Mon–Sat: 7:00 AM – 6:00 PM
+    </div>
 
-    <a href="{% url 'trainees:trainee_list' %}">← Back to List</a>
-
-    <hr>
-
-    <h3>Personal Information</h3>
-    <p><strong>Full Name:</strong> {{ trainee.user.first_name }} {{ trainee.user.last_name }}</p>
-    <p><strong>Phone:</strong> {{ trainee.user.phone }}</p>
-    <p><strong>Email:</strong> {{ trainee.user.email }}</p>
-    <p><strong>Address:</strong> {{ trainee.user.address|default:"N/A" }}</p>
-    <p><strong>Gender:</strong> {{ trainee.get_gender_display }}</p>
-    <p><strong>Date of Birth:</strong> {{ trainee.date_of_birth|default:"N/A" }}</p>
-
-    <hr>
-
-    <h3>Guardian Information</h3>
-    <p><strong>Guardian Name:</strong> {{ trainee.guardian_name|default:"N/A" }}</p>
-    <p><strong>Guardian Phone:</strong> {{ trainee.guardian_phone|default:"N/A" }}</p>
-
-    <hr>
-
-    <h3>Course Information</h3>
-
-    {% if trainee.course %}
-        <p><strong>Course Name:</strong> {{ trainee.course.course_name }}</p>
-        <p><strong>Vehicle Type:</strong> {{ trainee.course.get_vehicle_type_display }}</p>
-        <p><strong>Level:</strong> {{ trainee.course.get_level_display }}</p>
-        <p><strong>Duration:</strong> {{ trainee.course.duration_days }} days</p>
-        <p><strong>Total Lessons:</strong> {{ trainee.course.total_lessons }}</p>
-
-        <hr>
-
-        <h4>Course Fee Breakdown</h4>
-
-        <p><strong>Initial Course Fee:</strong> Rs. {{ base_fee }}</p>
-        <p><strong>Discount:</strong> Rs. {{ discount|default:"0" }}</p>
-        <p><strong>Final Course Fee:</strong> Rs. {{ final_fee }}</p>
-
-    {% else %}
-        <p>No course enrolled yet.</p>
-    {% endif %}
-
-    <hr>
-
-    <h3>Payment Information</h3>
-
-    {% if fee_record %}
-        <p><strong>Paid Amount:</strong> Rs. {{ paid }}</p>
-        <p><strong>Remaining Amount:</strong> Rs. {{ remaining }}</p>
-        <p><strong>Status:</strong> {{ fee_record.get_status_display }}</p>
-
-        <br>
-
-        <a href="{% url 'accounting:add_payment' trainee.pk %}">
-            Add Payment
+    <!-- NAVBAR -->
+    <nav>
+        <a href="{% url 'homesandall:index' %}" class="nav-brand">
+            <img src="{% static 'images/Soch Driving Institute.png' %}" alt="SDIMS Logo">
+            <div>
+                <div class="nav-brand-name">Soch Driving Institute</div>
+                <div class="nav-tagline">Drive Smart. Drive Safe.</div>
+            </div>
         </a>
+    </nav>
 
-    {% else %}
-        <p>No payment record available.</p>
-    {% endif %}
+    <!-- PAGE -->
+    <div class="page-wrapper">
 
-    <hr>
+        <!-- TRAINEE HERO -->
+        <div class="trainee-hero">
+            <div class="avatar-lg">
+                {{ trainee.user.first_name|slice:":1" }}{{ trainee.user.last_name|slice:":1" }}
+            </div>
+            <div>
+                <div class="page-tag">Trainee Profile</div>
+                <div class="page-title">{{ trainee.user.first_name }} {{ trainee.user.last_name }}</div>
+            </div>
+        </div>
 
-    <h3>Enrollment Information</h3>
-    <p><strong>Status:</strong> {{ trainee.get_status_display }}</p>
-    <p><strong>Enrollment Date:</strong> {{ trainee.enrollment_date }}</p>
+        <!-- ACTION BAR -->
+        <div class="action-bar">
+            <a href="{% url 'trainees:trainee_list' %}" class="btn-ghost">← Back to List</a>
+            {% if user.role == 'admin' %}
+                <a href="{% url 'trainees:trainee_edit' trainee.pk %}" class="btn-primary">✏ Edit Trainee</a>
+                <a href="{% url 'trainees:trainee_delete' trainee.pk %}" class="btn-danger">✕ Delete</a>
+            {% endif %}
+        </div>
 
-    <hr>
+        <hr class="divider">
 
-    {% if user.role == 'admin' %}
-        <a href="{% url 'trainees:trainee_edit' trainee.pk %}">Edit</a>
-        | <a href="{% url 'trainees:trainee_delete' trainee.pk %}">Delete</a>
-    {% endif %}
+        <!-- GRID -->
+        <div class="detail-grid">
+
+            <!-- Personal Information -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">👤</div>
+                    Personal Information
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value primary">{{ trainee.user.first_name }} {{ trainee.user.last_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">{{ trainee.user.phone }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ trainee.user.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">{{ trainee.user.address|default:"N/A" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Gender</span>
+                    <span class="info-value">{{ trainee.get_gender_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value">{{ trainee.date_of_birth|default:"N/A" }}</span>
+                </div>
+            </div>
+
+            <!-- Guardian Information -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">🛡</div>
+                    Guardian Information
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Guardian Name</span>
+                    <span class="info-value primary">{{ trainee.guardian_name|default:"N/A" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Guardian Phone</span>
+                    <span class="info-value">{{ trainee.guardian_phone|default:"N/A" }}</span>
+                </div>
+
+                <div style="margin-top: 28px;">
+                    <div class="card-title" style="margin-bottom: 16px;">
+                        <div class="card-title-icon">📋</div>
+                        Enrollment
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">
+                            <span class="badge {% if trainee.status == 'active' %}green{% elif trainee.status == 'dropped' %}red{% endif %}">
+                                {{ trainee.get_status_display }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Enrollment Date</span>
+                        <span class="info-value">{{ trainee.enrollment_date }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Information -->
+            <div class="card full">
+                <div class="card-title">
+                    <div class="card-title-icon">🎓</div>
+                    Course Information
+                </div>
+
+                {% if trainee.course %}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+                        <div>
+                            <div class="info-row">
+                                <span class="info-label">Course Name</span>
+                                <span class="info-value primary">{{ trainee.course.course_name }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Vehicle Type</span>
+                                <span class="info-value">{{ trainee.course.get_vehicle_type_display }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Level</span>
+                                <span class="info-value">
+                                    <span class="badge">{{ trainee.course.get_level_display }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="info-row">
+                                <span class="info-label">Duration</span>
+                                <span class="info-value">{{ trainee.course.duration_days }} days</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Total Lessons</span>
+                                <span class="info-value">{{ trainee.course.total_lessons }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0 20px;">
+
+                    <!-- Fee Breakdown -->
+                    <div style="font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px;">Course Fee Breakdown</div>
+                    <div class="fee-summary">
+                        <div class="fee-cell">
+                            <div class="fee-cell-label">Base Fee</div>
+                            <div class="fee-cell-value dim">Rs. {{ base_fee }}</div>
+                        </div>
+                        <div class="fee-cell">
+                            <div class="fee-cell-label">Discount</div>
+                            <div class="fee-cell-value dim">Rs. {{ discount|default:"0" }}</div>
+                        </div>
+                        <div class="fee-cell">
+                            <div class="fee-cell-label">Final Fee</div>
+                            <div class="fee-cell-value highlight">Rs. {{ final_fee }}</div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-label">No Course Enrolled</div>
+                        <div class="empty-state-sub">This trainee has not been assigned to a course yet.</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Payment Information -->
+            <div class="card full">
+                <div class="card-title">
+                    <div class="card-title-icon">💰</div>
+                    Payment Information
+                </div>
+
+                {% if fee_record %}
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 24px;">
+                        <div class="fee-cell">
+                            <div class="fee-cell-label">Paid Amount</div>
+                            <div class="fee-cell-value highlight">Rs. {{ paid }}</div>
+                        </div>
+                        <div class="fee-cell">
+                            <div class="fee-cell-label">Remaining</div>
+                            <div class="fee-cell-value dim">Rs. {{ remaining }}</div>
+                        </div>
+                        <div class="fee-cell">
+                            <div class="fee-cell-label">Status</div>
+                            <div style="margin-top: 6px;">
+                                <span class="badge {% if fee_record.status == 'paid' %}green{% elif fee_record.status == 'overdue' %}red{% endif %}">
+                                    {{ fee_record.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'accounting:add_payment' trainee.pk %}" class="btn-primary" style="width: fit-content;">
+                        + Add Payment
+                    </a>
+
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-label">No Payment Record</div>
+                        <div class="empty-state-sub">No payment record has been created for this trainee yet.</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Payment History -->
+            <div class="card full">
+                <div class="card-title">
+                    <div class="card-title-icon">🧾</div>
+                    Payment History
+                </div>
+
+                {% if payments %}
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Received By</th>
+                                    <th class="hide-mobile">Notes</th>
+                                    <th class="col-amount">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td style="color: var(--text-muted); font-size: 13px; font-variant-numeric: tabular-nums;">{{ forloop.counter }}</td>
+                                    <td class="td-date">{{ payment.date|date:"d M Y, g:i A" }}</td>
+                                    <td>
+                                        <span class="badge">{{ payment.get_method_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if payment.received_by %}
+                                            <div class="avatar-row">
+                                                <div class="avatar-sm">{{ payment.received_by.first_name|slice:":1" }}{{ payment.received_by.last_name|slice:":1" }}</div>
+                                                {{ payment.received_by.first_name }} {{ payment.received_by.last_name }}
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted); font-size: 13px;">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="td-notes hide-mobile">{{ payment.notes|default:"—" }}</td>
+                                    <td class="td-amount">Rs. {{ payment.amount }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-label">No Payments Yet</div>
+                        <div class="empty-state-sub">Payment entries will appear here once recorded.</div>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div><!-- /detail-grid -->
+    </div><!-- /page-wrapper -->
 
 </body>
 </html>

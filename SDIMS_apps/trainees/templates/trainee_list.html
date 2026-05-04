@@ -1,58 +1,661 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Trainee List{% endblock %}
 
 {% block content %}
 
-<h2>Trainee List</h2>
+<section class="trainees-section">
 
-{% if user.role == 'admin' %}
-    <a href="{% url 'trainees:register' %}">Register New Trainee</a>
-{% endif %}
+  <!-- Ghost background text -->
+  <span class="ghost-text">TRAINEES</span>
 
-<br><br>
+  <!-- Section header -->
+  <div class="section-header">
+    <span class="section-tag">Enrolled Members</span>
+    <h1 class="section-title">Trainee List</h1>
+  </div>
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Course</th>
-        <th>Status</th>
+  <!-- Top bar: search + count + register button -->
+  <div class="list-toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input
+          id="traineeSearch"
+          type="text"
+          class="search-input"
+          placeholder="Search trainees..."
+          autocomplete="off"
+        >
+        <button class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
+      </div>
+      <p class="trainee-count">
+        <span class="count-num" id="visibleCount">{{ trainees|length }}</span>
+        <span id="countLabel"> trainee{{ trainees|length|pluralize }} enrolled</span>
+      </p>
+    </div>
 
-        {% if user.role == 'admin' or user.role == 'instructor' %}
-            <th>Actions</th>
-        {% endif %}
-    </tr>
+    {% if user.role == 'admin' %}
+      <a href="{% url 'trainees:register' %}" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Register New Trainee
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Django messages -->
+  {% if messages %}
+    <div class="messages-block">
+      {% for message in messages %}
+        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Trainee cards grid -->
+  {% if trainees %}
+  <div class="trainees-grid" id="traineeGrid">
 
     {% for trainee in trainees %}
-    <tr>
-        <td>
-            <a href="{% url 'trainees:details' trainee.pk %}">
-                {{ trainee.user.first_name }} {{ trainee.user.last_name }}
-            </a>
-        </td>
+    <div
+      class="trainee-card"
+      data-name="{{ trainee.user.first_name|lower }} {{ trainee.user.last_name|lower }}"
+    >
 
-        <td>{{ trainee.user.phone }}</td>
-        <td>{{ trainee.course.course_name|default:"N/A" }}</td>
-        <td>{{ trainee.get_status_display }}</td>
+      <!-- UPPER: clickable link to trainee details -->
+      <a href="{% url 'trainees:details' trainee.pk %}" class="card-upper">
 
-        {% if user.role == 'admin' or user.role == 'instructor' %}
-        <td>
-            <a href="{% url 'accounting:add_payment' trainee.pk %}">Add Payment</a>
+        <!-- Arrow hint -->
+        <div class="card-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
 
-            {% if user.role == 'admin' %}
-                <a href="{% url 'trainees:trainee_edit' trainee.pk %}">Edit</a>
-                | <a href="{% url 'trainees:trainee_delete' trainee.pk %}">Delete</a>
-            {% endif %}
-        </td>
+        <!-- Avatar + name + status -->
+        <div class="card-top">
+          <div class="avatar">
+            {{ trainee.user.first_name|first|upper }}{{ trainee.user.last_name|first|upper }}
+          </div>
+
+          <div class="card-identity">
+            <span class="trainee-name">
+              {{ trainee.user.first_name }} {{ trainee.user.last_name }}
+            </span>
+            <span class="trainee-phone">{{ trainee.user.phone }}</span>
+          </div>
+
+          <!-- Status badge -->
+          <span class="status-badge status-{{ trainee.get_status_display|lower|slugify }}">
+            {{ trainee.get_status_display }}
+          </span>
+        </div>
+
+        <!-- Divider -->
+        <div class="card-divider"></div>
+
+        <!-- Course meta -->
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="meta-label">Course</span>
+            <span class="meta-value">{{ trainee.course.course_name|default:"— Not Assigned" }}</span>
+          </div>
+        </div>
+
+      </a><!-- /card-upper -->
+
+      <!-- LOWER: action buttons, independent of the link above -->
+      {% if user.role == 'admin' or user.role == 'instructor' %}
+      <div class="card-actions">
+        <a href="{% url 'accounting:add_payment' trainee.pk %}" class="btn-ghost btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Add Payment
+        </a>
+
+        {% if user.role == 'admin' %}
+          <a href="{% url 'trainees:trainee_edit' trainee.pk %}" class="btn-ghost btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </a>
+          <a href="{% url 'trainees:trainee_delete' trainee.pk %}" class="btn-danger btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </a>
         {% endif %}
-    </tr>
+      </div>
+      {% endif %}
 
-    {% empty %}
-    <tr>
-        <td colspan="5">No trainees found.</td>
-    </tr>
+    </div><!-- /trainee-card -->
     {% endfor %}
-</table>
+
+  </div>
+
+  <!-- No search results state (hidden by default) -->
+  <div class="empty-state" id="noResults" style="display:none;">
+    <div class="empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <p class="empty-title">No Match Found</p>
+    <p class="empty-sub">Try a different name.</p>
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <p class="empty-title">No trainees found</p>
+    <p class="empty-sub">Registered trainees will appear here.</p>
+    {% if user.role == 'admin' %}
+      <a href="{% url 'trainees:register' %}" class="btn-primary" style="margin-top:20px;">Register First Trainee</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</section>
+
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+  /* ── Layout ── */
+  .trainees-section {
+    position: relative;
+    padding: 56px 48px 80px;
+    min-height: 80vh;
+    overflow: hidden;
+  }
+
+  /* Ghost text */
+  .ghost-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 18vw, 200px);
+    color: rgba(255,255,255,0.028);
+    position: absolute;
+    top: 20px;
+    right: -10px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #facc15;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  /* ── Toolbar ── */
+  .list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Search ── */
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 13px;
+    color: rgba(255,255,255,0.35);
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 9px 36px 9px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: #fff;
+    width: 240px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+
+  .search-input::placeholder { color: rgba(255,255,255,0.28); }
+
+  .search-input:focus {
+    border-color: rgba(250,204,21,0.5);
+    box-shadow: 0 0 0 3px rgba(250,204,21,0.06);
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.3);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 4px;
+    display: none;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+
+  .search-clear:hover { color: #facc15; }
+  .search-clear.visible { display: block; }
+
+  .trainee-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.45);
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .count-num {
+    font-size: 22px;
+    font-weight: 500;
+    color: #facc15;
+    margin-right: 4px;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #facc15;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+
+  .btn-primary:hover {
+    background: #eab308;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    color: rgba(255,255,255,0.75);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 7px;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250,204,21,0.45);
+    color: #facc15;
+    transform: translateY(-1px);
+  }
+
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    color: rgba(255,90,90,0.8);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid rgba(255,90,90,0.25);
+    border-radius: 7px;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+
+  .btn-danger:hover {
+    border-color: rgba(255,90,90,0.6);
+    color: #ff5a5a;
+    transform: translateY(-1px);
+  }
+
+  .btn-sm {
+    font-size: 12px;
+    padding: 7px 13px;
+  }
+
+  /* ── Cards grid ── */
+  .trainees-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Card wrapper — plain div, no hover */
+  .trainee-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.22s ease, transform 0.22s ease;
+  }
+
+  .trainee-card:hover {
+    border-color: rgba(250,204,21,0.25);
+    transform: translateY(-3px);
+  }
+
+  /* Yellow top-border reveal on upper hover */
+  .trainee-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #facc15;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s ease;
+    z-index: 1;
+  }
+
+  .trainee-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Upper clickable area */
+  .card-upper {
+    display: block;
+    padding: 22px 22px 18px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+  }
+
+  /* Arrow hint — inside card-upper */
+  .card-arrow {
+    position: absolute;
+    top: 20px;
+    right: 18px;
+    color: rgba(255,255,255,0.15);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s, transform 0.2s, color 0.2s;
+  }
+
+  .card-upper:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: #facc15;
+  }
+
+  .card-upper:hover .trainee-name { color: #facc15; }
+
+  /* ── Card top ── */
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-right: 24px;
+  }
+
+  /* Avatar */
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(250,204,21,0.10);
+    border: 1.5px solid rgba(250,204,21,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: #facc15;
+    flex-shrink: 0;
+  }
+
+  .card-identity {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .trainee-name {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.18s;
+  }
+
+
+  .trainee-phone {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.42);
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* Status badge */
+  .status-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 9px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+
+  .status-active      { background: rgba(34,197,94,0.12);  color: #4ade80; border: 1px solid rgba(34,197,94,0.22); }
+  .status-inactive    { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.1); }
+  .status-completed   { background: rgba(250,204,21,0.10); color: #facc15; border: 1px solid rgba(250,204,21,0.22); }
+  .status-suspended   { background: rgba(255,90,90,0.10);  color: #f87171; border: 1px solid rgba(255,90,90,0.22); }
+
+  /* ── Divider ── */
+  .card-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin-bottom: 16px;
+  }
+
+  /* ── Meta row ── */
+  .card-meta {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 18px;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .meta-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .meta-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.80);
+  }
+
+  /* ── Card actions (lower section) ── */
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 22px 16px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+
+  /* ── Messages ── */
+  .messages-block { margin-bottom: 24px; }
+
+  .alert-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 20px;
+  }
+
+  .empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.6);
+    margin: 0 0 6px;
+  }
+
+  .empty-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.35);
+    margin: 0;
+  }
+
+  /* Hidden card during search */
+  .trainee-card.hidden {
+    display: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .trainees-section { padding: 36px 20px 60px; }
+    .ghost-text { font-size: 80px; }
+    .list-toolbar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .trainees-grid { grid-template-columns: 1fr; }
+    .search-input { width: 100%; }
+    .toolbar-left { width: 100%; flex-direction: column; align-items: flex-start; }
+    .search-wrap { width: 100%; }
+    .search-input { width: 100%; }
+  }
+</style>
+
+<script>
+  const searchInput = document.getElementById('traineeSearch');
+  const searchClear = document.getElementById('searchClear');
+  const grid        = document.getElementById('traineeGrid');
+  const noResults   = document.getElementById('noResults');
+  const countNum    = document.getElementById('visibleCount');
+  const countLabel  = document.getElementById('countLabel');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const query = this.value.trim().toLowerCase();
+      const cards = grid ? grid.querySelectorAll('.trainee-card') : [];
+      let visible = 0;
+
+      cards.forEach(card => {
+        const name = card.dataset.name || '';
+        const matches = name.includes(query);
+        card.classList.toggle('hidden', !matches);
+        if (matches) visible++;
+      });
+
+      // Update count
+      countNum.textContent = visible;
+      countLabel.textContent = visible === 1 ? ' trainee found' : ' trainees found';
+
+      // Toggle no-results state
+      if (noResults) noResults.style.display = (visible === 0 && query !== '') ? 'flex' : 'none';
+
+      // Toggle clear button
+      searchClear.classList.toggle('visible', query.length > 0);
+    });
+
+    searchClear.addEventListener('click', function () {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+      searchInput.focus();
+    });
+  }
+</script>
 
 {% endblock %}

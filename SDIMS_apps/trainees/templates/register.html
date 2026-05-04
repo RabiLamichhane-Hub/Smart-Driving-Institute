@@ -1,159 +1,690 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register Trainee</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-<h2>Register New Trainee</h2>
+{% block title %}Register Trainee{% endblock %}
 
-<form method="POST">
+{% block content %}
+
+<section class="register-section">
+
+  <!-- Ghost background text -->
+  <span class="ghost-text">REGISTER</span>
+
+  <!-- Back link -->
+  <a href="{% url 'trainees:trainee_list' %}" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Trainee List
+  </a>
+
+  <!-- Section header -->
+  <div class="section-header">
+    <span class="section-tag">Admin Panel</span>
+    <h1 class="section-title">Register New Trainee</h1>
+  </div>
+
+  <!-- Django messages -->
+  {% if messages %}
+    <div class="messages-block">
+      {% for message in messages %}
+        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" class="register-form" novalidate>
     {% csrf_token %}
 
-    <h3>Account Details</h3>
-    {% for field in user_form %}
-        <div>
-            {{ field.label_tag }}
-            {{ field }}
-            {% if field.errors %}
-                <span>{{ field.errors }}</span>
-            {% endif %}
+    <!-- ── Account Details ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-    {% endfor %}
+        <div>
+          <span class="form-card-tag">Step 1</span>
+          <h2 class="form-card-title">Account Details</h2>
+        </div>
+      </div>
 
-    <h3>Trainee Details</h3>
-
-    <div>
-        {{ trainee_form.gender.label_tag }}
-        {{ trainee_form.gender }}
-        {% if trainee_form.gender.errors %}
-            <span>{{ trainee_form.gender.errors }}</span>
-        {% endif %}
+      <div class="fields-grid">
+        {% for field in user_form %}
+        <div class="field-group {% if field.field.widget.input_type == 'text' and forloop.first %}field-full{% endif %}">
+          <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ field.errors|join:", " }}
+            </span>
+          {% endif %}
+          {% if field.help_text %}
+            <span class="field-hint">{{ field.help_text }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
     </div>
 
-    <div>
-        {{ trainee_form.date_of_birth.label_tag }}
-        {{ trainee_form.date_of_birth }}
-        {% if trainee_form.date_of_birth.errors %}
-            <span>{{ trainee_form.date_of_birth.errors }}</span>
-        {% endif %}
+    <!-- ── Trainee Details ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">Step 2</span>
+          <h2 class="form-card-title">Trainee Details</h2>
+        </div>
+      </div>
+
+      <div class="fields-grid">
+
+        <!-- Gender -->
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.gender.id_for_label }}">{{ trainee_form.gender.label }}</label>
+          {{ trainee_form.gender }}
+          {% if trainee_form.gender.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.gender.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.date_of_birth.id_for_label }}">{{ trainee_form.date_of_birth.label }}</label>
+          {{ trainee_form.date_of_birth }}
+          {% if trainee_form.date_of_birth.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.date_of_birth.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Status -->
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.status.id_for_label }}">{{ trainee_form.status.label }}</label>
+          {{ trainee_form.status }}
+          {% if trainee_form.status.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.status.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Course -->
+        <div class="field-group field-full">
+          <label class="field-label" for="{{ trainee_form.course.id_for_label }}">{{ trainee_form.course.label }}</label>
+          {{ trainee_form.course }}
+          {% if trainee_form.course.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.course.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Fee Summary (hidden until course selected) -->
+      <div id="fee-summary" class="fee-summary" style="display: none;">
+        <div class="fee-summary-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Fee Summary
+        </div>
+
+        <div class="fee-rows">
+          <div class="fee-row">
+            <span class="fee-row-label">Course Fee</span>
+            <span class="fee-row-value">Rs. <span id="course_fee_display">0.00</span></span>
+          </div>
+
+          <div class="fee-row fee-row-input">
+            <label class="fee-row-label" for="{{ trainee_form.discount.id_for_label }}">Discount</label>
+            <div class="discount-input-wrap">
+              <span class="discount-prefix">Rs.</span>
+              {{ trainee_form.discount }}
+              {% if trainee_form.discount.errors %}
+                <span class="field-error" style="grid-column: 1/-1;">{{ trainee_form.discount.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="fee-divider"></div>
+
+          <div class="fee-row fee-row-total">
+            <span class="fee-row-label">Final Fee</span>
+            <span class="fee-total-value">Rs. <span id="final_fee_display">0.00</span></span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div>
-        {{ trainee_form.course.label_tag }}
-        {{ trainee_form.course }}
-        {% if trainee_form.course.errors %}
-            <span>{{ trainee_form.course.errors }}</span>
-        {% endif %}
+    <!-- ── Guardian Details ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">Step 3</span>
+          <h2 class="form-card-title">Guardian Details</h2>
+        </div>
+      </div>
+
+      <div class="fields-grid">
+
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.guardian_name.id_for_label }}">{{ trainee_form.guardian_name.label }}</label>
+          {{ trainee_form.guardian_name }}
+          {% if trainee_form.guardian_name.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.guardian_name.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.guardian_phone.id_for_label }}">{{ trainee_form.guardian_phone.label }}</label>
+          {{ trainee_form.guardian_phone }}
+          {% if trainee_form.guardian_phone.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.guardian_phone.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
     </div>
 
-    <!-- Fee summary -->
-    <div id="fee-summary" style="display:none; border:1px solid #ccc; padding:12px; margin:10px 0;">
-        <strong>Fee Summary</strong>
-        <table>
-            <tr>
-                <td>Course Fee:</td>
-                <td>Rs. <span id="course_fee_display">0</span></td>
-            </tr>
-
-            <tr>
-                <td>Discount (Rs.):</td>
-                <td>
-                    {{ trainee_form.discount }}
-                    {% if trainee_form.discount.errors %}
-                        <span>{{ trainee_form.discount.errors }}</span>
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr>
-                <td><strong>Final Fee:</strong></td>
-                <td><strong>Rs. <span id="final_fee_display">0</span></strong></td>
-            </tr>
-        </table>
+    <!-- ── Form actions ── -->
+    <div class="form-actions">
+      <button type="submit" class="btn-primary btn-lg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Register Trainee
+      </button>
+      <a href="{% url 'trainees:trainee_list' %}" class="btn-ghost btn-lg">Cancel</a>
     </div>
 
-    <div>
-        {{ trainee_form.status.label_tag }}
-        {{ trainee_form.status }}
-        {% if trainee_form.status.errors %}
-            <span>{{ trainee_form.status.errors }}</span>
-        {% endif %}
-    </div>
+  </form>
+</section>
 
-    <div>
-        {{ trainee_form.guardian_name.label_tag }}
-        {{ trainee_form.guardian_name }}
-        {% if trainee_form.guardian_name.errors %}
-            <span>{{ trainee_form.guardian_name.errors }}</span>
-        {% endif %}
-    </div>
 
-    <div>
-        {{ trainee_form.guardian_phone.label_tag }}
-        {{ trainee_form.guardian_phone }}
-        {% if trainee_form.guardian_phone.errors %}
-            <span>{{ trainee_form.guardian_phone.errors }}</span>
-        {% endif %}
-    </div>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
-    <br>
+  /* ── Section ── */
+  .register-section {
+    position: relative;
+    padding: 48px 48px 80px;
+    max-width: 860px;
+    overflow: hidden;
+  }
 
-    <button type="submit">Register Trainee</button>
-    <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
-</form>
+  .ghost-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 16vw, 190px);
+    color: rgba(255,255,255,0.025);
+    position: absolute;
+    top: 0;
+    right: -20px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Back link ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.38);
+    text-decoration: none;
+    margin-bottom: 28px;
+    transition: color 0.18s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .back-link:hover { color: #facc15; }
+
+  /* ── Section header ── */
+  .section-header {
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #facc15;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 68px);
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  /* ── Messages ── */
+  .messages-block { margin-bottom: 24px; position: relative; z-index: 1; }
+
+  .alert-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ── Form layout ── */
+  .register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Form cards ── */
+  .form-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 24px 26px;
+    transition: border-color 0.2s;
+  }
+
+  .form-card:focus-within {
+    border-color: rgba(250,204,21,0.18);
+  }
+
+  .form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .form-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #facc15;
+    flex-shrink: 0;
+  }
+
+  .form-card-tag {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(250,204,21,0.7);
+    margin-bottom: 2px;
+  }
+
+  .form-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1;
+  }
+
+  /* ── Fields grid ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-full {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Labels ── */
+  .field-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.40);
+    display: block;
+  }
+
+  /* ── Django form widget override ── */
+  .register-form input[type="text"],
+  .register-form input[type="email"],
+  .register-form input[type="password"],
+  .register-form input[type="tel"],
+  .register-form input[type="date"],
+  .register-form input[type="number"],
+  .register-form select,
+  .register-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    outline: none;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .register-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  .register-form input:focus,
+  .register-form select:focus,
+  .register-form textarea:focus {
+    border-color: rgba(250,204,21,0.5);
+  }
+
+  .register-form input::placeholder,
+  .register-form textarea::placeholder {
+    color: rgba(255,255,255,0.2);
+  }
+
+  /* Date input calendar icon */
+  .register-form input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.4);
+    cursor: pointer;
+  }
+
+  /* ── Field error ── */
+  .field-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    font-weight: 400;
+    color: #f87171;
+  }
+
+  .field-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.28);
+  }
+
+  /* ── Fee summary ── */
+  .fee-summary {
+    margin-top: 20px;
+    background: #141414;
+    border: 1px solid rgba(250,204,21,0.18);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .fee-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: rgba(250,204,21,0.06);
+    border-bottom: 1px solid rgba(250,204,21,0.12);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #facc15;
+  }
+
+  .fee-rows {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fee-row-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.50);
+  }
+
+  .fee-row-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.80);
+  }
+
+  .fee-row-input {
+    align-items: center;
+  }
+
+  .discount-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 7px;
+    overflow: hidden;
+    width: 160px;
+  }
+
+  .discount-prefix {
+    padding: 0 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+  }
+
+  .discount-input-wrap input[type="number"] {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .discount-input-wrap input[type="number"]:focus {
+    border-color: transparent !important;
+  }
+
+  .fee-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 2px 0;
+  }
+
+  .fee-row-total .fee-row-label {
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .fee-total-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: #facc15;
+    line-height: 1;
+  }
+
+  /* ── Form actions ── */
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 4px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #facc15;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+
+  .btn-primary:hover {
+    background: #eab308;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    transition: border-color 0.18s, color 0.18s;
+    cursor: pointer;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.80);
+  }
+
+  .btn-lg {
+    font-size: 14px;
+    padding: 12px 26px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .register-section { padding: 32px 20px 60px; }
+    .ghost-text { display: none; }
+    .fields-grid { grid-template-columns: 1fr; }
+    .field-full { grid-column: 1; }
+    .form-actions { flex-direction: column; align-items: stretch; }
+    .btn-lg { justify-content: center; text-align: center; }
+  }
+</style>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const courseSelect = document.getElementById('id_course');
-    const discountInput = document.getElementById('id_discount');
-    const feeSummary  = document.getElementById('fee-summary');
-    const courseFeeDisplay = document.getElementById('course_fee_display');
-    const finalFeeDisplay  = document.getElementById('final_fee_display');
+  const courseSelect       = document.getElementById('id_course');
+  const discountInput      = document.getElementById('id_discount');
+  const feeSummary         = document.getElementById('fee-summary');
+  const courseFeeDisplay   = document.getElementById('course_fee_display');
+  const finalFeeDisplay    = document.getElementById('final_fee_display');
 
-    let courseFee = 0;
+  let courseFee = 0;
 
-    function updateFinalFee() {
-        if (!discountInput) return;
+  function updateFinalFee() {
+    if (!discountInput) return;
+    const discount = parseFloat(discountInput.value) || 0;
+    const final = Math.max(courseFee - discount, 0);
+    finalFeeDisplay.textContent = final.toFixed(2);
+  }
 
-        const discount = parseFloat(discountInput.value) || 0;
-        const final = Math.max(courseFee - discount, 0);
-        finalFeeDisplay.textContent = final.toFixed(2);
-    }
+  if (courseSelect) {
+    courseSelect.addEventListener('change', function () {
+      const courseId = this.value;
 
-    if (courseSelect) {
-        courseSelect.addEventListener('change', function () {
-            const courseId = this.value;
+      if (!courseId) {
+        feeSummary.style.display = 'none';
+        courseFee = 0;
+        if (discountInput) discountInput.value = '';
+        return;
+      }
 
-            if (!courseId) {
-                feeSummary.style.display = 'none';
-                courseFee = 0;
-                if (discountInput) discountInput.value = 0;
-                return;
-            }
-
-            fetch(`/trainee/ajax/course-fee/?course_id=${courseId}`)
-                .then(res => res.json())
-                .then(data => {
-                    courseFee = parseFloat(data.fee) || 0;
-                    courseFeeDisplay.textContent = courseFee.toFixed(2);
-                    feeSummary.style.display = 'block';
-                    updateFinalFee();
-                })
-                .catch(err => {
-                    console.error("Fee fetch error:", err);
-                    feeSummary.style.display = 'none';
-                });
+      fetch(`/trainee/ajax/course-fee/?course_id=${courseId}`)
+        .then(res => res.json())
+        .then(data => {
+          courseFee = parseFloat(data.fee) || 0;
+          courseFeeDisplay.textContent = courseFee.toFixed(2);
+          feeSummary.style.display = 'block';
+          updateFinalFee();
+        })
+        .catch(err => {
+          console.error('Fee fetch error:', err);
+          feeSummary.style.display = 'none';
         });
-    }
+    });
+  }
 
-    if (discountInput) {
-        discountInput.addEventListener('input', updateFinalFee);
-    }
+  if (discountInput) {
+    discountInput.addEventListener('input', updateFinalFee);
+  }
 
 });
 </script>
 
-</body>
-</html>
+{% endblock %}

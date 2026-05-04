@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Flagged Reschedules — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Wrapper ─────────────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'FLAGGED';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    color: rgba(255, 255, 255, 0.028);
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    user-select: none;
+  }
+
+  /* ── Page Header ──────────────────────────────────── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--danger, #ef4444);
+    margin: 0 0 6px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ───────────────────────────────────── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ──────────────────────────────────────── */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-assign {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-assign:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  /* ── Info Banner ──────────────────────────────────── */
+  .flagged-banner {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-sec);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .flagged-banner strong {
+    color: var(--yellow);
+    font-weight: 500;
+  }
+
+  /* ── Flagged Card ─────────────────────────────────── */
+  .flagged-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .flagged-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+    transform: translateY(-3px);
+  }
+
+  .flagged-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .trainee-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  .missed-meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .missed-meta .meta-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(239, 68, 68, 0.7);
+    margin-right: 6px;
+  }
+
+  .flagged-card-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 16px;
+  }
+
+  /* ── Option Panels ────────────────────────────────── */
+  .option-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .option-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .option-desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin: 0 0 16px;
+    flex: 1;
+  }
+
+  /* ── Select ───────────────────────────────────────── */
+  .sdims-select {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    appearance: none;
+    outline: none;
+    transition: border-color 0.18s;
+  }
+  .sdims-select:focus {
+    border-color: var(--yellow-focus);
+  }
+  .assign-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  /* ── Empty State ──────────────────────────────────── */
+  .empty-state {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin: 0 0 8px;
+  }
+  .empty-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── Mobile ───────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 40px; }
+    .flagged-card-body { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Flagged Reschedules</h1>
+
+  <div class="action-bar">
+    <a href="{% url 'scheduling:reschedule_queue' %}" class="btn-ghost">
+      ← Back to Queue
+    </a>
+  </div>
+  <hr class="section-divider">
+
+  {% if flagged %}
+
+    <div class="flagged-banner">
+      These trainees could not be rescheduled after
+      <strong>{{ config.max_reschedule_attempts }} attempts</strong>.
+      Manual intervention is required — reset their counter to retry,
+      or link them directly to an existing upcoming session.
+    </div>
+
+    {% for entry in flagged %}
+    <div class="flagged-card">
+
+      <div class="flagged-card-header">
+        <span class="trainee-name">{{ entry.trainee.user.get_full_name }}</span>
+        <span class="missed-meta">
+          <span class="meta-label">Missed</span>
+          {{ entry.original_session.date|date:"d M Y" }} &mdash; {{ entry.original_session.slot.label }}
+        </span>
+      </div>
+
+      <div class="flagged-card-body">
+
+        {# Option A: Reset & Retry #}
+        <div class="option-panel">
+          <p class="option-tag">Reset &amp; Retry</p>
+          <p class="option-desc">
+            Clears the attempt counter and bumps priority to Critical.
+            The next scheduler run will try again automatically.
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reset">
+            <input type="hidden" name="entry_id" value="{{ entry.pk }}">
+            <button type="submit" class="btn-primary"
+              onclick="return confirm('Reset attempt count for {{ entry.trainee.user.get_full_name }}?')">
+              Reset Attempts
+            </button>
+          </form>
+        </div>
+
+        {# Option B: Manual Assign #}
+        <div class="option-panel">
+          <p class="option-tag">Manually Assign to Session</p>
+          <p class="option-desc">
+            Link this trainee directly to an upcoming session to resolve immediately.
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="manual_resolve">
+            <input type="hidden" name="entry_id" value="{{ entry.pk }}">
+            <div class="assign-row">
+              <select name="session_id" class="sdims-select">
+                <option value="">— Select a session —</option>
+                {% for s in upcoming_sessions %}
+                  <option value="{{ s.pk }}">
+                    {{ s.date|date:"d M" }} · {{ s.slot.label }} · {{ s.trainee.user.get_full_name }}
+                  </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn-assign">Assign</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+
+  {% else %}
+
+    <div class="empty-state">
+      <p class="empty-label">No Flagged Entries</p>
+      <p class="empty-sub">All reschedule queues are clear — no manual intervention needed.</p>
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

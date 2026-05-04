@@ -1,0 +1,645 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance — {{ today|date:"d M Y" }} — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 100px;
+  }
+  .page-wrapper::before {
+    content: 'ATTENDANCE';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 160px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 10px;
+  }
+  .page-title span {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .page-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+  }
+
+  /* ── Live Badge ── */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #4ade80;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  /* ── Summary Bar ── */
+  .summary-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 28px;
+  }
+  .sum-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  #pill-present { border-color: rgba(34, 197, 94, 0.3);  color: #4ade80;  background: rgba(34, 197, 94, 0.07); }
+  #pill-late    { border-color: rgba(245,158, 11, 0.3);  color: #fbbf24;  background: rgba(245,158,11, 0.07); }
+  #pill-absent  { border-color: rgba(239,  68, 68, 0.3);  color: #f87171;  background: rgba(239, 68, 68, 0.07); }
+  #pill-pending { border-color: rgba(250, 204, 21, 0.3);  color: var(--yellow); background: rgba(250,204,21,0.07); }
+
+  /* ── Slot Divider ── */
+  .slot-group { margin-bottom: 32px; }
+  .slot-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .slot-divider-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .slot-pip {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+  .slot-divider-label span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.07em;
+    color: var(--text);
+  }
+  .slot-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+  .slot-divider-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Session Card ── */
+  .sess-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .sess-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .sess-card.st-present { border-left-color: #4ade80; }
+  .sess-card.st-late    { border-left-color: #fbbf24; }
+  .sess-card.st-absent  { border-left-color: #f87171; }
+
+  .sess-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Trainee Info ── */
+  .trainee-info { flex: 1; min-width: 180px; }
+  .trainee-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+  .trainee-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .trainee-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding-left: 36px;
+  }
+  .t-chip {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+  .t-chip.st-scheduled { color: rgba(96,179,245,0.9);  border-color: rgba(96,179,245,0.2);  background: rgba(96,179,245,0.06); }
+  .t-chip.st-ongoing   { color: #fbbf24;                border-color: rgba(245,158,11,0.2);  background: rgba(245,158,11,0.06); }
+  .t-chip.st-completed { color: #4ade80;                border-color: rgba(34,197,94,0.2);   background: rgba(34,197,94,0.06); }
+
+  /* ── Status Buttons ── */
+  .att-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .status-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .status-btns input[type="radio"] { display: none; }
+  .status-btns label {
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    background: var(--card);
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .status-btns label:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text);
+  }
+  .status-btns label.on-present {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #4ade80;
+  }
+  .status-btns label.on-late {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.5);
+    color: #fbbf24;
+  }
+  .status-btns label.on-absent {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #f87171;
+  }
+
+  /* ── Notes ── */
+  .notes-toggle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+  .notes-toggle:hover { color: var(--yellow); }
+  .notes-area { display: none; padding: 0 18px 14px; }
+  .notes-area.open { display: block; }
+  .notes-area textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    padding: 8px 12px;
+    resize: vertical;
+    min-height: 56px;
+    outline: none;
+    transition: border-color 0.15s;
+    line-height: 1.65;
+  }
+  .notes-area textarea:focus { border-color: var(--yellow-focus); }
+  .notes-area textarea::placeholder { color: var(--text-muted); }
+
+  /* ── Sticky Footer ── */
+  .att-footer {
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-w, 248px);
+    right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 48px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .footer-stat {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+  .footer-stat strong {
+    color: var(--yellow);
+    font-weight: 600;
+  }
+  .footer-progress {
+    width: 160px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .footer-progress-bar {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 22px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn-save:hover  { background: var(--yellow-dark); transform: translateY(-1px); }
+  .btn-save:active { transform: translateY(0); }
+  .btn-save:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* ── Empty State ── */
+  .empty-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 100px; }
+    .page-title { font-size: 38px; }
+    .att-footer { left: 0; padding: 12px 20px; }
+    .sess-body { flex-direction: column; align-items: flex-start; }
+    .att-actions { align-items: flex-start; width: 100%; }
+    .status-btns { width: 100%; }
+    .status-btns label { flex: 1; text-align: center; }
+    .footer-progress { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Attendance <span>— {{ today|date:"D, d M Y" }}</span></h1>
+  <p class="page-sub">Mark each trainee as present, late, or absent.</p>
+  <div class="live-badge">
+    <span class="live-dot"></span>Live
+  </div>
+
+  <hr class="section-divider">
+
+  {% if sessions %}
+
+  {# ── Summary Bar ── #}
+  <div class="summary-bar">
+    <span class="sum-pill" id="pill-total">{{ sessions|length }} session{{ sessions|length|pluralize }}</span>
+    <span class="sum-pill" id="pill-present">0 present</span>
+    <span class="sum-pill" id="pill-late">0 late</span>
+    <span class="sum-pill" id="pill-absent">0 absent</span>
+    <span class="sum-pill" id="pill-pending">{{ sessions|length }} unmarked</span>
+  </div>
+
+  <form method="post" id="att-form">
+    {% csrf_token %}
+
+    {% regroup sessions by slot.slot_number as slot_groups %}
+
+    {% for grp in slot_groups %}
+    <div class="slot-group">
+
+      <div class="slot-divider">
+        <div class="slot-divider-label">
+          <div class="slot-pip"></div>
+          <span>Slot {{ grp.grouper }}</span>
+        </div>
+        <div class="slot-divider-line"></div>
+        <span class="slot-divider-count">{{ grp.list|length }} session{{ grp.list|length|pluralize }}</span>
+      </div>
+
+      {% for session in grp.list %}
+      <div class="sess-card{% if session.att_status %} st-{{ session.att_status }}{% endif %}"
+           id="card-{{ session.pk }}" data-pk="{{ session.pk }}">
+
+        <div class="sess-body">
+
+          {# ── Trainee Info ── #}
+          <div class="trainee-info">
+            <div class="trainee-name-row">
+              <div class="avatar">
+                {{ session.trainee.user.first_name|slice:":1" }}{{ session.trainee.user.last_name|slice:":1" }}
+              </div>
+              <span class="trainee-name">{{ session.trainee.user.get_full_name }}</span>
+            </div>
+            <div class="trainee-chips">
+              <span class="t-chip st-{{ session.status }}">{{ session.get_status_display }}</span>
+              {% if session.vehicle %}
+                <span class="t-chip">{{ session.vehicle }}</span>
+              {% endif %}
+              {% if session.instructor %}
+                <span class="t-chip">{{ session.instructor.user.get_full_name }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# ── Status Selector ── #}
+          <div class="att-actions">
+            <div class="status-btns" id="pills-{{ session.pk }}">
+
+              <input type="radio" name="status_{{ session.pk }}"
+                     id="pr-{{ session.pk }}" value="present"
+                     {% if session.att_status == 'present' %}checked{% endif %}>
+              <label for="pr-{{ session.pk }}" data-val="present"
+                     {% if session.att_status == 'present' %}class="on-present"{% endif %}>
+                ✓ Present
+              </label>
+
+              <input type="radio" name="status_{{ session.pk }}"
+                     id="la-{{ session.pk }}" value="late"
+                     {% if session.att_status == 'late' %}checked{% endif %}>
+              <label for="la-{{ session.pk }}" data-val="late"
+                     {% if session.att_status == 'late' %}class="on-late"{% endif %}>
+                ⏱ Late
+              </label>
+
+              <input type="radio" name="status_{{ session.pk }}"
+                     id="ab-{{ session.pk }}" value="absent"
+                     {% if session.att_status == 'absent' %}checked{% endif %}>
+              <label for="ab-{{ session.pk }}" data-val="absent"
+                     {% if session.att_status == 'absent' %}class="on-absent"{% endif %}>
+                ✕ Absent
+              </label>
+
+            </div>
+            <button type="button" class="notes-toggle"
+                    data-pk="{{ session.pk }}"
+                    onclick="toggleNotes({{ session.pk }})">
+              {% if session.att_notes %}✎ Edit Note{% else %}+ Add Note{% endif %}
+            </button>
+          </div>
+
+        </div>
+
+        {# ── Notes Field ── #}
+        <div class="notes-area{% if session.att_notes %} open{% endif %}"
+             id="notes-area-{{ session.pk }}">
+          <textarea name="notes_{{ session.pk }}"
+                    placeholder="Optional note — e.g. arrived 10 min late, left early…"
+                    rows="2">{{ session.att_notes }}</textarea>
+        </div>
+
+      </div>
+      {% endfor %}
+
+    </div>
+    {% endfor %}
+
+    {# ── Sticky Footer ── #}
+    <div class="att-footer">
+      <div class="footer-left">
+        <span class="footer-stat">
+          <strong id="ft-marked">0</strong> / <strong>{{ sessions|length }}</strong> marked
+        </span>
+        <div class="footer-progress">
+          <div class="footer-progress-bar" id="progress-bar"></div>
+        </div>
+      </div>
+      <button type="submit" class="btn-save" id="btn-save">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Save Attendance
+      </button>
+    </div>
+
+  </form>
+
+  {% else %}
+
+  <div class="empty-card">
+    <p class="empty-state-label">No Sessions Today</p>
+    <p class="empty-state-sub">
+      No scheduled, ongoing, or completed sessions found for {{ today|date:"d M Y" }}.
+    </p>
+  </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const total = {{ sessions|length }};
+  if (!total) return;
+
+  function applyLabel(pk, val) {
+    const row = document.getElementById('pills-' + pk);
+    if (!row) return;
+    row.querySelectorAll('label').forEach(l => {
+      l.classList.remove('on-present', 'on-late', 'on-absent');
+      if (val && l.dataset.val === val) l.classList.add('on-' + val);
+    });
+    const card = document.getElementById('card-' + pk);
+    if (card) {
+      card.classList.remove('st-present', 'st-late', 'st-absent');
+      if (val) card.classList.add('st-' + val);
+    }
+  }
+
+  function updateSummary() {
+    let present = 0, late = 0, absent = 0;
+    document.querySelectorAll('.sess-card').forEach(card => {
+      const r = document.querySelector(`input[name="status_${card.dataset.pk}"]:checked`);
+      if (!r) return;
+      if (r.value === 'present') present++;
+      else if (r.value === 'late') late++;
+      else if (r.value === 'absent') absent++;
+    });
+    const marked  = present + late + absent;
+    const pending = total - marked;
+
+    document.getElementById('pill-present').textContent = present + ' present';
+    document.getElementById('pill-late').textContent    = late    + ' late';
+    document.getElementById('pill-absent').textContent  = absent  + ' absent';
+    document.getElementById('pill-pending').textContent = pending + ' unmarked';
+    document.getElementById('ft-marked').textContent    = marked;
+
+    const bar = document.getElementById('progress-bar');
+    if (bar) bar.style.width = Math.round((marked / total) * 100) + '%';
+  }
+
+  updateSummary();
+
+  document.getElementById('att-form').addEventListener('change', function (e) {
+    if (e.target.type !== 'radio') return;
+    const pk = e.target.closest('.sess-card').dataset.pk;
+    applyLabel(pk, e.target.value);
+    updateSummary();
+  });
+
+  window.toggleNotes = function (pk) {
+    const area = document.getElementById('notes-area-' + pk);
+    if (!area) return;
+    area.classList.toggle('open');
+    const btn = document.querySelector(`.notes-toggle[data-pk="${pk}"]`);
+    if (btn) btn.textContent = area.classList.contains('open') ? '✎ Edit Note' : '+ Add Note';
+  };
+
+  document.getElementById('att-form').addEventListener('submit', function () {
+    const btn = document.getElementById('btn-save');
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+  });
+})();
+</script>
+{% endblock %}

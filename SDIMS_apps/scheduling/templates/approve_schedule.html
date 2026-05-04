@@ -1,0 +1,642 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Approve Pending Sessions — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'APPROVE';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 10px;
+  }
+  .page-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin: 0 0 24px;
+    line-height: 1.6;
+  }
+
+  /* ── Pending Count Badge ── */
+  .pending-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yellow);
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+  }
+  .pending-count-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--yellow);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 28px;
+  }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sec);
+    cursor: pointer;
+    user-select: none;
+  }
+  .check-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--yellow);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  /* ── Date Divider ── */
+  .date-group { margin-bottom: 36px; }
+
+  .date-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 36px 0 16px;
+  }
+  .date-divider-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .date-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+  .date-divider-label span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.07em;
+    color: var(--text);
+  }
+  .date-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+  .date-divider-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Slot Card ── */
+  .slot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.18s;
+  }
+  .slot-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+  }
+  .slot-header {
+    display: flex;
+    align-items: center;
+    padding: 13px 18px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .slot-num-badge {
+    display: inline-block;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .slot-label-text {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .slot-session-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 16px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.col-check { width: 44px; }
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 14px 16px;
+    vertical-align: middle;
+  }
+  td.col-check {
+    width: 44px;
+  }
+  td.col-check input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--yellow);
+    cursor: pointer;
+  }
+
+  /* ── Trainee Cell ── */
+  .trainee-name {
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+  }
+  .trainee-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    display: block;
+  }
+
+  /* ── Avatar + Name ── */
+  .avatar-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  /* ── Type Badges ── */
+  .type-badge {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .type-guided {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    color: var(--yellow);
+  }
+  .type-unguided {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .type-course {
+    background: rgba(250, 204, 21, 0.06);
+    border: 1px solid rgba(250, 204, 21, 0.14);
+    color: rgba(250, 204, 21, 0.75);
+  }
+
+  /* ── Bottom Submit Bar ── */
+  .submit-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .submit-bar-info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .submit-bar-info strong {
+    color: var(--yellow);
+    font-weight: 600;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    transform: translateY(-1px);
+  }
+
+  /* ── Empty State ── */
+  .empty-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.65;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Approve Pending</h1>
+  <p class="page-sub">Review and approve all pending sessions before they go live.</p>
+
+  {% if grouped_by_date %}
+    <div class="pending-count">
+      <span class="pending-count-dot"></span>
+      {{ total }} session{{ total|pluralize }} awaiting approval
+    </div>
+  {% endif %}
+
+  <hr class="section-divider">
+
+  {% if grouped_by_date %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      {# ── Toolbar ── #}
+      <div class="toolbar">
+        <label class="check-label" for="select-all">
+          <input type="checkbox" id="select-all">
+          Select all sessions
+        </label>
+      </div>
+
+      {# ── Date groups ── #}
+      {% for session_date, slots in grouped_by_date.items %}
+
+        <div class="date-divider">
+          <div class="date-divider-label">
+            <div class="date-dot"></div>
+            <span>{{ session_date|date:"l, d M Y" }}</span>
+          </div>
+          <div class="date-divider-line"></div>
+          <span class="date-divider-count">
+            {{ slots|length }} slot{{ slots|length|pluralize }}
+          </span>
+        </div>
+
+        <div class="date-group">
+          {% for slot, sessions in slots.items %}
+          <div class="slot-card">
+
+            <div class="slot-header">
+              <span class="slot-num-badge">Slot {{ slot.slot_number }}</span>
+              <span class="slot-label-text">{{ slot.label }}</span>
+              <span class="slot-session-count">
+                {{ sessions|length }} session{{ sessions|length|pluralize }}
+              </span>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="col-check"></th>
+                    <th>Trainee</th>
+                    <th>Session Type</th>
+                    <th>Enrolment</th>
+                    <th class="hide-mobile">Vehicle</th>
+                    <th class="hide-mobile">Track</th>
+                    <th class="hide-mobile">Instructor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for session in sessions %}
+                  <tr>
+                    <td class="col-check">
+                      <input type="checkbox"
+                             name="session_ids"
+                             value="{{ session.pk }}"
+                             class="session-checkbox">
+                    </td>
+
+                    <td>
+                      <div class="avatar-pair">
+                        <div class="avatar">
+                          {{ session.trainee.user.first_name|slice:":1" }}{{ session.trainee.user.last_name|slice:":1" }}
+                        </div>
+                        <div>
+                          <span class="trainee-name">{{ session.trainee.user.get_full_name }}</span>
+                          <span class="trainee-meta">
+                            {% if session.trainee_type == 'course' %}
+                              Course — {{ session.trainee.course }}
+                            {% else %}
+                              Independent
+                            {% endif %}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      {% if session.session_type == 'guided' %}
+                        <span class="type-badge type-guided">Guided</span>
+                      {% else %}
+                        <span class="type-badge type-unguided">Unguided</span>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      {% if session.trainee_type == 'course' %}
+                        <span class="type-badge type-course">Course</span>
+                      {% else %}
+                        <span style="font-size:12px; color: var(--text-muted);">Indep.</span>
+                      {% endif %}
+                    </td>
+
+                    <td class="hide-mobile">{{ session.vehicle }}</td>
+                    <td class="hide-mobile">{{ session.track }}</td>
+
+                    <td class="hide-mobile">
+                      {% if session.instructor %}
+                        <div class="avatar-pair">
+                          <div class="avatar">
+                            {{ session.instructor.user.first_name|slice:":1" }}{{ session.instructor.user.last_name|slice:":1" }}
+                          </div>
+                          {{ session.instructor.user.get_full_name }}
+                        </div>
+                      {% else %}
+                        <span style="color: var(--text-muted);">—</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+
+      {% endfor %}
+
+      {# ── Bottom Submit ── #}
+      <div class="submit-bar">
+        <span class="submit-bar-info">
+          <strong id="selected-count">0</strong> selected
+        </span>
+        <button type="submit" class="btn-primary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Approve Selected Sessions
+        </button>
+      </div>
+
+    </form>
+
+  {% else %}
+
+    {# ── Empty State ── #}
+    <div class="empty-card">
+      <p class="empty-state-label">All Clear</p>
+      <p class="empty-state-sub">
+        No pending sessions to approve right now. Run the scheduler to generate new sessions,
+        or check back after the nightly run at 10 PM.
+      </p>
+      <form method="post" action="{% url 'scheduling:run_scheduler' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-ghost">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Run Scheduler Now
+        </button>
+      </form>
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const selectAll = document.getElementById('select-all');
+    const allBoxes  = () => document.querySelectorAll('.session-checkbox');
+    const countEl   = document.getElementById('selected-count');
+
+    function updateCount() {
+      const n = document.querySelectorAll('.session-checkbox:checked').length;
+      if (countEl) countEl.textContent = n;
+    }
+
+    function syncMaster() {
+      const all     = allBoxes();
+      const checked = document.querySelectorAll('.session-checkbox:checked');
+      if (selectAll) {
+        selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+        selectAll.checked       = all.length > 0 && checked.length === all.length;
+      }
+      updateCount();
+    }
+
+    if (selectAll) {
+      selectAll.addEventListener('change', function () {
+        allBoxes().forEach(cb => cb.checked = selectAll.checked);
+        updateCount();
+      });
+    }
+
+    allBoxes().forEach(function (cb) {
+      cb.addEventListener('change', syncMaster);
+    });
+
+    updateCount();
+  });
+</script>
+{% endblock %}

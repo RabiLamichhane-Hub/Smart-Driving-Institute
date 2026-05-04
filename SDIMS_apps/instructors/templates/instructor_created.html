@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructor Registered{% endblock %}
+
+{% block content %}
+
+<h2>Instructor Registered Successfully</h2>
+
+<p><strong>Share these credentials with the Instructor. This page will not be shown again.</strong></p>
+
+<hr>
+
+<!-- LOGIN -->
+<h3>Login Credentials</h3>
+<p><strong>Username:</strong> {{ username }}</p>
+<p><strong>Password:</strong> {{ password }}</p>
+
+<hr>
+
+<!-- PERSONAL INFO -->
+<h3>Personal Information</h3>
+<p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+<p><strong>Phone:</strong> {{ user.phone }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Address:</strong> {{ user.address }}</p>
+
+<hr>
+
+<!-- INSTRUCTOR INFO -->
+<h3>Instructor Details</h3>
+<p><strong>License Number:</strong> {{ user.instructor.license_number }}</p>
+<p><strong>Status:</strong> {{ user.instructor.get_status_display }}</p>
+
+<hr>
+
+<a href="{% url 'instructors:instructor_list' %}">← Back to Instructor List</a> |
+<a href="{% url 'instructors:instructor_create' %}">Register Another Instructor</a>
+
+{% endblock %}

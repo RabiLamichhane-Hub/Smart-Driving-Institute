@@ -1,45 +1,640 @@
-<!DOCTYPE html>
-<html>
-<head><title>Fee Overview</title></head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-<h1>Fee Overview</h1>
+{% block title %}Fee Overview{% endblock %}
 
-<a href="{% url 'accounting:add_expense' %}">Add Expense</a> |
-<a href="{% url 'accounting:expense_list' %}">Expenses</a>
+{% block content %}
 
-<table border="1" cellpadding="6">
-    <thead>
-        <tr>
-            <th>Trainee</th>
-            <th>Course</th>
-            <th>Total Fee</th>
-            <th>Discount</th>
-            <th>Final Fee</th>
-            <th>Paid</th>
-            <th>Remaining</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for record in fee_records %}
-        <tr>
-            <td>{{ record.trainee }}</td>
-            <td>{{ record.course }}</td>
-            <td>Rs.{{ record.total_fee }}</td>
-            <td>Rs.{{ record.discount_amount }}</td>
-            <td>Rs.{{ record.final_fee }}</td>
-            <td>Rs.{{ record.total_paid }}</td>
-            <td>Rs.{{ record.remaining }}</td>
-            <td>{{ record.get_status_display }}</td>
-            <td><a href="{% url 'accounting:add_payment' record.trainee.pk %}">Add Payment</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="9">No fee records found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+<section class="fee-section">
 
-</body>
-</html>
+  <!-- Ghost background text -->
+  <span class="ghost-text">FEES</span>
+
+  <!-- Section header -->
+  <div class="section-header">
+    <span class="section-tag">Accounting</span>
+    <h1 class="section-title">Fee Overview</h1>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="list-toolbar">
+    <p class="record-count">
+      <span class="count-num">{{ fee_records|length }}</span>
+      fee record{{ fee_records|length|pluralize }}
+    </p>
+    <div class="toolbar-actions">
+      <a href="{% url 'accounting:expense_list' %}" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Expenses
+      </a>
+      <a href="{% url 'accounting:add_expense' %}" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Expense
+      </a>
+    </div>
+  </div>
+
+  <!-- Django messages -->
+  {% if messages %}
+    <div class="messages-block">
+      {% for message in messages %}
+        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Fee cards -->
+  {% if fee_records %}
+  <div class="fee-grid">
+
+    {% for record in fee_records %}
+    <div class="fee-card">
+
+      <!-- Top accent bar via ::before -->
+
+      <!-- Card header: trainee + course + status -->
+      <div class="card-header">
+        <div class="header-left">
+          <div class="avatar">
+            {{ record.trainee|truncatechars:1 }}
+          </div>
+          <div class="header-identity">
+            <span class="trainee-name">{{ record.trainee }}</span>
+            <span class="course-name">{{ record.course }}</span>
+          </div>
+        </div>
+        <span class="status-pill status-{{ record.get_status_display|lower|slugify }}">
+          {{ record.get_status_display }}
+        </span>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Fee breakdown -->
+      <div class="fee-breakdown">
+
+        <div class="breakdown-row">
+          <span class="breakdown-label">Total Fee</span>
+          <span class="breakdown-value">Rs. {{ record.total_fee }}</span>
+        </div>
+
+        {% if record.discount_amount %}
+        <div class="breakdown-row breakdown-discount">
+          <span class="breakdown-label">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            Discount
+          </span>
+          <span class="breakdown-value discount-val">− Rs. {{ record.discount_amount }}</span>
+        </div>
+        {% endif %}
+
+        <div class="breakdown-row breakdown-final">
+          <span class="breakdown-label">Final Fee</span>
+          <span class="breakdown-value final-val">Rs. {{ record.final_fee }}</span>
+        </div>
+
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Payment progress -->
+      <div class="payment-section">
+
+        <div class="payment-numbers">
+          <div class="payment-item">
+            <span class="payment-label">Paid</span>
+            <span class="payment-paid">Rs. {{ record.total_paid }}</span>
+          </div>
+          <div class="payment-item payment-item-right">
+            <span class="payment-label">Remaining</span>
+            <span class="payment-remaining {% if record.remaining == 0 %}remaining-clear{% endif %}">
+              Rs. {{ record.remaining }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        {% if record.final_fee %}
+        <div class="progress-track">
+          <div class="progress-fill"
+               style="width: {% widthratio record.total_paid record.final_fee 100 %}%">
+          </div>
+        </div>
+        <div class="progress-label">
+          {% widthratio record.total_paid record.final_fee 100 %}% paid
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Add payment CTA -->
+      <div class="card-footer">
+        <a href="{% url 'accounting:add_payment' record.trainee.pk %}" class="btn-payment">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Add Payment
+        </a>
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <p class="empty-title">No Fee Records</p>
+    <p class="empty-sub">Fee records will appear here once trainees are enrolled.</p>
+  </div>
+  {% endif %}
+
+</section>
+
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+  /* ── Section ── */
+  .fee-section {
+    position: relative;
+    padding: 56px 48px 80px;
+    min-height: 80vh;
+    overflow: hidden;
+  }
+
+  .ghost-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(100px, 22vw, 260px);
+    color: rgba(255,255,255,0.025);
+    position: absolute;
+    top: 6px;
+    right: -16px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #facc15;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  /* ── Toolbar ── */
+  .list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .record-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.40);
+    margin: 0;
+  }
+
+  .count-num {
+    font-size: 22px;
+    font-weight: 500;
+    color: #facc15;
+    margin-right: 4px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #facc15;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+
+  .btn-primary:hover {
+    background: #eab308;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    padding: 10px 18px;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250,204,21,0.4);
+    color: #facc15;
+    transform: translateY(-1px);
+  }
+
+  .btn-payment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(250,204,21,0.08);
+    color: #facc15;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid rgba(250,204,21,0.22);
+    border-radius: 7px;
+    padding: 8px 16px;
+    transition: background 0.18s, border-color 0.18s, transform 0.18s;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-payment:hover {
+    background: rgba(250,204,21,0.14);
+    border-color: rgba(250,204,21,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* ── Messages ── */
+  .messages-block {
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .alert-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ── Fee grid ── */
+  .fee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Fee card ── */
+  .fee-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 22px 22px 18px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.22s ease, transform 0.22s ease;
+  }
+
+  .fee-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #facc15;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s ease;
+  }
+
+  .fee-card:hover {
+    border-color: rgba(250,204,21,0.25);
+    transform: translateY(-3px);
+  }
+
+  .fee-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* ── Card header ── */
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(250,204,21,0.10);
+    border: 1.5px solid rgba(250,204,21,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: #facc15;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .header-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .trainee-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .course-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.38);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Status pill */
+  .status-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 9px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+
+  .status-paid        { background: rgba(34,197,94,0.10);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .status-partial     { background: rgba(250,204,21,0.10); color: #facc15; border: 1px solid rgba(250,204,21,0.2); }
+  .status-unpaid      { background: rgba(255,90,90,0.10);  color: #f87171; border: 1px solid rgba(255,90,90,0.2); }
+  .status-overpaid    { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.22); }
+  .status-waived      { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.38); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* ── Divider ── */
+  .card-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin-bottom: 16px;
+  }
+
+  /* ── Fee breakdown ── */
+  .fee-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .breakdown-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.42);
+  }
+
+  .breakdown-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.65);
+  }
+
+  .breakdown-discount .breakdown-label { color: rgba(255,255,255,0.32); }
+  .discount-val { color: #4ade80; font-size: 12.5px; }
+
+  .breakdown-final {
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255,255,255,0.08);
+    margin-top: 2px;
+  }
+
+  .breakdown-final .breakdown-label {
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    font-size: 13px;
+  }
+
+  .final-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    line-height: 1;
+  }
+
+  /* ── Payment section ── */
+  .payment-section {
+    margin-bottom: 18px;
+  }
+
+  .payment-numbers {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .payment-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .payment-item-right {
+    align-items: flex-end;
+  }
+
+  .payment-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.28);
+  }
+
+  .payment-paid {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: #4ade80;
+    line-height: 1;
+  }
+
+  .payment-remaining {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: #f87171;
+    line-height: 1;
+  }
+
+  .remaining-clear {
+    color: rgba(255,255,255,0.25);
+  }
+
+  /* Progress bar */
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #facc15;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+    min-width: 2px;
+  }
+
+  .progress-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.28);
+    text-align: right;
+  }
+
+  /* ── Card footer ── */
+  .card-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.22);
+    margin-bottom: 20px;
+  }
+
+  .empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.55);
+    margin: 0 0 6px;
+  }
+
+  .empty-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.32);
+    margin: 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .fee-section { padding: 36px 20px 60px; }
+    .ghost-text { font-size: 100px; }
+    .list-toolbar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .toolbar-actions { width: 100%; }
+    .fee-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+{% endblock %}

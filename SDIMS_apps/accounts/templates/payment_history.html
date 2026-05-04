@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment History — {{ trainee.user.first_name }} {{ trainee.user.last_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'PAYMENTS';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.028);
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  /* ── Page header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-sec);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+
+  /* ── Summary stat strip ── */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 860px) { .summary-strip { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .summary-strip { grid-template-columns: 1fr 1fr; } }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(250,204,21,0.18); }
+  .stat-card .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .stat-card .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-card .stat-value.yellow  { color: var(--yellow); }
+  .stat-card .stat-value.green   { color: #38d9a9; }
+  .stat-card .stat-value.danger  { color: #ef4444; }
+  .stat-card .stat-value.muted   { color: var(--text-muted); }
+
+  /* ── Progress bar ── */
+  .progress-wrap { margin-bottom: 32px; }
+  .progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--yellow);
+    transition: width 0.5s ease;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  /* ── Table wrapper ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-card thead {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-card thead th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .table-card thead th.amount-col { color: rgba(250,204,21,0.7); }
+
+  .table-card tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.15s;
+  }
+  .table-card tbody tr:last-child { border-bottom: none; }
+  .table-card tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+  .table-card tbody td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+  .table-card tbody td:first-child { font-weight: 500; color: var(--text); }
+
+  /* Cell types */
+  .cell-amount {
+    color: var(--yellow);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+  .cell-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .cell-note {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+  }
+
+  /* Method badge */
+  .method-badge {
+    display: inline-block;
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .method-badge.neutral {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+
+  /* Row counter */
+  .row-index {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state p.empty-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state p.empty-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Section title ── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-wrapper::before { font-size: 80px; }
+    .page-title { font-size: 36px; }
+    .col-hide { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page header ── #}
+  <p class="page-label">Payments</p>
+  <h1 class="page-title">Payment History</h1>
+
+  <div class="action-bar">
+    <a href="{% url 'homesandall:index' %}" class="btn btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back to Dashboard
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {% if fee_record %}
+
+    {# ── Trainee + fee info ── #}
+    <p class="section-tag">Trainee</p>
+    <p class="section-heading">{{ trainee.user.first_name }} {{ trainee.user.last_name }}</p>
+
+    {# ── Stat strip ── #}
+    <div class="summary-strip">
+      <div class="stat-card">
+        <p class="stat-label">Total Fee</p>
+        <p class="stat-value yellow">Rs. {{ total_fee }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Discount</p>
+        <p class="stat-value muted">− Rs. {{ discount }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Final Fee</p>
+        <p class="stat-value">Rs. {{ final_fee }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Amount Paid</p>
+        <p class="stat-value green">Rs. {{ paid }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Remaining</p>
+        <p class="stat-value {% if remaining > 0 %}danger{% else %}green{% endif %}">Rs. {{ remaining }}</p>
+      </div>
+    </div>
+
+    {# ── Progress bar ── #}
+    <div class="progress-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" style="width: {% if final_fee %}{% widthratio paid final_fee 100 %}{% else %}0{% endif %}%"></div>
+      </div>
+      <div class="progress-meta">
+        <span>Fee paid</span>
+        <span>{% if final_fee %}{% widthratio paid final_fee 100 %}{% else %}0{% endif %}% of Rs. {{ final_fee }}</span>
+      </div>
+    </div>
+
+    {# ── Payment history table ── #}
+    <p class="section-tag">Transactions</p>
+    <p class="section-heading">All Payments</p>
+
+    <div class="table-card">
+      {% if payments %}
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th class="amount-col">Amount</th>
+              <th>Method</th>
+              <th class="col-hide">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for payment in payments %}
+            <tr>
+              <td><span class="row-index">{{ forloop.counter }}</span></td>
+              <td><span class="cell-date">{{ payment.date }}</span></td>
+              <td><span class="cell-amount">Rs. {{ payment.amount }}</span></td>
+              <td>
+                <span class="method-badge {% if not payment.method %}neutral{% endif %}">
+                  {{ payment.get_method_display|default:"—" }}
+                </span>
+              </td>
+              <td class="col-hide">
+                {% if payment.note %}
+                  <span class="cell-note">{{ payment.note }}</span>
+                {% else %}
+                  <span style="color:rgba(255,255,255,0.20);">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty-state">
+          <p class="empty-label">No payments yet</p>
+          <p class="empty-sub">Payments will appear here once recorded by the institute.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  {% else %}
+    {# ── No fee record ── #}
+    <div class="table-card">
+      <div class="empty-state">
+        <p class="empty-label">No fee record found</p>
+        <p class="empty-sub">This trainee has no payment record on file yet.</p>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

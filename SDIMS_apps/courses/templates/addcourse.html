@@ -1,167 +1,366 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit Course{% else %}Add Course{% endif %} — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    max-width: 900px;
+  }
+  .page-wrapper::before {
+    content: 'COURSE';
+    position: absolute;
+    top: 0;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    color: rgba(255,255,255,0.028);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(250,204,21,0.18); }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    margin-bottom: 24px;
+  }
+
+  /* Form layout */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group textarea { resize: vertical; min-height: 100px; line-height: 1.65; }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--yellow-focus); }
+  .form-group select option { background: var(--card); }
+  .form-group .errorlist { list-style: none; font-size: 12px; color: #f87171; }
+
+  .field-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Checkbox — is_active */
+  .check-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .check-group:hover { border-color: var(--yellow-focus); }
+
+  .check-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--yellow);
+    cursor: pointer;
+  }
+  .check-group label {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-sec);
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  /* Vehicle select loading state */
+  #id_vehicle:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Buttons */
+  .btn-primary {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 11px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 36px; }
+    .page-wrapper::before { font-size: 120px; }
+    .card { padding: 20px; }
+    .form-grid,
+    .form-grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="page-wrapper">
 
-<div class="container mt-4">
-  <div class="card shadow-sm">
+  <p class="page-label">Course Management</p>
+  <h1 class="page-title">{% if form.instance.pk %}Edit Course{% else %}Add New Course{% endif %}</h1>
 
-    <div class="card-header">
-      <h5 class="mb-0">
-        {% if form.instance.pk %}Edit Course{% else %}Add New Course{% endif %}
-      </h5>
-    </div>
+  <div class="action-bar">
+    <button type="submit" form="courseForm" class="btn-primary">Save Course</button>
+    <a href="{% url 'courses:course_list' %}" class="btn-ghost">Cancel</a>
+  </div>
 
-    <div class="card-body">
-      <form method="POST" id="courseForm">
-        {% csrf_token %}
+  <hr class="section-divider">
 
-        <!-- Course Name -->
-        <div class="mb-3">
-          {{ form.course_name.label_tag }}
+  <form method="POST" id="courseForm">
+    {% csrf_token %}
+
+    <!-- Basic Info -->
+    <div class="card">
+      <div class="card-title">Basic Information</div>
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label for="{{ form.course_name.id_for_label }}">{{ form.course_name.label }}</label>
           {{ form.course_name }}
           {% if form.course_name.errors %}
-            <div class="text-danger small">{{ form.course_name.errors }}</div>
+            <ul class="errorlist">{% for e in form.course_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
           {% endif %}
         </div>
 
-        <!-- Vehicle Type & Level -->
-        <div class="row mb-3">
-          <div class="col-md-6">
-            {{ form.vehicle_type.label_tag }}
-            {{ form.vehicle_type }}
-            {% if form.vehicle_type.errors %}
-              <div class="text-danger small">{{ form.vehicle_type.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-md-6">
-            {{ form.level.label_tag }}
-            {{ form.level }}
-            {% if form.level.errors %}
-              <div class="text-danger small">{{ form.level.errors }}</div>
-            {% endif %}
-          </div>
+        <div class="form-group">
+          <label for="{{ form.vehicle_type.id_for_label }}">{{ form.vehicle_type.label }}</label>
+          {{ form.vehicle_type }}
+          {% if form.vehicle_type.errors %}
+            <ul class="errorlist">{% for e in form.vehicle_type.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
         </div>
 
-        <!-- Vehicles Dropdown -->
-        <div class="mb-3">
-            {{ form.vehicle.label_tag }}
-            {{ form.vehicle }}
-            <small class="form-text text-muted">Only vehicles matching the selected type are shown.</small>
+        <div class="form-group">
+          <label for="{{ form.level.id_for_label }}">{{ form.level.label }}</label>
+          {{ form.level }}
+          {% if form.level.errors %}
+            <ul class="errorlist">{% for e in form.level.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
         </div>
 
-        <!-- Description -->
-        <div class="mb-3">
-          {{ form.description.label_tag }}
+        <div class="form-group full">
+          <label for="{{ form.vehicle.id_for_label }}">{{ form.vehicle.label }}</label>
+          {{ form.vehicle }}
+          <span class="field-hint">Only vehicles matching the selected type are shown.</span>
+          {% if form.vehicle.errors %}
+            <ul class="errorlist">{% for e in form.vehicle.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group full">
+          <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
           {{ form.description }}
           {% if form.description.errors %}
-            <div class="text-danger small">{{ form.description.errors }}</div>
+            <ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>
           {% endif %}
         </div>
 
-        <!-- Duration / Lessons / Fee -->
-        <div class="row mb-3">
-          <div class="col-md-4">
-            {{ form.duration_days.label_tag }}
-            {{ form.duration_days }}
-            {% if form.duration_days.errors %}
-              <div class="text-danger small">{{ form.duration_days.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-md-4">
-            {{ form.total_lessons.label_tag }}
-            {{ form.total_lessons }}
-            {% if form.total_lessons.errors %}
-              <div class="text-danger small">{{ form.total_lessons.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-md-4">
-            {{ form.fee.label_tag }}
-            {{ form.fee }}
-            {% if form.fee.errors %}
-              <div class="text-danger small">{{ form.fee.errors }}</div>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Active -->
-        <div class="mb-3 form-check">
-          {{ form.is_active }}
-          {{ form.is_active.label_tag }}
-        </div>
-
-        <!-- Buttons -->
-        <div class="d-flex justify-content-between">
-          <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">Cancel</a>
-          <button type="submit" class="btn btn-primary">Save Course</button>
-        </div>
-
-      </form>
+      </div>
     </div>
 
-  </div>
+    <!-- Schedule & Pricing -->
+    <div class="card">
+      <div class="card-title">Schedule & Pricing</div>
+      <div class="form-grid-3">
+
+        <div class="form-group">
+          <label for="{{ form.duration_days.id_for_label }}">{{ form.duration_days.label }}</label>
+          {{ form.duration_days }}
+          {% if form.duration_days.errors %}
+            <ul class="errorlist">{% for e in form.duration_days.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.total_lessons.id_for_label }}">{{ form.total_lessons.label }}</label>
+          {{ form.total_lessons }}
+          {% if form.total_lessons.errors %}
+            <ul class="errorlist">{% for e in form.total_lessons.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.fee.id_for_label }}">{{ form.fee.label }} (Rs.)</label>
+          {{ form.fee }}
+          {% if form.fee.errors %}
+            <ul class="errorlist">{% for e in form.fee.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="card">
+      <div class="card-title">Status</div>
+      <label class="check-group">
+        {{ form.is_active }}
+        <span style="font-size:14px; color: var(--text-sec);">{{ form.is_active.label }} — course will be visible and available for enrollment</span>
+      </label>
+    </div>
+
+  </form>
 </div>
+{% endblock %}
 
-<!-- Dynamic vehicles dropdown via AJAX -->
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const vehicleTypeSelect = document.getElementById('id_vehicle_type');
-    const vehicleSelect = document.getElementById('id_vehicle');
+document.addEventListener('DOMContentLoaded', function () {
+  const vehicleTypeSelect = document.getElementById('id_vehicle_type');
+  const vehicleSelect     = document.getElementById('id_vehicle');
 
-    function resetVehicleDropdown(message = 'Select vehicle type first') {
-        vehicleSelect.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.textContent = message;
-        defaultOption.value = '';
-        defaultOption.disabled = true;   // can't select it
-        defaultOption.selected = true;   // shown by default
-        vehicleSelect.appendChild(defaultOption);
-    }
+  function resetVehicleDropdown(message = 'Select vehicle type first') {
+    vehicleSelect.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.textContent = message;
+    opt.value = '';
+    opt.disabled = true;
+    opt.selected = true;
+    vehicleSelect.appendChild(opt);
+  }
 
-    // Start empty on page load (add course)
-    resetVehicleDropdown();
+  resetVehicleDropdown();
 
-    vehicleTypeSelect.addEventListener('change', function() {
-        const type = this.value;
+  vehicleTypeSelect.addEventListener('change', function () {
+    const type = this.value;
+    if (!type) { resetVehicleDropdown(); return; }
 
-        // If nothing selected, reset and stop
-        if (!type) {
-            resetVehicleDropdown();
-            return;
+    resetVehicleDropdown('Loading...');
+    vehicleSelect.disabled = true;
+
+    fetch("{% url 'courses:ajax_vehicles_by_type' %}?vehicle_type=" + type)
+      .then(r => r.json())
+      .then(data => {
+        vehicleSelect.disabled = false;
+        if (data.vehicles.length === 0) {
+          resetVehicleDropdown('No vehicles available for this type');
+          return;
         }
+        vehicleSelect.innerHTML = '';
+        const def = document.createElement('option');
+        def.textContent = 'Select a vehicle';
+        def.value = '';
+        def.disabled = true;
+        def.selected = true;
+        vehicleSelect.appendChild(def);
 
-        // Show loading state while fetching
-        resetVehicleDropdown('Loading...');
-
-        fetch("{% url 'courses:ajax_vehicles_by_type' %}?vehicle_type=" + type)
-        .then(response => response.json())
-        .then(data => {
-            if (data.vehicles.length === 0) {
-                resetVehicleDropdown('No vehicles available for this type');
-                return;
-            }
-
-            vehicleSelect.innerHTML = '';
-
-            const defaultOption = document.createElement('option');
-            defaultOption.textContent = 'Select a vehicle';
-            defaultOption.value = '';
-            defaultOption.disabled = true;    // unselectable
-            defaultOption.selected = true;    // shown until user picks
-            vehicleSelect.appendChild(defaultOption);
-
-            data.vehicles.forEach(v => {
-                const option = document.createElement('option');
-                option.value = v.id;
-                option.textContent = `${v.brand} ${v.model} (${v.registration_number})`;
-                vehicleSelect.appendChild(option);
-            });
-        })
-        .catch(() => {
-            resetVehicleDropdown('Error loading vehicles');
+        data.vehicles.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.id;
+          opt.textContent = `${v.brand} ${v.model} (${v.registration_number})`;
+          vehicleSelect.appendChild(opt);
         });
-    });
+      })
+      .catch(() => {
+        vehicleSelect.disabled = false;
+        resetVehicleDropdown('Error loading vehicles');
+      });
+  });
 });
 </script>
-
 {% endblock %}

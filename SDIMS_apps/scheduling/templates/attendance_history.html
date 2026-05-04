@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance History — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'HISTORY';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 190px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 10px;
+  }
+  .page-title span {
+    color: rgba(255, 255, 255, 0.35);
+  }
+  .page-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+  }
+
+  /* ── Record Count Badge ── */
+  .record-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yellow);
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  /* ── Filter Bar ── */
+  .filter-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .filter-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .filter-input,
+  .filter-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 8px 12px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .filter-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+  .filter-input:focus,
+  .filter-select:focus { border-color: var(--yellow-focus); }
+  .filter-input::placeholder { color: var(--text-muted); }
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); transform: translateY(-1px); }
+
+  /* ── Active Filter Chips ── */
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.2);
+    color: var(--yellow);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 13px 18px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 15px 18px;
+    vertical-align: middle;
+  }
+
+  /* ── Cell Types ── */
+  .cell-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .slot-badge {
+    display: inline-block;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .cell-primary {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .cell-muted {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    font-style: italic;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cell-muted.has-note {
+    font-style: normal;
+    color: var(--text-sec);
+  }
+  .cell-time {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* ── Avatar + Name ── */
+  .avatar-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  /* ── Status Chip ── */
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .status-chip::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .att-present {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #4ade80;
+  }
+  .att-present::before { background: #4ade80; }
+  .att-late {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+  }
+  .att-late::before { background: #fbbf24; }
+  .att-absent {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+  .att-absent::before { background: #f87171; }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Pagination ── */
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pagination-info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .pagination-links { display: flex; gap: 6px; align-items: center; }
+  .page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    background: transparent;
+    color: var(--text-sec);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .page-btn:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+  .page-num {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 4px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Attendance <span>History</span></h1>
+  <p class="page-sub">Browse, filter, and review all attendance records.</p>
+
+  {% if page.paginator.count %}
+    <div class="record-count">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      {{ page.paginator.count }} record{{ page.paginator.count|pluralize }}
+    </div>
+  {% endif %}
+
+  <hr class="section-divider">
+
+  {# ── Filter Bar ── #}
+  <form method="get" class="filter-card">
+
+    <div class="filter-group">
+      <label class="filter-label" for="f-date">Date</label>
+      <input type="date" id="f-date" name="date"
+             class="filter-input" value="{{ filter_date|default:'' }}">
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="f-status">Status</label>
+      <select id="f-status" name="status" class="filter-select">
+        <option value="">All Statuses</option>
+        {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="f-trainee">Trainee</label>
+      <input type="text" id="f-trainee" name="trainee"
+             class="filter-input" placeholder="Search name…"
+             value="{{ filter_trainee|default:'' }}">
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="btn-primary">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Filter
+      </button>
+      <a href="{% url 'scheduling:attendance_history' %}" class="btn-ghost">Clear</a>
+    </div>
+
+  </form>
+
+  {# ── Active Filter Chips ── #}
+  {% if filter_date or filter_status or filter_trainee %}
+  <div class="active-filters">
+    {% if filter_date %}
+    <span class="active-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      {{ filter_date }}
+    </span>
+    {% endif %}
+    {% if filter_status %}
+    <span class="active-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+      </svg>
+      {{ filter_status }}
+    </span>
+    {% endif %}
+    {% if filter_trainee %}
+    <span class="active-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+      "{{ filter_trainee }}"
+    </span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ── Table ── #}
+  <div class="table-card">
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Slot</th>
+            <th>Trainee</th>
+            <th>Status</th>
+            <th class="hide-mobile">Marked By</th>
+            <th class="hide-mobile">Marked At</th>
+            <th class="hide-mobile">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in page %}
+          <tr>
+            <td class="cell-date">{{ record.session.date|date:"d M Y" }}</td>
+
+            <td>
+              <span class="slot-badge">{{ record.session.slot.slot_number }}</span>
+            </td>
+
+            <td>
+              <div class="avatar-pair">
+                <div class="avatar">
+                  {{ record.session.trainee.user.first_name|slice:":1" }}{{ record.session.trainee.user.last_name|slice:":1" }}
+                </div>
+                <span class="cell-primary">{{ record.session.trainee.user.get_full_name }}</span>
+              </div>
+            </td>
+
+            <td>
+              <span class="status-chip att-{{ record.status }}">
+                {{ record.get_status_display }}
+              </span>
+            </td>
+
+            <td class="hide-mobile">
+              <div class="avatar-pair">
+                <div class="avatar">
+                  {{ record.marked_by.first_name|slice:":1" }}{{ record.marked_by.last_name|slice:":1" }}
+                </div>
+                {{ record.marked_by.get_full_name }}
+              </div>
+            </td>
+
+            <td class="cell-time hide-mobile">{{ record.marked_at|date:"d M, H:i" }}</td>
+
+            <td class="hide-mobile">
+              {% if record.notes %}
+                <span class="cell-muted has-note" title="{{ record.notes }}">{{ record.notes }}</span>
+              {% else %}
+                <span class="cell-muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <p class="empty-state-label">No Records Found</p>
+                <p class="empty-state-sub">
+                  {% if filter_date or filter_status or filter_trainee %}
+                    Try adjusting your filters.
+                  {% else %}
+                    Attendance records will appear here once sessions are marked.
+                  {% endif %}
+                </p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {# ── Pagination ── #}
+    {% if page.has_other_pages %}
+    <div class="pagination-bar">
+      <span class="pagination-info">
+        Page {{ page.number }} of {{ page.paginator.num_pages }}
+        &mdash; {{ page.paginator.count }} record{{ page.paginator.count|pluralize }}
+      </span>
+      <div class="pagination-links">
+        {% if page.has_previous %}
+        <a class="page-btn"
+           href="?page={{ page.previous_page_number }}&date={{ filter_date|default:'' }}&status={{ filter_status|default:'' }}&trainee={{ filter_trainee|default:'' }}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Previous
+        </a>
+        {% endif %}
+        <span class="page-num">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}
+        <a class="page-btn"
+           href="?page={{ page.next_page_number }}&date={{ filter_date|default:'' }}&status={{ filter_status|default:'' }}&trainee={{ filter_trainee|default:'' }}">
+          Next
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reschedule Queue — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'RESCHEDULE';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 160px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 32px;
+  }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 13px 18px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 15px 18px;
+    vertical-align: middle;
+  }
+
+  /* ── Avatar + Name ── */
+  .avatar-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+  .trainee-name {
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+  }
+  .trainee-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* ── Slot Badge ── */
+  .slot-badge {
+    display: inline-block;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+
+  /* ── Cell types ── */
+  .cell-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .cell-score {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Attempts Badge ── */
+  .attempts-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .attempts-normal {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+  }
+  .attempts-warn {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+  }
+
+  /* ── Priority Badge ── */
+  .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .priority-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .p-critical {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+  .p-critical::before { background: #f87171; }
+  .p-high {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+  }
+  .p-high::before { background: #fbbf24; }
+  .p-normal {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-muted);
+  }
+  .p-normal::before { background: var(--text-muted); }
+  .p-low {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.3);
+  }
+  .p-low::before { background: rgba(255, 255, 255, 0.3); }
+
+  /* ── Priority Adjust Form ── */
+  .priority-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .priority-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 5px 24px 5px 10px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    transition: border-color 0.15s;
+    width: 70px;
+  }
+  .priority-select:focus { border-color: var(--yellow-focus); }
+
+  /* ── Empty State ── */
+  .empty-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Reschedule Queue</h1>
+
+  {% if request.user.role == 'admin' %}
+  <div class="action-bar">
+    <a href="{% url 'scheduling:flagged_reschedule' %}" class="btn-danger">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+        <line x1="4" y1="22" x2="4" y2="15"/>
+      </svg>
+      View Flagged
+    </a>
+  </div>
+  {% endif %}
+
+  <hr class="section-divider">
+
+  {% if queue %}
+
+  <div class="table-card">
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Trainee</th>
+            <th>Missed Session</th>
+            <th>Attempts</th>
+            <th>Priority</th>
+            <th class="hide-mobile">Score</th>
+            <th class="hide-mobile">Added</th>
+            <th class="hide-mobile">Last Tried</th>
+            <th>Adjust</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in queue %}
+          <tr>
+
+            <td>
+              <div class="avatar-pair">
+                <div class="avatar">
+                  {{ entry.trainee.user.first_name|slice:":1" }}{{ entry.trainee.user.last_name|slice:":1" }}
+                </div>
+                <div>
+                  <span class="trainee-name">{{ entry.trainee.user.get_full_name }}</span>
+                  <span class="trainee-meta">
+                    {% if entry.trainee.course %}{{ entry.trainee.course }}{% else %}Independent{% endif %}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <span class="cell-date">{{ entry.original_session.date|date:"d M Y" }}</span>
+              <span class="slot-badge" style="margin-left: 6px;">
+                {{ entry.original_session.slot.slot_number }}
+              </span>
+            </td>
+
+            <td>
+              {% if entry.attempt_count >= 2 %}
+                <span class="attempts-badge attempts-warn">{{ entry.attempt_count }} / 3</span>
+              {% else %}
+                <span class="attempts-badge attempts-normal">{{ entry.attempt_count }} / 3</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if entry.priority == 1 %}
+                <span class="priority-badge p-critical">Critical</span>
+              {% elif entry.priority == 2 %}
+                <span class="priority-badge p-high">High</span>
+              {% elif entry.priority == 3 %}
+                <span class="priority-badge p-normal">Normal</span>
+              {% else %}
+                <span class="priority-badge p-low">Low</span>
+              {% endif %}
+            </td>
+
+            <td class="cell-score hide-mobile">{{ entry.priority_score }}</td>
+
+            <td class="cell-date hide-mobile">{{ entry.added_at|date:"d M, H:i" }}</td>
+
+            <td class="cell-date hide-mobile">
+              {% if entry.last_attempted_at %}
+                {{ entry.last_attempted_at|date:"d M, H:i" }}
+              {% else %}
+                <span style="color: var(--text-muted);">—</span>
+              {% endif %}
+            </td>
+
+            <td>
+              <form method="post" class="priority-form">
+                {% csrf_token %}
+                <input type="hidden" name="entry_id" value="{{ entry.pk }}">
+                <select name="priority" class="priority-select">
+                  {% for p in priority_range %}
+                    <option value="{{ p }}" {% if entry.priority == p %}selected{% endif %}>
+                      {{ p }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn-primary">Set</button>
+              </form>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+
+  <div class="empty-card">
+    <p class="empty-state-label">Queue Is Empty</p>
+    <p class="empty-state-sub">
+      All absent trainees have been rescheduled<br>or are awaiting the next scheduler run.
+    </p>
+  </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

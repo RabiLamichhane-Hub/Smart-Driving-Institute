@@ -1,26 +1,426 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Add Expense{% endblock %}
 
 {% block content %}
 
-<h1>Add Expense</h1>
+<section class="expense-section">
 
-<a href="{% url 'accounting:expense_list' %}">View Expenses</a> |
-<a href="{% url 'accounting:fee_overview' %}">Fee Overview</a>
+  <!-- Ghost background text -->
+  <span class="ghost-text">EXPENSE</span>
 
-<hr>
+  <!-- Back link -->
+  <div class="nav-links">
+    <a href="{% url 'accounting:expense_list' %}" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      View Expenses
+    </a>
+    <span class="nav-sep">|</span>
+    <a href="{% url 'accounting:fee_overview' %}" class="back-link">Fee Overview</a>
+  </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <p><strong>{{ message }}</strong></p>
-    {% endfor %}
-{% endif %}
+  <!-- Section header -->
+  <div class="section-header">
+    <span class="section-tag">Accounting</span>
+    <h1 class="section-title">Add Expense</h1>
+  </div>
 
-<form method="post">
+  <!-- Django messages -->
+  {% if messages %}
+    <div class="messages-block">
+      {% for message in messages %}
+        <div class="alert-msg alert-{{ message.tags }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Form card -->
+  <form method="post" class="expense-form" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Expense</button>
-</form>
+
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">New Entry</span>
+          <h2 class="form-card-title">Expense Details</h2>
+        </div>
+      </div>
+
+      <div class="fields-grid">
+        {% for field in form %}
+        <div class="field-group {% if field.field.widget.attrs.rows or forloop.last %}field-full{% endif %}">
+          <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ field.errors|join:", " }}
+            </span>
+          {% endif %}
+          {% if field.help_text %}
+            <span class="field-hint">{{ field.help_text }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn-primary btn-lg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Expense
+      </button>
+      <a href="{% url 'accounting:expense_list' %}" class="btn-ghost btn-lg">Cancel</a>
+    </div>
+
+  </form>
+
+</section>
+
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+  /* ── Section ── */
+  .expense-section {
+    position: relative;
+    padding: 48px 48px 80px;
+    max-width: 720px;
+    overflow: hidden;
+  }
+
+  .ghost-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 18vw, 200px);
+    color: rgba(255,255,255,0.025);
+    position: absolute;
+    top: 0;
+    right: -20px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Nav links ── */
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.38);
+    text-decoration: none;
+    transition: color 0.18s;
+  }
+
+  .back-link:hover { color: #facc15; }
+
+  .nav-sep {
+    color: rgba(255,255,255,0.15);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #facc15;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 68px);
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  /* ── Messages ── */
+  .messages-block {
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .alert-msg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ── Form layout ── */
+  .expense-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Form card ── */
+  .form-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 26px 28px;
+    transition: border-color 0.2s;
+  }
+
+  .form-card:focus-within {
+    border-color: rgba(250,204,21,0.18);
+  }
+
+  .form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .form-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #facc15;
+    flex-shrink: 0;
+  }
+
+  .form-card-tag {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(250,204,21,0.65);
+    margin-bottom: 2px;
+  }
+
+  .form-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1;
+  }
+
+  /* ── Fields grid ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 22px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .field-full {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Labels ── */
+  .field-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.38);
+    display: block;
+  }
+
+  /* ── Django widget override ── */
+  .expense-form input[type="text"],
+  .expense-form input[type="number"],
+  .expense-form input[type="date"],
+  .expense-form input[type="email"],
+  .expense-form select,
+  .expense-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    outline: none;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .expense-form textarea {
+    resize: vertical;
+    min-height: 96px;
+    line-height: 1.65;
+  }
+
+  .expense-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+
+  .expense-form input:focus,
+  .expense-form select:focus,
+  .expense-form textarea:focus {
+    border-color: rgba(250,204,21,0.5);
+  }
+
+  .expense-form input::placeholder,
+  .expense-form textarea::placeholder {
+    color: rgba(255,255,255,0.18);
+  }
+
+  .expense-form input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.4);
+    cursor: pointer;
+  }
+
+  /* Remove number input arrows */
+  .expense-form input[type="number"]::-webkit-inner-spin-button,
+  .expense-form input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* ── Field error & hint ── */
+  .field-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    color: #f87171;
+  }
+
+  .field-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.26);
+  }
+
+  /* ── Form actions ── */
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 4px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #facc15;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+
+  .btn-primary:hover {
+    background: #eab308;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    color: rgba(255,255,255,0.50);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 8px;
+    transition: border-color 0.18s, color 0.18s;
+    cursor: pointer;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.78);
+  }
+
+  .btn-lg {
+    font-size: 14px;
+    padding: 12px 26px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .expense-section { padding: 32px 20px 60px; }
+    .ghost-text { display: none; }
+    .fields-grid { grid-template-columns: 1fr; }
+    .field-full { grid-column: 1; }
+    .form-actions { flex-direction: column; align-items: stretch; }
+    .btn-lg { justify-content: center; }
+  }
+</style>
 
 {% endblock %}

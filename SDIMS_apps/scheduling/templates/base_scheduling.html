@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% comment %}
+scheduling/templates/scheduling/base_scheduling.html
+Extends your project's main base.html.
+All scheduling templates extend this.
+{% endcomment %}
+
+{% block extra_css %}
+<style>
+  /* ── Scheduling module shared styles ── */
+  .sched-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: .75rem;
+    border-bottom: 2px solid #e9ecef;
+  }
+  .sched-header h4 { margin: 0; font-weight: 600; }
+
+  .slot-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: .75rem;
+    font-weight: 600;
+    background: #e8f4fd;
+    color: #1a6fa8;
+  }
+
+  /* Status pills */
+  .status-pending   { background:#fff3cd; color:#856404; }
+  .status-scheduled { background:#cfe2ff; color:#084298; }
+  .status-ongoing   { background:#d1e7dd; color:#0a3622; }
+  .status-completed { background:#d1e7dd; color:#0a3622; }
+  .status-cancelled { background:#f8d7da; color:#842029; }
+
+  .status-pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 600;
+  }
+
+  /* Attendance pills */
+  .att-present { background:#d1e7dd; color:#0a3622; }
+  .att-late    { background:#fff3cd; color:#856404; }
+  .att-absent  { background:#f8d7da; color:#842029; }
+
+  /* Sidebar nav highlight */
+  .sched-nav .nav-link.active {
+    background: #0d6efd;
+    color: #fff !important;
+    border-radius: 6px;
+  }
+  .sched-nav .nav-link,
+  .sched-nav .nav-link:link,
+  .sched-nav .nav-link:visited { color: #fff !important; padding: .4rem .75rem; }
+  .sched-nav .nav-link:hover  { background: rgba(255,255,255,.1); border-radius: 6px; }  /* ← was #f1f3f5 */
+
+  /* Sidebar section label */
+  .sched-label { color: rgba(255,255,255,.5) !important; }  /* ← new helper class */
+
+  .table th { font-size: .82rem; text-transform: uppercase;
+              letter-spacing: .04em; color: #6c757d; }
+  .table td { vertical-align: middle; font-size: .9rem; }
+
+  .filter-bar { background:#f8f9fa; border-radius:8px;
+                padding:.75rem 1rem; margin-bottom:1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="row">
+
+    {# ── Sidebar navigation ── #}
+    <div class="col-lg-2 col-md-3 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-2">
+          <p class="sched-label small fw-semibold px-2 mb-1 mt-1">SCHEDULING</p>  {# ← added sched-label #}
+          <nav class="sched-nav nav flex-column">
+
+            {% if request.user.role == 'trainee' %}
+              <a class="nav-link {% if request.resolver_match.url_name == 'my_schedule' %}active{% endif %}"
+                 href="{% url 'scheduling:my_schedule' %}">📅 My Schedule</a>
+              <a class="nav-link {% if request.resolver_match.url_name == 'preferences' %}active{% endif %}"
+                 href="{% url 'scheduling:preferences' %}">⚙️ My Preferences</a>
+
+            {% elif request.user.role == 'instructor' %}
+              <a class="nav-link {% if request.resolver_match.url_name == 'my_schedule' %}active{% endif %}"
+                 href="{% url 'scheduling:my_schedule' %}">📅 My Sessions</a>
+
+            {% else %}
+              <a class="nav-link {% if request.resolver_match.url_name == 'session_list' %}active{% endif %}"
+                 href="{% url 'scheduling:session_list' %}">📋 All Sessions</a>
+              <a class="nav-link {% if request.resolver_match.url_name == 'approve' %}active{% endif %}"
+                 href="{% url 'scheduling:approve' %}">✅ Approve</a>
+              <a class="nav-link {% if request.resolver_match.url_name == 'attendance_today' %}active{% endif %}"
+                 href="{% url 'scheduling:attendance_today' %}">📝 Attendance</a>
+              <a class="nav-link {% if request.resolver_match.url_name == 'attendance_history' %}active{% endif %}"
+                 href="{% url 'scheduling:attendance_history' %}">🗂️ Att. History</a>
+              <a class="nav-link {% if request.resolver_match.url_name == 'reschedule_queue' %}active{% endif %}"
+                 href="{% url 'scheduling:reschedule_queue' %}">🔄 Reschedule Queue</a>
+              {% if request.user.role == 'admin' %}
+              <a class="nav-link {% if request.resolver_match.url_name == 'flagged_reschedule' %}active{% endif %}"
+                 href="{% url 'scheduling:flagged_reschedule' %}">🚩 Flagged</a>
+              {% endif %}
+              <hr class="my-1" style="border-color: rgba(255,255,255,.15);">  {# ← softened hr #}
+              <a class="nav-link {% if request.resolver_match.url_name == 'run_list' %}active{% endif %}"
+                 href="{% url 'scheduling:run_list' %}">🕒 Scheduler Runs</a>
+            {% endif %}
+
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    {# ── Main content area ── #}
+    <div class="col-lg-10 col-md-9">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show py-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% block scheduling_content %}{% endblock %}
+
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}{% endblock %}
+
+{% endblock %}

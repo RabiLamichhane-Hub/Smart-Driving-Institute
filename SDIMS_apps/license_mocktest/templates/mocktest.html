@@ -1,27 +1,374 @@
-<a href="{% url 'license_mocktest:new_mocktest' %}"
-   onclick="return confirm('Are you sure? Your current progress will be lost.')">
-    New Test
-</a>
-<p>Total questions: {{ mocktest|length }}</p>
-<form method="post" action="{% url 'license_mocktest:mocktest_result' %}">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mock Test — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'MOCKTEST';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    transform: translateY(-1px);
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Meta bar ── */
+  .meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .meta-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .meta-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .meta-count span {
+    font-weight: 500;
+    color: var(--text-sec);
+  }
+
+  /* ── Question list ── */
+  .question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  /* ── Question card ── */
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    transition: border-color 0.18s;
+  }
+  .question-card:has(input:checked) {
+    border-color: rgba(250, 204, 21, 0.2);
+  }
+
+  .question-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .question-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--yellow);
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 5px;
+    padding: 2px 9px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .question-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  /* ── Options ── */
+  .options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .option-item label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    line-height: 1.5;
+  }
+  .option-item label:hover {
+    border-color: rgba(250, 204, 21, 0.3);
+    background: rgba(250, 204, 21, 0.03);
+    color: var(--text);
+  }
+  .option-item input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .option-item input[type="radio"]:checked {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    box-shadow: inset 0 0 0 3px var(--card);
+  }
+  .option-item input[type="radio"]:checked + .option-key {
+    color: var(--yellow);
+  }
+  .option-item:has(input:checked) label {
+    border-color: rgba(250, 204, 21, 0.35);
+    background: rgba(250, 204, 21, 0.05);
+    color: var(--text);
+  }
+  .option-key {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  /* ── Submit row ── */
+  .submit-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-submit:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .question-card { padding: 18px 16px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Theory Test</p>
+  <h1 class="page-title">Mock Test</h1>
+
+  {# ── Action Bar ── #}
+  <div class="action-bar">
+    <a href="{% url 'license_mocktest:new_mocktest' %}"
+       class="btn-danger"
+       onclick="return confirm('Are you sure? Your current progress will be lost.')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      New Test
+    </a>
+    <a href="{% url 'license_mocktest:test_history' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      Test History
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ── Form ── #}
+  <form method="post" action="{% url 'license_mocktest:mocktest_result' %}">
     {% csrf_token %}
 
-    {% for q in mocktest %}
-    <div class="question-block">
-        <p><strong>Q{{ forloop.counter }}:</strong> {{ q.question }}</p>
-        <ul>
-            {% for key, val in q.options.items %}
-            <li>
-                <label>
-                    <input type="radio" name="{{ q.id }}" value="{{ key }}" required>
-                    {{ key }}. {{ val }}
-                </label>
-            </li>
-            {% endfor %}
-        </ul>
+    {# ── Meta bar ── #}
+    <div class="meta-bar">
+      <p class="meta-tag">Questions</p>
+      <p class="meta-count">Total: <span>{{ mocktest|length }}</span></p>
     </div>
-    <hr>
-    {% endfor %}
 
-    <button type="submit">Submit</button>
-</form>
+    {# ── Question cards ── #}
+    <div class="question-list">
+      {% for q in mocktest %}
+      <div class="question-card">
+
+        <div class="question-header">
+          <span class="question-number">Q{{ forloop.counter }}</span>
+          <p class="question-text">{{ q.question }}</p>
+        </div>
+
+        <ul class="options-list">
+          {% for key, val in q.options.items %}
+          <li class="option-item">
+            <label>
+              <input type="radio" name="{{ q.id }}" value="{{ key }}" required>
+              <span class="option-key">{{ key }}</span>
+              {{ val }}
+            </label>
+          </li>
+          {% endfor %}
+        </ul>
+
+      </div>
+      {% endfor %}
+    </div>
+
+    {# ── Submit ── #}
+    <div class="submit-row">
+      <button type="submit" class="btn-submit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Submit Test
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

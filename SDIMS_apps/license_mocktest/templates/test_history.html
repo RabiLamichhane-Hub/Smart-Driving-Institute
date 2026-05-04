@@ -1,48 +1,311 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Test History</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-    <h1>My Test History</h1>
-    <a href="{% url 'license_mocktest:mocktest' %}">Take New Test</a>
-    <a href="{% url 'homesandall:trainee_dashboard' %}">Back to Dashboard</a>
+{% block title %}Test History — SDIMS{% endblock %}
 
-    <hr>
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'HISTORY';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
 
-    <table border="1" cellpadding="10">
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    transform: translateY(-1px);
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Section tag ── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 4px;
+  }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.col-score {
+    color: rgba(250, 204, 21, 0.7);
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+  td.col-id {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  td.col-score {
+    font-weight: 500;
+    color: var(--yellow);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Result pill ── */
+  .result-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .result-pill::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .pill-passed {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #4ade80;
+  }
+  .pill-passed::before { background: #4ade80; }
+  .pill-failed {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+  .pill-failed::before { background: #f87171; }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Theory Test</p>
+  <h1 class="page-title">Test History</h1>
+
+  {# ── Action Bar ── #}
+  <div class="action-bar">
+    <a href="{% url 'license_mocktest:mocktest' %}" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="12" y1="18" x2="12" y2="12"/>
+        <line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+      Take New Test
+    </a>
+    <a href="{% url 'homesandall:trainee_dashboard' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back to Dashboard
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ── Table ── #}
+  <p class="section-tag">Results</p>
+
+  <div class="table-card">
+    <div style="overflow-x: auto;">
+      <table>
         <thead>
-            <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Score</th>
-                <th>Pass Mark</th>
-                <th>Result</th>
-            </tr>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th class="col-score">Score</th>
+            <th class="hide-mobile">Pass Mark</th>
+            <th>Result</th>
+          </tr>
         </thead>
         <tbody>
-            {% for attempt in attempts %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ attempt.taken_at|date:"Y-m-d H:i" }}</td>
-                <td>{{ attempt.score }} / {{ attempt.total }}</td>
-                <td>{{ attempt.pass_mark }}</td>
-                <td>
-                    {% if attempt.passed %}
-                        <span style="color: green;">Passed</span>
-                    {% else %}
-                        <span style="color: red;">Failed</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">No tests taken yet.</td>
-            </tr>
-            {% endfor %}
+          {% for attempt in attempts %}
+          <tr>
+            <td class="col-id">{{ forloop.counter }}</td>
+            <td class="col-date">{{ attempt.taken_at|date:"d M Y, H:i" }}</td>
+            <td class="col-score">{{ attempt.score }} / {{ attempt.total }}</td>
+            <td class="hide-mobile" style="color: var(--text-muted); font-size: 13px;">{{ attempt.pass_mark }}</td>
+            <td>
+              {% if attempt.passed %}
+                <span class="result-pill pill-passed">Passed</span>
+              {% else %}
+                <span class="result-pill pill-failed">Failed</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <p class="empty-state-label">No Tests Taken Yet</p>
+                <p class="empty-state-sub">Take your first mock test to see your results here.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 
-</body>
-</html>
+</div>
+{% endblock %}

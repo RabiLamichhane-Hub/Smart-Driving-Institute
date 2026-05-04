@@ -1,67 +1,529 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Mock Test Result</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-    <h1>Mock Test Result</h1>
+{% block title %}Mock Test Result — SDIMS{% endblock %}
 
-    <h2>Score: {{ result.score }} / {{ result.total }}</h2>
-    <p>Pass mark: {{ result.pass_mark }} / {{ result.total }}</p>
+{% block extra_css %}
+<style>
+  /* ── Page Shell ─────────────────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
 
-    {% if result.passed %}
-        <p style="color: green;"><strong>Congratulations! You passed.</strong></p>
-    {% else %}
-        <p style="color: red;"><strong>You did not pass. Better luck next time.</strong></p>
-    {% endif %}
+  .page-wrapper::before {
+    content: 'RESULTS';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
 
-    <a href="{% url 'license_mocktest:mocktest' %}">Take Another Test</a>
-    <a href="{% url 'homesandall:trainee_dashboard' %}">Back to Dashboard</a>
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
 
-    <hr>
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 28px;
+  }
 
-    <h2>Detailed Results</h2>
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
 
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ─────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: background 0.18s, transform 0.18s, border-color 0.18s, color 0.18s;
+  }
+
+  .btn-primary {
+    background: var(--yellow);
+    color: #000;
+  }
+
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Score Summary Card ──────────────────────────────── */
+  .score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .score-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .score-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+    transform: translateY(-3px);
+  }
+
+  .score-card__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+
+  .score-card__value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    color: var(--yellow);
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .score-card__sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Pass/fail verdict card */
+  .verdict-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .verdict-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .verdict-card--pass {
+    border: 1px solid rgba(34, 197, 94, 0.25);
+  }
+
+  .verdict-card--fail {
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+
+  .verdict-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .verdict-icon--pass {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1.5px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .verdict-icon--fail {
+    background: rgba(239, 68, 68, 0.10);
+    border: 1.5px solid rgba(239, 68, 68, 0.25);
+  }
+
+  .verdict-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+  }
+
+  .verdict-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .verdict-text--pass { color: #22c55e; }
+  .verdict-text--fail { color: #ef4444; }
+
+  /* ── Section Header ──────────────────────────────────── */
+  .section-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Question Cards ──────────────────────────────────── */
+  .question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .question-card--correct {
+    border-left: 3px solid rgba(34, 197, 94, 0.5);
+  }
+
+  .question-card--wrong {
+    border-left: 3px solid rgba(239, 68, 68, 0.4);
+  }
+
+  .question-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .question-number {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .question-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.65;
+    margin: 0;
+    flex: 1;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .status-badge--correct {
+    background: rgba(34, 197, 94, 0.10);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #22c55e;
+  }
+
+  .status-badge--wrong {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.20);
+    color: #ef4444;
+  }
+
+  /* ── Options List ────────────────────────────────────── */
+  .options-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .option-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    line-height: 1.55;
+    transition: background 0.15s;
+  }
+
+  .option-item--default {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .option-item--correct {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.22);
+    color: #86efac;
+    font-weight: 400;
+  }
+
+  .option-item--wrong {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.20);
+    color: #fca5a5;
+    font-weight: 400;
+  }
+
+  .option-key {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    padding-top: 1px;
+    min-width: 18px;
+  }
+
+  .option-tags {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    padding-left: 12px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .option-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .option-tag--yours {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    color: var(--yellow);
+  }
+
+  .option-tag--correct {
+    background: rgba(34, 197, 94, 0.10);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    color: #22c55e;
+  }
+
+  /* ── Responsive ──────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .page-wrapper {
+      padding: 28px 20px 60px;
+    }
+
+    .score-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .score-grid .verdict-card {
+      grid-column: 1 / -1;
+    }
+
+    .page-title {
+      font-size: 38px;
+    }
+
+    .question-header {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page Header -->
+  <p class="page-label">License Mock Test</p>
+  <h1 class="page-title">Test Results</h1>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <a href="{% url 'license_mocktest:mocktest' %}" class="btn btn-primary">
+      ↺ &nbsp;Take Another Test
+    </a>
+    <a href="{% url 'homesandall:trainee_dashboard' %}" class="btn btn-ghost">
+      ← &nbsp;Back to Dashboard
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Score Summary -->
+  <div class="score-grid">
+
+    <div class="score-card">
+      <p class="score-card__label">Your Score</p>
+      <p class="score-card__value">{{ result.score }}</p>
+      <p class="score-card__sub">out of {{ result.total }} questions</p>
+    </div>
+
+    <div class="score-card">
+      <p class="score-card__label">Pass Mark</p>
+      <p class="score-card__value">{{ result.pass_mark }}</p>
+      <p class="score-card__sub">minimum to pass</p>
+    </div>
+
+    <div class="verdict-card {% if result.passed %}verdict-card--pass{% else %}verdict-card--fail{% endif %}">
+      <div class="verdict-icon {% if result.passed %}verdict-icon--pass{% else %}verdict-icon--fail{% endif %}">
+        {% if result.passed %}✔{% else %}✘{% endif %}
+      </div>
+      <div>
+        <p class="verdict-label">Verdict</p>
+        <p class="verdict-text {% if result.passed %}verdict-text--pass{% else %}verdict-text--fail{% endif %}">
+          {% if result.passed %}Congratulations, You Passed!{% else %}Not Passed — Try Again{% endif %}
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Detailed Results -->
+  <p class="section-tag">Review</p>
+  <h2 class="section-heading">Detailed Results</h2>
+
+  <div class="question-list">
     {% for q in result.details %}
-    <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+    <div class="question-card {% if q.is_correct %}question-card--correct{% else %}question-card--wrong{% endif %}">
 
-        <p><strong>Q{{ forloop.counter }}:</strong> {{ q.question }}</p>
+      <div class="question-header">
+        <span class="question-number">Q{{ forloop.counter }}</span>
+        <p class="question-text">{{ q.question }}</p>
+        <span class="status-badge {% if q.is_correct %}status-badge--correct{% else %}status-badge--wrong{% endif %}">
+          {% if q.is_correct %}✔ Correct{% else %}✘ Wrong{% endif %}
+        </span>
+      </div>
 
-        <ul>
-            {% for key, val in q.options.items %}
-            <li
-                {% if key == q.correct %}
-                    style="color: green; font-weight: bold;"
-                {% elif key == q.selected and not q.is_correct %}
-                    style="color: red;"
-                {% endif %}
-            >
-                {{ key }}. {{ val }}
+      <ul class="options-list">
+        {% for key, val in q.options.items %}
+        <li class="option-item
+          {% if key == q.correct %}option-item--correct
+          {% elif key == q.selected and not q.is_correct %}option-item--wrong
+          {% else %}option-item--default{% endif %}">
 
-                {% if key == q.selected %}
-                    (Your answer)
-                {% endif %}
+          <span class="option-key">{{ key }}.</span>
+          <span>{{ val }}</span>
 
-                {% if key == q.correct %}
-                    (Correct answer)
-                {% endif %}
+          {% if key == q.selected or key == q.correct %}
+          <span class="option-tags">
+            {% if key == q.selected %}
+              <span class="option-tag option-tag--yours">Your Answer</span>
+            {% endif %}
+            {% if key == q.correct %}
+              <span class="option-tag option-tag--correct">Correct</span>
+            {% endif %}
+          </span>
+          {% endif %}
 
-            </li>
-            {% endfor %}
-        </ul>
-
-        {% if q.is_correct %}
-            <p style="color: green;">✔ Correct</p>
-        {% else %}
-            <p style="color: red;">✘ Wrong</p>
-        {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
 
     </div>
     {% endfor %}
+  </div>
 
-    <a href="{% url 'license_mocktest:mocktest' %}">Take Another Test</a>
-    <a href="{% url 'homesandall:trainee_dashboard' %}">Back to Dashboard</a>
+  <hr class="section-divider">
 
-</body>
-</html>
+  <!-- Bottom Action Bar -->
+  <div class="action-bar">
+    <a href="{% url 'license_mocktest:mocktest' %}" class="btn btn-primary">
+      ↺ &nbsp;Take Another Test
+    </a>
+    <a href="{% url 'homesandall:trainee_dashboard' %}" class="btn btn-ghost">
+      ← &nbsp;Back to Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}

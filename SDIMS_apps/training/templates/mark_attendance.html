@@ -1,0 +1,143 @@
+{% block title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 640px;">
+
+  <!-- Header -->
+  <div class="mb-4">
+    <a href="{% url 'training:session_list' %}" class="text-decoration-none text-muted small">
+      <i class="bi bi-arrow-left"></i> Back to Sessions
+    </a>
+    <h2 class="fw-bold mt-2 mb-0">Mark Attendance</h2>
+    <p class="text-muted">Record attendance for this training session</p>
+  </div>
+
+  <!-- Session Info Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h6 class="text-uppercase text-muted fw-semibold small mb-3 letter-spacing-1">Session Details</h6>
+      <div class="row g-3">
+
+        <div class="col-6">
+          <div class="text-muted small">Trainee</div>
+          <div class="fw-semibold">{{ session.trainee.user.get_full_name }}</div>
+          <div class="text-muted small">{{ session.trainee.user.username }}</div>
+        </div>
+
+        <div class="col-6">
+          <div class="text-muted small">Instructor</div>
+          <div class="fw-semibold">{{ session.instructor.user.get_full_name }}</div>
+        </div>
+
+        <div class="col-6">
+          <div class="text-muted small">Date</div>
+          <div class="fw-semibold">{{ session.session_date }}</div>
+        </div>
+
+        <div class="col-6">
+          <div class="text-muted small">Time</div>
+          <div class="fw-semibold">
+            {{ session.start_time|time:"H:i" }} – {{ session.end_time|time:"H:i" }}
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="text-muted small">Vehicle</div>
+          <div class="fw-semibold">{{ session.vehicle }}</div>
+        </div>
+
+        <div class="col-6">
+          <div class="text-muted small">Session Status</div>
+          <div>
+            {% if session.status == 'scheduled' %}
+              <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Scheduled</span>
+            {% elif session.status == 'completed' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Completed</span>
+            {% else %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">Cancelled</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Form Card -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h6 class="text-uppercase text-muted fw-semibold small mb-3">Attendance</h6>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Status: Visual Button Selector -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+
+          <div class="d-flex gap-2 flex-wrap" id="status-buttons">
+            {% for value, label in form.fields.status.choices %}
+            <input type="radio" class="btn-check" name="status" id="status_{{ value }}"
+                   value="{{ value }}"
+                   {% if form.status.value == value %}checked{% elif not form.status.value and value == 'present' %}checked{% endif %}>
+            <label class="btn btn-outline-secondary px-4" for="status_{{ value }}">
+              {% if value == 'present' %}✓ {{ label }}
+              {% elif value == 'absent' %}✗ {{ label }}
+              {% elif value == 'late' %}⚠ {{ label }}
+              {% else %}~ {{ label }}
+              {% endif %}
+            </label>
+            {% endfor %}
+          </div>
+
+          {% if form.status.errors %}
+            <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold" for="{{ form.notes.id_for_label }}">
+            Notes <span class="text-muted fw-normal">(optional)</span>
+          </label>
+          <textarea name="notes" id="{{ form.notes.id_for_label }}"
+                    class="form-control {% if form.notes.errors %}is-invalid{% endif %}"
+                    rows="3"
+                    placeholder="Any remarks about this session...">{{ form.notes.value|default:'' }}</textarea>
+          {% if form.notes.errors %}
+            <div class="invalid-feedback">{{ form.notes.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Info box: auto-complete notice -->
+        <div class="alert alert-info d-flex align-items-start gap-2 py-2 mb-4 border-0 bg-info-subtle">
+          <span class="fs-6">ℹ️</span>
+          <div class="small text-info-emphasis">
+            Saving attendance will automatically mark this session as <strong>Completed</strong>.
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary px-4 fw-semibold">
+            Save Attendance
+          </button>
+          <a href="{% url 'training:session_list' %}" class="btn btn-outline-secondary px-4">
+            Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Highlight selected status button with colour -->
+<style>
+  #status-buttons input[value="present"]:checked + label { background-color: #198754; color: #fff; border-color: #198754; }
+  #status-buttons input[value="absent"]:checked  + label { background-color: #dc3545; color: #fff; border-color: #dc3545; }
+  #status-buttons input[value="late"]:checked    + label { background-color: #ffc107; color: #000; border-color: #ffc107; }
+  #status-buttons input[value="excused"]:checked + label { background-color: #6c757d; color: #fff; border-color: #6c757d; }
+</style>
+{% endblock %}

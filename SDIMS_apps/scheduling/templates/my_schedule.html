@@ -1,0 +1,524 @@
+{% extends "base_scheduling.html" %}
+{% load tz %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Geist+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:       #09090b;
+    --s1:       #111113;
+    --s2:       #18181b;
+    --s3:       #27272a;
+    --b1:       #27272a;
+    --b2:       #3f3f46;
+    --text:     #fafafa;
+    --muted:    #71717a;
+    --dim:      #52525b;
+    --green:    #34d399;
+    --green-bg: rgba(52,211,153,.08);
+    --blue:     #60a5fa;
+    --blue-bg:  rgba(96,165,250,.08);
+    --amber:    #fbbf24;
+    --amber-bg: rgba(251,191,36,.08);
+    --purple:   #a78bfa;
+    --r:        10px;
+    --r-sm:     6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .page-wrapper {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--b1);
+  }
+  .page-eyebrow {
+    font-family: 'Geist Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    animation: blink 2.5s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.3; transform:scale(.75); } }
+
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    line-height: 1;
+  }
+  h1 .hl { color: var(--green); }
+
+  .page-header-date {
+    font-family: 'Geist Mono', monospace;
+    font-size: .7rem;
+    color: var(--dim);
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  /* ── Stats ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
+    padding: 20px 22px;
+  }
+  .stat-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--card-accent, var(--text));
+    margin-bottom: 7px;
+  }
+  .stat-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: 'Geist Mono', monospace;
+    font-size: .67rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--b1);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .filter-btn:hover  { background: var(--s2); color: var(--text); border-color: var(--b2); }
+  .filter-btn.active { background: var(--s3); color: var(--text); border-color: var(--b2); }
+  .filter-spacer { flex: 1; }
+  .session-count {
+    font-family: 'Geist Mono', monospace;
+    font-size: .67rem;
+    color: var(--dim);
+  }
+
+  /* ── Day group ── */
+  .day-group { margin-bottom: 36px; }
+  .day-group[hidden] { display: none; }
+
+  .day-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .day-dow {
+    font-family: 'Geist Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    flex-shrink: 0;
+  }
+  .day-full {
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .today-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: .63rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(52,211,153,.18);
+    flex-shrink: 0;
+  }
+  .today-tag::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .day-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--b1);
+  }
+
+  /* ── Session card ── */
+  .session-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r-sm);
+    padding: 16px 18px 16px 22px;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: background .15s, border-color .15s;
+  }
+  .session-card:hover { background: var(--s2); border-color: var(--b2); }
+  .session-card[hidden] { display: none; }
+
+  .session-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--stripe, var(--b1));
+  }
+  .session-card.status-scheduled   { --stripe: var(--green); }
+  .session-card.status-in_progress { --stripe: var(--blue); }
+  .session-card.status-pending     { --stripe: var(--amber); }
+  .session-card.status-completed   { --stripe: var(--dim); opacity: .6; }
+
+  .session-body { flex: 1; min-width: 0; }
+
+  .session-slot {
+    font-size: .95rem;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .session-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Geist Mono', monospace;
+    font-size: .7rem;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: var(--s3);
+    border: 1px solid var(--b1);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .session-aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  /* ── Status badge ── */
+  .status-badge {
+    font-family: 'Geist Mono', monospace;
+    font-size: .63rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-weight: 500;
+    border: 1px solid transparent;
+  }
+  .badge-scheduled   { background: var(--green-bg); color: var(--green); border-color: rgba(52,211,153,.15); }
+  .badge-in_progress { background: var(--blue-bg);  color: var(--blue);  border-color: rgba(96,165,250,.15); }
+  .badge-pending     { background: var(--amber-bg); color: var(--amber); border-color: rgba(251,191,36,.15); }
+  .badge-completed   { background: var(--s3); color: var(--dim); border-color: var(--b1); }
+
+  /* ── No-results ── */
+  .no-results {
+    display: none;
+    padding: 40px 0;
+    text-align: center;
+    font-family: 'Geist Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .no-results.visible { display: block; }
+
+  /* ── Empty state ── */
+  .empty-card {
+    background: var(--s1);
+    border: 1px dashed var(--b1);
+    border-radius: var(--r);
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .empty-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .empty-card p { font-size: .875rem; color: var(--dim); }
+
+  /* ── Responsive ── */
+  @media (max-width: 520px) {
+    h1 { font-size: 1.9rem; }
+    .page-header-date { display: none; }
+    .session-card { padding: 14px 14px 14px 20px; }
+    .status-badge { display: none; }
+  }
+</style>
+{% endblock %}
+
+
+{% block scheduling_content %}
+{% now "Y-m-d" as today_str %}
+
+<div class="page-wrapper">
+
+  {# ── Header ── #}
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">
+        <span class="live-dot" aria-hidden="true"></span>
+        Live schedule
+      </p>
+      <h1>My <span class="hl">Schedule</span></h1>
+    </div>
+    <p class="page-header-date" aria-label="Today's date">
+      {% now "l" %}<br>{% now "N j, Y" %}
+    </p>
+  </header>
+
+  {% if sessions %}
+
+  {# ── Stats ── #}
+  <dl class="stats-row" aria-label="Schedule summary">
+    <div class="stat-card" style="--card-accent: var(--blue);">
+      <dt class="stat-label">Upcoming</dt>
+      <dd class="stat-num">{{ sessions|length }}</dd>
+    </div>
+    <div class="stat-card" style="--card-accent: var(--green);">
+      <dt class="stat-label">Today</dt>
+      <dd class="stat-num">{{ today_count }}</dd>
+    </div>
+    {% if role == 'instructor' %}
+    <div class="stat-card" style="--card-accent: var(--purple);">
+      <dt class="stat-label">Trainees</dt>
+      <dd class="stat-num">{{ trainee_count }}</dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  {# ── Filter bar ── #}
+  <div class="filter-bar" role="group" aria-label="Filter sessions by status">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="scheduled">Scheduled</button>
+    <button class="filter-btn" data-filter="in_progress">In progress</button>
+    <button class="filter-btn" data-filter="pending">Pending</button>
+    <button class="filter-btn" data-filter="completed">Completed</button>
+    <span class="filter-spacer"></span>
+    <span class="session-count" id="session-count" aria-live="polite">
+      {{ sessions|length }} session{{ sessions|length|pluralize }}
+    </span>
+  </div>
+
+  {# ── Sessions grouped by date ── #}
+  {% regroup sessions by date as day_list %}
+
+  <div id="session-list">
+    {% for day in day_list %}
+    <section
+      class="day-group"
+      data-date="{{ day.grouper|date:'Y-m-d' }}"
+      aria-label="{{ day.grouper|date:'l, F j' }}"
+    >
+      <div class="day-heading" aria-hidden="true">
+        <span class="day-dow">{{ day.grouper|date:"D" }}</span>
+        <span class="day-full">{{ day.grouper|date:"F j, Y" }}</span>
+        {% if day.grouper|date:"Y-m-d" == today_str %}
+          <span class="today-tag">Today</span>
+        {% endif %}
+        <span class="day-rule"></span>
+      </div>
+
+      {% for session in day.list %}
+      <article
+        class="session-card status-{{ session.status }}"
+        data-status="{{ session.status }}"
+        aria-label="{{ session.slot.label|default:'Session' }}, {{ session.get_status_display|default:'Pending' }}"
+      >
+        <div class="session-body">
+          <p class="session-slot">{{ session.slot.label|default:"Session" }}</p>
+          <ul class="session-chips">
+            {% if session.vehicle %}
+            <li class="chip">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 9h10M2 11h12M4 6l1.5-3h5L12 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="4.5" cy="12.5" r="1.5" fill="currentColor"/>
+                <circle cx="11.5" cy="12.5" r="1.5" fill="currentColor"/>
+              </svg>
+              {{ session.vehicle }}
+            </li>
+            {% endif %}
+            {% if session.track %}
+            <li class="chip">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2C5.79 2 4 3.79 4 6c0 3.5 4 8 4 8s4-4.5 4-8c0-2.21-1.79-4-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                <circle cx="8" cy="6" r="1.5" fill="currentColor"/>
+              </svg>
+              {{ session.track }}
+            </li>
+            {% endif %}
+            {% if role == 'trainee' and session.instructor %}
+            <li class="chip">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              {{ session.instructor }}
+            </li>
+            {% endif %}
+            {% if role == 'instructor' and session.trainee %}
+            <li class="chip">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              {{ session.trainee }}
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <aside class="session-aside">
+          <span class="status-badge badge-{{ session.status }}" role="status">
+            {{ session.get_status_display|default:"Pending" }}
+          </span>
+        </aside>
+      </article>
+      {% endfor %}
+
+    </section>
+    {% endfor %}
+  </div>
+
+  <p class="no-results" id="no-results" aria-live="polite">No matching sessions</p>
+
+  {% else %}
+
+  <div class="empty-card" role="status">
+    <span class="empty-label">No sessions</span>
+    <p>Nothing scheduled yet — check back later.</p>
+  </div>
+
+  {% endif %}
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var filterBtns = document.querySelectorAll('.filter-btn');
+  var cards      = document.querySelectorAll('.session-card');
+  var groups     = document.querySelectorAll('.day-group');
+  var countEl    = document.getElementById('session-count');
+  var noResults  = document.getElementById('no-results');
+
+  if (!filterBtns.length) return;
+
+  function applyFilter(filter) {
+    var visible = 0;
+
+    cards.forEach(function (card) {
+      var match = filter === 'all' || card.dataset.status === filter;
+      card.hidden = !match;
+      if (match) visible++;
+    });
+
+    groups.forEach(function (group) {
+      var hasVisible = Array.from(
+        group.querySelectorAll('.session-card')
+      ).some(function (c) { return !c.hidden; });
+      group.hidden = !hasVisible;
+    });
+
+    if (countEl) {
+      countEl.textContent = visible + (visible === 1 ? ' session' : ' sessions');
+    }
+
+    if (noResults) {
+      noResults.classList.toggle('visible', visible === 0);
+    }
+  }
+
+  filterBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      filterBtns.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      applyFilter(btn.dataset.filter);
+    });
+  });
+}());
+</script>
+{% endblock %}
+

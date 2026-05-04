@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Slot Preferences — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'PREFERENCES';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 160px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    transform: translateY(-1px);
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Two-col layout ── */
+  .pref-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .pref-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Section tag ── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 4px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+
+  /* ── Card ── */
+  .pref-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .pref-card-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pref-card-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .pref-card-desc strong {
+    color: var(--text-sec);
+    font-weight: 500;
+  }
+
+  /* ── Sortable list ── */
+  .slot-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .slot-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: default;
+    transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+  }
+  .slot-item:hover {
+    border-color: rgba(250, 204, 21, 0.25);
+    background: rgba(250, 204, 21, 0.03);
+  }
+  .slot-item.sortable-ghost {
+    opacity: 0.35;
+  }
+  .slot-item.sortable-chosen {
+    border-color: rgba(250, 204, 21, 0.4);
+    background: rgba(250, 204, 21, 0.05);
+  }
+  .drag-handle {
+    color: var(--text-muted);
+    cursor: grab;
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+    padding: 2px 4px;
+  }
+  .drag-handle:active { cursor: grabbing; }
+  .slot-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+  .slot-label-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-sec);
+    flex: 1;
+  }
+
+  /* ── Submit button ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  /* ── Info card ── */
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .info-card-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .info-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .info-list li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--yellow);
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+  .info-list li strong {
+    color: var(--text-sec);
+    font-weight: 500;
+  }
+
+  .info-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  /* ── All slots reference list ── */
+  .all-slots-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .all-slots-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+  .slot-badge {
+    display: inline-block;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    font-family: 'DM Sans', sans-serif;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Slot Preferences</h1>
+
+  {# ── Action Bar ── #}
+  <div class="action-bar">
+    <a href="{% url 'scheduling:my_schedule' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back to My Schedule
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ── Two-column layout ── #}
+  <div class="pref-grid">
+
+    {# ── Left: Drag-to-rank form ── #}
+    <div>
+      <p class="section-tag">Rank Your Slots</p>
+      <p class="section-heading">My Preferences</p>
+
+      <div class="pref-card">
+        <p class="pref-card-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          Drag to reorder
+        </p>
+        <p class="pref-card-desc">
+          Arrange the slots in your preferred order —
+          <strong>top = highest priority</strong>.
+          The scheduler tries your top choice first, then works down the list.
+        </p>
+
+        <form method="post" id="pref-form">
+          {% csrf_token %}
+          <ul class="slot-list" id="sortable-slots">
+            {% if current %}
+              {% for pref in current %}
+                <li class="slot-item" data-id="{{ pref.slot.id }}">
+                  <span class="drag-handle">⠿</span>
+                  <span class="slot-rank">{{ forloop.counter }}</span>
+                  <span class="slot-label-text">{{ pref.slot.label }}</span>
+                  <input type="hidden" name="slot_order" value="{{ pref.slot.id }}">
+                </li>
+              {% endfor %}
+            {% else %}
+              {% for slot in slots %}
+                <li class="slot-item" data-id="{{ slot.id }}">
+                  <span class="drag-handle">⠿</span>
+                  <span class="slot-rank">{{ forloop.counter }}</span>
+                  <span class="slot-label-text">{{ slot.label }}</span>
+                  <input type="hidden" name="slot_order" value="{{ slot.id }}">
+                </li>
+              {% endfor %}
+            {% endif %}
+          </ul>
+
+          <button type="submit" class="btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save Preferences
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {# ── Right: Info panel ── #}
+    <div>
+      <p class="section-tag">Reference</p>
+      <p class="section-heading">How It Works</p>
+
+      <div class="info-card">
+        <p class="info-card-title">Scheduling rules</p>
+        <ul class="info-list">
+          <li>The scheduler runs every night and assigns your session for the next day.</li>
+          <li>It tries your <strong>1st choice</strong> slot first.</li>
+          <li>If that slot is full, it checks the nearest available slot outward.</li>
+          <li>A slot is <strong>not guaranteed</strong> — it depends on resource availability.</li>
+          <li>Update your preferences any time before <strong>10 PM</strong> to affect tomorrow's schedule.</li>
+        </ul>
+
+        <hr class="info-divider">
+
+        <p class="info-card-title">All available slots</p>
+        <ul class="all-slots-list">
+          {% for slot in slots %}
+          <li>
+            <span class="slot-badge">{{ slot.slot_number }}</span>
+            {{ slot.label }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  </div>{# /pref-grid #}
+
+</div>{# /page-wrapper #}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script>
+  const list = document.getElementById('sortable-slots');
+
+  Sortable.create(list, {
+    handle: '.drag-handle',
+    animation: 150,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    onEnd: function () {
+      const items = list.querySelectorAll('li');
+      items.forEach((item, index) => {
+        item.querySelector('.slot-rank').textContent = index + 1;
+        item.querySelector('input[name="slot_order"]').value = item.dataset.id;
+      });
+    }
+  });
+</script>
+{% endblock %}

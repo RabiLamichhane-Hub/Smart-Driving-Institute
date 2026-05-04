@@ -1,15 +1,362 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Instructor</title>
-</head>
-<body>
-    <h1>Delete Instructor</h1>
-    <p>Are you sure you want to delete {{ instructor.first_name }} {{ instructor.last_name }}?</p>
-    <form method="POST">
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Instructor — Soch Driving Institute{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ──────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+
+  .page-wrapper::before {
+    content: 'DELETE';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page header ───────────────────────────── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ef4444;
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Delete card ───────────────────────────── */
+  .delete-card {
+    max-width: 520px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: rise 0.3s ease both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Danger strip ──────────────────────────── */
+  .card-danger-strip {
+    background: rgba(239, 68, 68, 0.08);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .strip-icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .strip-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: #ef4444;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .strip-text strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ef4444;
+    letter-spacing: 0.02em;
+  }
+
+  .strip-text span {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* ── Card body ─────────────────────────────── */
+  .card-body {
+    padding: 24px;
+  }
+
+  /* Instructor chip */
+  .instructor-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  .instructor-meta strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.01em;
+  }
+
+  .instructor-meta span {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* Warning text */
+  .warning-text {
+    font-size: 13px;
+    color: var(--text-sec);
+    line-height: 1.7;
+    border-left: 2px solid #ef4444;
+    padding-left: 14px;
+    margin-bottom: 20px;
+  }
+
+  .warning-text strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Consequences */
+  .consequences {
+    list-style: none;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .consequences li {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  .consequences li::before {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.5);
+    margin-top: 0.42em;
+    flex-shrink: 0;
+  }
+
+  /* Actions */
+  .card-actions {
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Ghost / Cancel */
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-sec);
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  /* Danger / Delete */
+  .btn-danger {
+    background: #ef4444;
+    color: #fff;
+  }
+
+  .btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+
+  /* ── Mobile ────────────────────────────────── */
+  @media (max-width: 640px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title   { font-size: 38px; }
+    .delete-card  { max-width: 100%; }
+    .card-actions { flex-direction: column-reverse; }
+    .btn          { justify-content: center; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page header -->
+  <p class="page-label">Instructors</p>
+  <h1 class="page-title">Delete Instructor</h1>
+
+  <hr class="section-divider">
+
+  <!-- Card -->
+  <div class="delete-card">
+
+    <!-- Danger strip -->
+    <div class="card-danger-strip">
+      <div class="strip-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="strip-text">
+        <strong>Irreversible Action</strong>
+        <span>This cannot be undone once confirmed</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+
+      <!-- Instructor chip -->
+      <div class="instructor-chip">
+        <div class="avatar">
+          {{ instructor.user.first_name|slice:":1" }}{{ instructor.user.last_name|slice:":1" }}
+        </div>
+        <div class="instructor-meta">
+          <strong>{{ instructor.user.first_name }} {{ instructor.user.last_name }}</strong>
+          <span>Instructor &nbsp;·&nbsp; {{ instructor.license_number|default:"No license on record" }}</span>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <p class="warning-text">
+        You are about to permanently delete
+        <strong>{{ instructor.user.first_name }} {{ instructor.user.last_name }}</strong>
+        from the system. All data tied to this instructor will be removed and cannot be recovered.
+      </p>
+
+      <!-- Consequences -->
+      <ul class="consequences">
+        <li>Instructor account and auto-generated login credentials will be removed</li>
+        <li>Lesson schedules assigned to this instructor will be affected</li>
+        <li>Training history and associated records may be lost</li>
+      </ul>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="card-actions">
+      <a href="{% url 'instructors:instructor_list' %}" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Cancel
+      </a>
+      <form method="POST" style="display: inline;">
         {% csrf_token %}
-        <button type="submit">Yes, Delete</button>
-    </form>
-    <a href="{% url 'instructors:instructor_list' %}">Cancel</a>
-</body>
-</html>
+        <button type="submit" class="btn btn-danger">
+          <svg viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+          </svg>
+          Yes, Delete Instructor
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

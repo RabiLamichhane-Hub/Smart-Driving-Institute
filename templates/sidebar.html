@@ -1,37 +1,331 @@
-<div class="sidebar">
-    <h2 class="logo">SDIMS</h2>
+{% load static %}
 
-    <ul class="menu">
+<aside class="sdims-sidebar" id="sdimsSidebar">
 
-        <!-- Dashboard (role-based) -->
-        <li>
-            {% if user.role == 'admin' %}
-                <a href="{% url 'homesandall:admin_dashboard' %}">Dashboard</a>
-            {% elif user.role == 'instructor' %}
-                <a href="{% url 'homesandall:instructor_dashboard' %}">Dashboard</a>
-            {% elif user.role == 'trainee' %}
-                <a href="{% url 'homesandall:trainee_dashboard' %}">Dashboard</a>
-            {% else %}
-                <a href="#">Dashboard</a>
-            {% endif %}
-        </li>
+  <!-- Ghost BG Text -->
+  <span class="sidebar-ghost">DRIVE</span>
 
-        <!-- TRAINEES (admin + instructor only) -->
-        {% if user.role == 'admin' or user.role == 'instructor' %}
-        <li>
-            <a href="{% url 'trainees:trainee_list' %}">Trainees</a>
-        </li>
-        {% endif %}
+  <!-- ── Brand ─────────────────────────────────── -->
+  <div class="sidebar-brand">
+    <div class="sidebar-logo-wrap">
+      <img src="{% static 'images/Soch Driving Institute.png' %}"
+           alt="Soch Driving Institute logo"
+           class="sidebar-logo-img">
+    </div>
+    <div class="sidebar-brand-text">
+      <span class="sidebar-institute-name">Soch Driving Institute</span>
+      <span class="sidebar-tagline">Drive Smart. Drive Safe.</span>
+    </div>
+  </div>
 
-        <!-- COURSES (everyone can see) -->
-        <li>
-            <a href="{% url 'courses:course_list' %}">Courses</a>
-        </li>
+  <!-- ── Menu ──────────────────────────────────── -->
+  <ul class="sidebar-menu">
 
-        <!-- Others (unchanged for now) -->
-        <li><a href="{% url 'instructors:instructor_list' %}">Instructors</a></li>
-        <li><a href="#">Schedules</a></li>
-        <li><a href="#">Payments</a></li>
+    <li class="sidebar-section-label">Main</li>
 
-    </ul>
-</div>
+    <!-- Dashboard (role-based URL) -->
+    <li class="sidebar-item">
+      {% if user.role == 'admin' %}
+        <a href="{% url 'homesandall:admin_dashboard' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+      {% elif user.role == 'instructor' %}
+        <a href="{% url 'homesandall:instructor_dashboard' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}">
+      {% elif user.role == 'trainee' %}
+        <a href="{% url 'homesandall:trainee_dashboard' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'trainee_dashboard' %}active{% endif %}">
+      {% else %}
+        <a href="#" class="sidebar-link">
+      {% endif %}
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Dashboard</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Courses — everyone sees this -->
+    <li class="sidebar-item">
+      <a href="{% url 'courses:course_list' %}"
+         class="sidebar-link {% if 'course' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Courses</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Trainees — admin + instructor only -->
+    {% if user.role == 'admin' or user.role == 'instructor' %}
+    <li class="sidebar-item">
+      <a href="{% url 'trainees:trainee_list' %}"
+         class="sidebar-link {% if 'trainee' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Trainees</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- Instructors — admin sees full list; trainee sees browse view -->
+    {% if user.role == 'admin' %}
+    <li class="sidebar-item">
+      <a href="{% url 'instructors:instructor_list' %}"
+         class="sidebar-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" opacity=".4"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Instructors</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+    {% elif user.role == 'trainee' %}
+    <li class="sidebar-item">
+      <a href="{% url 'instructors:instructor_list' %}"
+         class="sidebar-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" opacity=".4"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Instructors</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- Vehicles — admin + instructor only -->
+    {% if user.role == 'admin' or user.role == 'instructor' %}
+    <li class="sidebar-item">
+      <a href="{% url 'vehicles:vehicles_list' %}"
+         class="sidebar-link {% if 'vehicle' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="2"/>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Vehicles</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- ── Instructor-only section ──────────────── -->
+    {% if user.role == 'instructor' %}
+
+    <li class="sidebar-section-label">Operations</li>
+
+    <!-- Schedules -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:session_list' %}"
+         class="sidebar-link {% if 'scheduling' in request.resolver_match.namespace or 'schedule' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Schedules</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Add Expense -->
+    <li class="sidebar-item">
+      <a href="{% url 'accounting:add_expense' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'add_expense' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Add Expense</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    {% endif %}
+
+    <!-- ── Trainee-only section ───────────────── -->
+    {% if user.role == 'trainee' %}
+
+    <li class="sidebar-section-label">My Training</li>
+
+    <!-- My Schedule -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:my_schedule' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'my_schedule' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">My Schedule</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Set Preferences -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:preferences' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'preferences' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Set Preferences</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Take Mock Test -->
+    <li class="sidebar-item">
+      <a href="{% url 'license_mocktest:mocktest' %}"
+         class="sidebar-link {% if 'mocktest' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Take Mock Test</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    {% endif %}
+
+    <!-- ── Admin-only section ─────────────────── -->
+    {% if user.role == 'admin' %}
+
+    <li class="sidebar-section-label">Operations</li>
+
+    <!-- Schedules -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:session_list' %}"
+         class="sidebar-link {% if 'scheduling' in request.resolver_match.namespace or 'schedule' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Schedules</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Payments -->
+    <li class="sidebar-item">
+      <a href="{% url "accounting:fee_overview" %}"
+         class="sidebar-link {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Payments</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Expenses -->
+    <li class="sidebar-item">
+      <a href="{% url "accounting:expense_list" %}"
+         class="sidebar-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Expenses</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    {% endif %}
+
+  </ul>
+
+  <!-- ── User Footer ────────────────────────────── -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">
+        {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}
+      </div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-user-name">{{ user.first_name }} {{ user.last_name }}</span>
+        <span class="sidebar-user-role">{{ user.role|capfirst }}</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer-actions">
+      <!-- Home -->
+      <a href="{% url 'homesandall:index' %}" class="sidebar-icon-btn" title="Public Homepage">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </a>
+      <!-- Logout -->
+      <form method="post" action="{% url 'accounts:logout' %}" style="display:contents;">
+        {% csrf_token %}
+        <button type="submit" class="sidebar-icon-btn sidebar-icon-btn--logout" title="Log out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+</aside>
+
+<!-- Mobile Toggle -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+  <span></span><span></span><span></span>
+</button>

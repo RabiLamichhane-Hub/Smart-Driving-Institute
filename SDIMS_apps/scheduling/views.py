@@ -161,7 +161,7 @@ def my_schedule_view(request):
 # 3. Session List View  (supervisor / admin)
 
 @login_required
-@role_required(['admin', 'supervisor'])
+@role_required(['admin', 'supervisor', 'instructor'])
 def session_list_view(request):
     """
     Full paginated session list with filters for date, status, slot, trainee type.

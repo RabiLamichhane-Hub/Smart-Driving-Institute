@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from SDIMS_apps.trainees.models import Trainee
 from .models import FeeRecord, Expense
 from .forms import PaymentForm, ExpenseForm
+from django.core.exceptions import PermissionDenied
 
 
 @login_required
@@ -31,7 +32,7 @@ def add_payment(request, pk):
             try:
                 payment.save()
                 messages.success(request, "Payment recorded successfully.")
-                return redirect('trainees:trainee_detail', trainee_id=trainee.pk)
+                return redirect('trainees:details', pk = trainee.pk)
             except ValidationError as e:
                 messages.error(request, e.message)
             except Exception as e:
@@ -92,3 +93,40 @@ def fee_overview(request):
         'fee_records': fee_records,
     }
     return render(request, 'fee_overview.html', context)
+
+@login_required
+def payment_history(request, trainee_id):
+    """
+    Show the full payment history for a trainee's fee record.
+    - The trainee themselves can view their own history.
+    - Staff / superusers can view any trainee's history.
+    """
+    trainee = get_object_or_404(Trainee, pk=trainee_id)
+ 
+    # Permission check: only the trainee or staff may view
+    is_own   = hasattr(request.user, 'trainee') and request.user.trainee == trainee
+    is_staff = request.user.is_staff or request.user.is_superuser
+    if not (is_own or is_staff):
+        raise PermissionDenied
+ 
+    # Grab the fee record (may not exist if trainee has no course yet)
+    fee_record = FeeRecord.objects.filter(trainee=trainee).select_related('trainee').first()
+ 
+    payments = fee_record.payments.all().order_by('-date') if fee_record else []
+    total_fee = fee_record.total_fee if fee_record else 0
+    discount = fee_record.discount_amount if fee_record else 0
+    final_fee = total_fee - discount
+    paid = sum(p.amount for p in payments)
+    remaining = final_fee - paid
+ 
+    context = {
+        'trainee':    trainee,
+        'fee_record': fee_record,
+        'payments':   payments,
+        'total_fee':  total_fee,
+        'discount':   discount,
+        'final_fee':  final_fee,
+        'paid':       paid,
+        'remaining':  remaining,
+    }
+    return render(request, 'payment_history.html', context)

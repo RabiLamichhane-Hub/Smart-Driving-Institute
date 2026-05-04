@@ -97,7 +97,7 @@ def admin_dashboard(request):
 # ---------------------------------------------------------------------------
 
 @login_required
-@role_required(['instructor'])
+@role_required(['instructor', 'supervisor'])
 def instructor_dashboard(request):
     if not hasattr(request.user, 'instructor'):
         return redirect('homesandall:index')

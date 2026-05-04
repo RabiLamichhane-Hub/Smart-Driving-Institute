@@ -9,4 +9,5 @@ urlpatterns = [
     path('add-expense/', views.add_expense, name='add_expense'),
     path('expenses/', views.expense_list, name='expense_list'),
     path('', views.fee_overview, name='fee_overview'),
+    path('history/<int:trainee_id>/', views.payment_history, name='payment_history'),
 ]

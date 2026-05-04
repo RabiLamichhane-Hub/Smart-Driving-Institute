@@ -1,92 +1,312 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Trainee</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-    <h2>Edit Trainee</h2>
-    <p>
-        Editing: <strong>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</strong>
-    </p>
+{% block title %}Edit Trainee — SDIMS{% endblock %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+{% block extra_css %}
+<style>
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    max-width: 860px;
+  }
+  .page-wrapper::before {
+    content: 'TRAINEE';
+    position: absolute;
+    top: 0;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    color: rgba(255,255,255,0.028);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
 
-    <form method="POST">
-        {% csrf_token %}
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .page-subtitle strong { color: var(--text-sec); font-weight: 500; }
 
-        <!-- Trainee fields -->
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(250,204,21,0.18); }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    margin-bottom: 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--yellow-focus); }
+  .form-group select option { background: var(--card); }
+  .form-group .errorlist { list-style: none; font-size: 12px; color: #f87171; }
+
+  .billing-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .billing-row:last-of-type { border-bottom: none; }
+  .billing-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .billing-amount { color: var(--yellow); font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .billing-final {
+    color: var(--yellow);
+    font-size: 22px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  .course-badge {
+    background: rgba(250,204,21,0.08);
+    border: 1px solid rgba(250,204,21,0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    font-weight: 500;
+  }
+
+  .no-course { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 13px; }
+  .no-course span {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 6px;
+  }
+
+  .discount-wrapper { display: flex; align-items: center; gap: 8px; }
+  .discount-wrapper input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 8px 12px;
+    width: 130px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .discount-wrapper input:focus { border-color: var(--yellow-focus); }
+  .currency-prefix { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+  .btn-primary {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 11px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 36px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .page-wrapper::before { font-size: 120px; }
+    .card { padding: 20px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <p class="page-label">Trainee Management</p>
+  <h1 class="page-title">Edit Trainee</h1>
+  <p class="page-subtitle">Editing: <strong>{{ trainee.user.first_name }} {{ trainee.user.last_name }}</strong></p>
+
+  <div class="action-bar">
+    <button type="submit" form="edit-trainee-form" class="btn-primary">Save Changes</button>
+    <a href="{% url 'trainees:trainee_list' %}" class="btn-ghost">Cancel</a>
+  </div>
+
+  <hr class="section-divider">
+
+  <form method="POST" id="edit-trainee-form">
+    {% csrf_token %}
+
+    <div class="card">
+      <div class="card-title">Trainee Details</div>
+      <div class="form-grid">
         {% for field in trainee_form %}
-            <div>
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.errors %}
-                    <span>{{ field.errors }}</span>
-                {% endif %}
+          {% if field.name != 'discount' %}
+            <div class="form-group {% if forloop.last %}full{% endif %}">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <ul class="errorlist">
+                  {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+              {% endif %}
             </div>
+          {% endif %}
         {% endfor %}
+      </div>
+    </div>
 
-        <hr>
+    <div class="card">
+      <div class="card-title">Course Billing</div>
+      {% if trainee.course %}
+        <div class="billing-row">
+          <span class="billing-label">Course</span>
+          <span class="course-badge">{{ trainee.course.course_name }}</span>
+        </div>
+        <div class="billing-row">
+          <span class="billing-label">Course Fee</span>
+          <span class="billing-amount">Rs. <span id="course_fee">{{ course_fee }}</span></span>
+        </div>
+        <div class="billing-row">
+          <span class="billing-label">Discount</span>
+          <div class="discount-wrapper">
+            <span class="currency-prefix">Rs.</span>
+            {{ trainee_form.discount }}
+            {% if trainee_form.discount.errors %}
+              <ul class="errorlist">
+                {% for error in trainee_form.discount.errors %}<li>{{ error }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+        <div class="billing-row">
+          <span class="billing-label">Final Fee</span>
+          <span class="billing-final">Rs. <span id="final_fee">{{ course_fee }}</span></span>
+        </div>
+      {% else %}
+        <div class="no-course">
+          <span>No Course Assigned</span>
+          Assign a course to this trainee to enable billing.
+        </div>
+      {% endif %}
+    </div>
 
-        <!-- Billing Section -->
-        <h3>Course Billing</h3>
+  </form>
+</div>
+{% endblock %}
 
-        {% if trainee.course %}
-            <p><strong>Course:</strong> {{ trainee.course.course_name }}</p>
-
-            <p>
-                <strong>Course Fee:</strong>
-                Rs. <span id="course_fee">{{ course_fee }}</span>
-            </p>
-
-            <p>
-                <strong>Discount:</strong>
-                {{ trainee_form.discount }}
-                {% if trainee_form.discount.errors %}
-                    <span>{{ trainee_form.discount.errors }}</span>
-                {% endif %}
-            </p>
-
-            <p>
-                <strong>Final Fee:</strong>
-                Rs. <span id="final_fee">{{ course_fee }}</span>
-            </p>
-
-        {% else %}
-            <p>No course assigned.</p>
-        {% endif %}
-
-        <br>
-
-        <button type="submit">Save Changes</button>
-        <a href="{% url 'trainees:trainee_list' %}">Cancel</a>
-
-    </form>
-
-    <!-- JS for live calculation -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const discountInput = document.getElementById('id_discount');
-            const courseFee = parseFloat(document.getElementById('course_fee').innerText) || 0;
-            const finalFee = document.getElementById('final_fee');
-
-            function updateFinal() {
-                const discount = parseFloat(discountInput.value) || 0;
-                const final = Math.max(courseFee - discount, 0);
-                finalFee.innerText = final.toFixed(2);
-            }
-
-            if (discountInput) {
-                discountInput.addEventListener('input', updateFinal);
-            }
-
-        });
-    </script>
-
-</body>
-</html>
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const discountInput = document.getElementById('id_discount');
+    const courseFeeEl   = document.getElementById('course_fee');
+    const finalFeeEl    = document.getElementById('final_fee');
+    if (!discountInput || !courseFeeEl) return;
+    const courseFee = parseFloat(courseFeeEl.innerText) || 0;
+    function updateFinal() {
+      const discount = parseFloat(discountInput.value) || 0;
+      finalFeeEl.innerText = Math.max(courseFee - discount, 0).toFixed(2);
+    }
+    discountInput.addEventListener('input', updateFinal);
+    updateFinal();
+  });
+</script>
+{% endblock %}

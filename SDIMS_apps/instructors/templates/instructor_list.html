@@ -57,68 +57,74 @@
     {% for instructor in instructors %}
     <div class="instructor-card">
 
-      <!-- Top accent bar -->
-      <!-- rendered via ::before in CSS -->
+        <!-- Card clickable area links to detail -->
+        <a href="{% url 'instructors:instructor_detail' instructor.pk %}" class="card-body-link">
 
-      <!-- Card top: avatar + identity + status -->
-      <div class="card-top">
+          <!-- Card top: avatar + identity + status -->
+          <div class="card-top">
 
-        <div class="avatar">
-          {{ instructor.user.first_name|first|upper }}{{ instructor.user.last_name|first|upper }}
+            <div class="avatar">
+              {% if instructor.images %}
+                <img src="{{ instructor.images.url }}" alt="{{ instructor.user.first_name }} {{ instructor.user.last_name }}">
+              {% else %}
+                {{ instructor.user.first_name|first|upper }}{{ instructor.user.last_name|first|upper }}
+              {% endif %}
+            </div>
+
+            <div class="card-identity">
+              <span class="instructor-name">
+                {{ instructor.user.first_name }} {{ instructor.user.last_name }}
+              </span>
+              <span class="instructor-email">{{ instructor.user.email }}</span>
+            </div>
+
+            <span class="status-pill status-{{ instructor.get_status_display|lower|slugify }}">
+              {{ instructor.get_status_display }}
+            </span>
+
+          </div>
+
+          <!-- Divider -->
+          <div class="card-divider"></div>
+
+          <!-- Meta grid -->
+          <div class="card-meta">
+
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6 6l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>
+                Phone
+              </span>
+              <span class="meta-value">{{ instructor.user.phone }}</span>
+            </div>
+
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                License No.
+              </span>
+              <span class="meta-value meta-license">{{ instructor.license_number }}</span>
+            </div>
+
+          </div>
+
+        </a><!-- end card-body-link -->
+
+        <!-- Admin actions — outside the <a> so they navigate independently -->
+        {% if request.user.role == 'admin' %}
+        <div class="card-actions">
+          <a href="{% url 'instructors:instructor_update' instructor.pk %}" class="btn-ghost btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </a>
+          <a href="{% url 'instructors:instructor_delete' instructor.pk %}" class="btn-danger btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </a>
         </div>
-
-        <div class="card-identity">
-          <span class="instructor-name">
-            {{ instructor.user.first_name }} {{ instructor.user.last_name }}
-          </span>
-          <span class="instructor-email">{{ instructor.user.email }}</span>
-        </div>
-
-        <span class="status-pill status-{{ instructor.get_status_display|lower|slugify }}">
-          {{ instructor.get_status_display }}
-        </span>
+        {% endif %}
 
       </div>
-
-      <!-- Divider -->
-      <div class="card-divider"></div>
-
-      <!-- Meta grid -->
-      <div class="card-meta">
-
-        <div class="meta-item">
-          <span class="meta-label">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6 6l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>
-            Phone
-          </span>
-          <span class="meta-value">{{ instructor.user.phone }}</span>
-        </div>
-
-        <div class="meta-item">
-          <span class="meta-label">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            License No.
-          </span>
-          <span class="meta-value meta-license">{{ instructor.license_number }}</span>
-        </div>
-
-      </div>
-
-      <!-- Admin actions -->
-      {% if request.user.role == 'admin' %}
-      <div class="card-actions">
-        <a href="{% url 'instructors:instructor_update' instructor.pk %}" class="btn-ghost btn-sm">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Edit
-        </a>
-        <a href="{% url 'instructors:instructor_delete' instructor.pk %}" class="btn-danger btn-sm">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          Delete
-        </a>
-      </div>
-      {% endif %}
-
-    </div>
     {% endfor %}
 
   </div>
@@ -327,12 +333,11 @@
     background: #1a1a1a;
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 12px;
-    padding: 22px 22px 18px;
-    position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: border-color 0.22s ease, transform 0.22s ease;
+    position: relative;
   }
 
   .instructor-card::before {
@@ -344,6 +349,8 @@
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.28s ease;
+    z-index: 1;
+    pointer-events: none;
   }
 
   .instructor-card:hover {
@@ -353,6 +360,15 @@
 
   .instructor-card:hover::before {
     transform: scaleX(1);
+  }
+
+  /* Clickable body area — the <a> that links to detail */
+  .card-body-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    padding: 22px 22px 0;
+    cursor: pointer;
   }
 
   /* ── Card top ── */
@@ -378,6 +394,14 @@
     letter-spacing: 0.04em;
     color: #facc15;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
   }
 
   .card-identity {
@@ -438,6 +462,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 14px;
     margin-bottom: 18px;
+    padding-bottom: 6px;
   }
 
   .meta-item {
@@ -483,7 +508,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding-top: 14px;
+    padding: 12px 22px 16px;
     border-top: 1px solid rgba(255,255,255,0.06);
     margin-top: auto;
   }

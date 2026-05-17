@@ -1,15 +1,756 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <form method="post">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button type="submit">Add Vehicle</button>
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Vehicle — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    max-width: 900px;
+  }
+
+  .page-wrapper::before {
+    content: 'VEHICLE';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(90px, 18vw, 200px);
+    color: rgba(255, 255, 255, 0.028);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Back link ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 28px;
+    transition: color 0.18s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .back-link:hover { color: var(--yellow); }
+
+  /* ── Page header ── */
+  .page-header {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 28px;
+  }
+
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    border-radius: 8px;
+    padding: 10px 22px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, border-color 0.18s, color 0.18s;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: var(--yellow);
+    color: #0a0a0a;
+  }
+
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 400;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250,204,21,0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Form layout ── */
+  .add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Form cards ── */
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 26px;
+    transition: border-color 0.2s;
+  }
+
+  .form-card:focus-within {
+    border-color: rgba(250,204,21,0.18);
+  }
+
+  .form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .form-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  .form-card-tag {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(250,204,21,0.7);
+    margin-bottom: 2px;
+  }
+
+  .form-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin: 0;
+    line-height: 1;
+  }
+
+  /* ── Fields grid ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-full { grid-column: 1 / -1; }
+
+  /* ── Labels ── */
+  .field-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  /* ── Inputs ── */
+  .add-form input[type="text"],
+  .add-form input[type="number"],
+  .add-form input[type="date"],
+  .add-form select,
+  .add-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    outline: none;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .add-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  .add-form input:focus,
+  .add-form select:focus,
+  .add-form textarea:focus {
+    border-color: var(--yellow-focus);
+  }
+
+  .add-form input::placeholder,
+  .add-form textarea::placeholder {
+    color: rgba(255,255,255,0.18);
+  }
+
+  .add-form input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.4);
+    cursor: pointer;
+  }
+
+  /* ── Checkbox (dual control) ── */
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+  }
+
+  .checkbox-row:has(input:checked) {
+    border-color: rgba(250,204,21,0.35);
+    background: rgba(250,204,21,0.04);
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--yellow);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .checkbox-row span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text-sec);
+  }
+
+  /* ── File input ── */
+  .add-form input[type="file"] {
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-sec);
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+
+  .add-form input[type="file"]::file-selector-button {
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 5px;
+    color: var(--yellow);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 4px 10px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background 0.18s;
+  }
+
+  .add-form input[type="file"]::file-selector-button:hover {
+    background: rgba(250,204,21,0.18);
+  }
+
+  /* ── Photo upload ── */
+  .photo-upload-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .photo-preview-box {
+    width: 90px;
+    height: 90px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px dashed rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: border-color 0.2s, border-style 0.2s;
+  }
+
+  .photo-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 9px;
+  }
+
+  .photo-upload-right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  /* ── Field error ── */
+  .field-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    color: #f87171;
+  }
+
+  .field-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  /* ── Form footer actions ── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-wrapper::before { display: none; }
+    .fields-grid { grid-template-columns: 1fr; }
+    .field-full { grid-column: 1; }
+    .action-bar { flex-direction: column; }
+    .form-footer { flex-direction: column; }
+    .btn { justify-content: center; }
+    .photo-upload-wrap { flex-direction: column; align-items: flex-start; }
+  }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Back link -->
+  <a href="{% url 'vehicles:vehicles_list' %}" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Fleet
+  </a>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <p class="page-label">Fleet Management</p>
+    <h1 class="page-title">Add Vehicle</h1>
+  </div>
+
+  <!-- Action bar (Cancel only) -->
+  <div class="action-bar">
+    <a href="{% url 'vehicles:vehicles_list' %}" class="btn btn-ghost">Cancel</a>
+  </div>
+
+  <hr class="section-divider">
+
+  <form id="add-vehicle-form" method="POST" enctype="multipart/form-data" class="add-form" novalidate>
+    {% csrf_token %}
+
+    <!-- ── Basic Info ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">Step 1</span>
+          <h2 class="form-card-title">Basic Info</h2>
+        </div>
+      </div>
+
+      <div class="fields-grid">
+
+        <!-- Name -->
+        <div class="field-group field-full">
+          <label class="field-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.name.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Brand -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.brand.id_for_label }}">{{ form.brand.label }}</label>
+          {{ form.brand }}
+          {% if form.brand.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.brand.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Model -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.model.id_for_label }}">{{ form.model.label }}</label>
+          {{ form.model }}
+          {% if form.model.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.model.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Vehicle Type -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.vehicle_type.id_for_label }}">{{ form.vehicle_type.label }}</label>
+          {{ form.vehicle_type }}
+          {% if form.vehicle_type.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.vehicle_type.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Transmission -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.transmission.id_for_label }}">{{ form.transmission.label }}</label>
+          {{ form.transmission }}
+          {% if form.transmission.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.transmission.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Fuel Type -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.fuel_type.id_for_label }}">{{ form.fuel_type.label }}</label>
+          {{ form.fuel_type }}
+          {% if form.fuel_type.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.fuel_type.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Status -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+          {{ form.status }}
+          {% if form.status.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.status.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Dual Control -->
+        <div class="field-group">
+          <label class="field-label">{{ form.dual_control.label }}</label>
+          <label class="checkbox-row">
+            {{ form.dual_control }}
+            <span>Vehicle has dual controls</span>
+          </label>
+          {% if form.dual_control.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.dual_control.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Registration Details ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">Step 2</span>
+          <h2 class="form-card-title">Registration Details</h2>
+        </div>
+      </div>
+
+      <div class="fields-grid">
+
+        <!-- Registration Number -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.registration_number.id_for_label }}">{{ form.registration_number.label }}</label>
+          {{ form.registration_number }}
+          {% if form.registration_number.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.registration_number.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Bluebook Number -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.bluebook_number.id_for_label }}">{{ form.bluebook_number.label }}</label>
+          {{ form.bluebook_number }}
+          {% if form.bluebook_number.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.bluebook_number.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Engine Number -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.engine_number.id_for_label }}">{{ form.engine_number.label }}</label>
+          {{ form.engine_number }}
+          {% if form.engine_number.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.engine_number.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Chassis Number -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.chassis_number.id_for_label }}">{{ form.chassis_number.label }}</label>
+          {{ form.chassis_number }}
+          {% if form.chassis_number.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.chassis_number.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Service & Insurance ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">Step 3</span>
+          <h2 class="form-card-title">Service &amp; Insurance</h2>
+        </div>
+      </div>
+
+      <div class="fields-grid">
+
+        <!-- Last Service Date -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.last_service_date.id_for_label }}">{{ form.last_service_date.label }}</label>
+          {{ form.last_service_date }}
+          {% if form.last_service_date.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.last_service_date.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Insurance Expiry -->
+        <div class="field-group">
+          <label class="field-label" for="{{ form.insurance_expiry.id_for_label }}">{{ form.insurance_expiry.label }}</label>
+          {{ form.insurance_expiry }}
+          {% if form.insurance_expiry.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.insurance_expiry.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Vehicle Photo ── -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div>
+          <span class="form-card-tag">Step 4</span>
+          <h2 class="form-card-title">Vehicle Photo</h2>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+        <div class="photo-upload-wrap">
+
+          <div class="photo-preview-box" id="photo-preview-box">
+            <svg id="photo-placeholder-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <img id="photo-preview-img" src="" alt="Preview" style="display:none;">
+          </div>
+
+          <div class="photo-upload-right">
+            {{ form.image }}
+            <span class="field-hint">JPG, PNG or WEBP. Optional.</span>
+            {% if form.image.errors %}
+              <span class="field-error">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ form.image.errors|join:", " }}
+              </span>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Form footer ── -->
+    <div class="form-footer">
+      <button type="submit" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Add Vehicle
+      </button>
+      <a href="{% url 'vehicles:vehicles_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ── Select colour update ──
+  document.querySelectorAll('.add-form select').forEach(sel => {
+    const update = () => {
+      sel.style.color = sel.value ? 'var(--text-sec)' : 'var(--text-muted)';
+    };
+    update();
+    sel.addEventListener('change', update);
+  });
+
+  // ── Photo preview ──
+  const imageInput      = document.getElementById('id_image');
+  const previewImg      = document.getElementById('photo-preview-img');
+  const placeholderIcon = document.getElementById('photo-placeholder-icon');
+  const previewBox      = document.getElementById('photo-preview-box');
+
+  if (imageInput) {
+    imageInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          previewImg.src = e.target.result;
+          previewImg.style.display = 'block';
+          placeholderIcon.style.display = 'none';
+          previewBox.style.borderColor = 'rgba(250,204,21,0.4)';
+          previewBox.style.borderStyle = 'solid';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImg.style.display = 'none';
+        placeholderIcon.style.display = 'block';
+        previewBox.style.borderColor = 'rgba(255,255,255,0.15)';
+        previewBox.style.borderStyle = 'dashed';
+      }
+    });
+  }
+
+});
+</script>
+{% endblock %}

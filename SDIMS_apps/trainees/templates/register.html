@@ -31,7 +31,7 @@
     </div>
   {% endif %}
 
-  <form method="POST" class="register-form" novalidate>
+  <form method="POST" class="register-form" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
 
     <!-- ── Account Details ── -->
@@ -123,6 +123,37 @@
             <span class="field-error">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               {{ trainee_form.course.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Photo -->
+        <div class="field-group field-full">
+          <label class="field-label" for="{{ trainee_form.images.id_for_label }}">{{ trainee_form.images.label }}</label>
+          <div class="drop-zone" id="drop-zone">
+            <!-- Preview state (hidden by default) -->
+            <div class="drop-zone-preview" id="drop-zone-preview" style="display:none;">
+              <img id="photo-preview-img" src="" alt="Preview">
+              <button type="button" class="drop-zone-remove" id="drop-zone-remove" title="Remove photo">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <!-- Idle state -->
+            <div class="drop-zone-idle" id="drop-zone-idle">
+              <div class="drop-zone-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <p class="drop-zone-title">Drop photo here</p>
+              <p class="drop-zone-sub">or <span class="drop-zone-browse">browse files</span></p>
+              <p class="drop-zone-hint">JPG, PNG or WEBP · Optional</p>
+            </div>
+            <!-- Hidden real input -->
+            <div style="display:none;">{{ trainee_form.images }}</div>
+          </div>
+          {% if trainee_form.images.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.images.errors|join:", " }}
             </span>
           {% endif %}
         </div>
@@ -443,6 +474,140 @@
     cursor: pointer;
   }
 
+  /* ── Drag-and-drop photo upload ── */
+  .drop-zone {
+    position: relative;
+    width: 100%;
+    min-height: 140px;
+    border-radius: 10px;
+    background: #141414;
+    border: 1.5px dashed rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .drop-zone:hover,
+  .drop-zone.drop-zone--hover {
+    border-color: rgba(250,204,21,0.5);
+    background: rgba(250,204,21,0.04);
+  }
+
+  .drop-zone.drop-zone--has-file {
+    border-color: rgba(250,204,21,0.35);
+    border-style: solid;
+    min-height: 180px;
+  }
+
+  /* Idle content */
+  .drop-zone-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 28px 20px;
+    pointer-events: none;
+    user-select: none;
+    text-align: center;
+  }
+
+  .drop-zone-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 4px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .drop-zone:hover .drop-zone-icon,
+  .drop-zone.drop-zone--hover .drop-zone-icon {
+    border-color: rgba(250,204,21,0.3);
+    color: rgba(250,204,21,0.6);
+  }
+
+  .drop-zone-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    margin: 0;
+  }
+
+  .drop-zone-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.35);
+    margin: 0;
+  }
+
+  .drop-zone-browse {
+    color: #facc15;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .drop-zone-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.22);
+    margin: 0;
+  }
+
+  /* Preview state */
+  .drop-zone-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .drop-zone-preview img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    border-radius: 9px;
+  }
+
+  .drop-zone-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    pointer-events: auto;
+  }
+
+  .drop-zone-remove:hover {
+    background: rgba(248,113,113,0.85);
+    border-color: transparent;
+    color: #fff;
+  }
+
   /* ── Field error ── */
   .field-error {
     display: inline-flex;
@@ -632,6 +797,7 @@
     .field-full { grid-column: 1; }
     .form-actions { flex-direction: column; align-items: stretch; }
     .btn-lg { justify-content: center; text-align: center; }
+    .photo-upload-wrap { flex-direction: column; align-items: flex-start; }
   }
 </style>
 
@@ -639,6 +805,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
+  // ── Fee calculator ──
   const courseSelect       = document.getElementById('id_course');
   const discountInput      = document.getElementById('id_discount');
   const feeSummary         = document.getElementById('fee-summary');
@@ -682,6 +849,85 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (discountInput) {
     discountInput.addEventListener('input', updateFinalFee);
+  }
+
+  // ── Drag-and-drop photo upload ──
+  const dropZone       = document.getElementById('drop-zone');
+  const dropIdle       = document.getElementById('drop-zone-idle');
+  const dropPreview    = document.getElementById('drop-zone-preview');
+  const previewImg     = document.getElementById('photo-preview-img');
+  const removeBtn      = document.getElementById('drop-zone-remove');
+  const photoInput     = document.getElementById('id_images');
+
+  if (dropZone && photoInput) {
+
+    function applyFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        dropIdle.style.display    = 'none';
+        dropPreview.style.display = 'flex';
+        dropZone.classList.add('drop-zone--has-file');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearFile() {
+      photoInput.value  = '';
+      previewImg.src    = '';
+      dropPreview.style.display = 'none';
+      dropIdle.style.display    = 'flex';
+      dropZone.classList.remove('drop-zone--has-file');
+    }
+
+    // Click anywhere on zone → open file picker
+    dropZone.addEventListener('click', e => {
+      if (e.target === removeBtn || removeBtn.contains(e.target)) return;
+      photoInput.click();
+    });
+
+    // File picker change
+    photoInput.addEventListener('change', function () {
+      if (this.files && this.files[0]) applyFile(this.files[0]);
+    });
+
+    // Remove button
+    removeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      clearFile();
+    });
+
+    // Drag events
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('drop-zone--hover');
+      });
+    });
+
+    ['dragleave', 'dragend'].forEach(evt => {
+      dropZone.addEventListener(evt, e => {
+        if (!dropZone.contains(e.relatedTarget)) {
+          dropZone.classList.remove('drop-zone--hover');
+        }
+      });
+    });
+
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drop-zone--hover');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        // Transfer file to real input via DataTransfer
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        photoInput.files = dt.files;
+        applyFile(file);
+      }
+    });
   }
 
 });

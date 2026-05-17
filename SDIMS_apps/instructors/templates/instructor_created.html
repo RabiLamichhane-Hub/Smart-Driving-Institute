@@ -1,39 +1,410 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Instructor Registered{% endblock %}
+{% block title %}Instructor Registered — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+
+  .page-wrapper::before {
+    content: 'REGISTERED';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    color: rgba(255, 255, 255, 0.028);
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    user-select: none;
+  }
+
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 10px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* Credentials alert banner */
+  .credentials-banner {
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .credentials-banner svg {
+    flex-shrink: 0;
+    color: var(--yellow);
+  }
+
+  .credentials-banner p {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--yellow);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  /* Info grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .info-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+    transform: translateY(-3px);
+  }
+
+  .info-card-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 18px;
+  }
+
+  .info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-field-key {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .info-field-value {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  /* Credential card special styling */
+  .credential-card {
+    background: var(--card);
+    border: 1px solid var(--yellow-border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+
+  .credential-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .credential-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .credential-item:first-child {
+    padding-top: 0;
+  }
+
+  .credential-key {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .credential-value {
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--yellow);
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Status badge */
+  .status-badge {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    display: inline-block;
+  }
+
+  /* Avatar */
+  .instructor-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--yellow);
+    letter-spacing: 0.03em;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .instructor-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .instructor-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .instructor-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .instructor-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .instructor-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+    color: #000;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 640px) {
+    .page-wrapper {
+      padding: 28px 20px 60px;
+    }
+
+    .page-title {
+      font-size: 38px;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="page-wrapper">
 
-<h2>Instructor Registered Successfully</h2>
+  <p class="page-label">Instructors</p>
+  <h1 class="page-title">Instructor Registered</h1>
 
-<p><strong>Share these credentials with the Instructor. This page will not be shown again.</strong></p>
+  <div class="action-bar">
+    <a href="{% url 'instructors:instructor_list' %}" class="btn-ghost">
+      ← Back to Instructor List
+    </a>
+    <a href="{% url 'instructors:instructor_create' %}" class="btn-primary">
+      + Register Another
+    </a>
+  </div>
 
-<hr>
+  <hr class="section-divider">
 
-<!-- LOGIN -->
-<h3>Login Credentials</h3>
-<p><strong>Username:</strong> {{ username }}</p>
-<p><strong>Password:</strong> {{ password }}</p>
+  <!-- One-time credentials warning -->
+  <div class="credentials-banner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <p>Share these credentials with the instructor now — this page will not be shown again.</p>
+  </div>
 
-<hr>
+  <!-- Instructor identity -->
+  <div class="instructor-meta">
+    <div class="instructor-avatar">
+      {% if user.instructor.images %}
+        <img src="{{ user.instructor.images.url }}" alt="{{ user.first_name }} {{ user.last_name }}">
+      {% else %}
+        {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+      {% endif %}
+    </div>
+    <div class="instructor-meta-info">
+      <span class="instructor-name">{{ user.first_name }} {{ user.last_name }}</span>
+      <span class="instructor-subtitle">New Instructor · {{ user.instructor.get_status_display }}</span>
+    </div>
+  </div>
 
-<!-- PERSONAL INFO -->
-<h3>Personal Information</h3>
-<p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-<p><strong>Phone:</strong> {{ user.phone }}</p>
-<p><strong>Email:</strong> {{ user.email }}</p>
-<p><strong>Address:</strong> {{ user.address }}</p>
+  <!-- Login credentials -->
+  <p class="page-label" style="margin-bottom: 12px;">Login Credentials</p>
+  <div class="credential-card">
+    <div class="credential-item">
+      <span class="credential-key">Username</span>
+      <span class="credential-value">{{ username }}</span>
+    </div>
+    <div class="credential-item">
+      <span class="credential-key">Password</span>
+      <span class="credential-value">{{ password }}</span>
+    </div>
+  </div>
 
-<hr>
+  <hr class="section-divider">
 
-<!-- INSTRUCTOR INFO -->
-<h3>Instructor Details</h3>
-<p><strong>License Number:</strong> {{ user.instructor.license_number }}</p>
-<p><strong>Status:</strong> {{ user.instructor.get_status_display }}</p>
+  <!-- Info grid -->
+  <div class="info-grid">
 
-<hr>
+    <!-- Personal Information -->
+    <div class="info-card">
+      <p class="info-card-label">Personal Information</p>
+      <div class="info-row">
+        <div class="info-field">
+          <span class="info-field-key">Full Name</span>
+          <span class="info-field-value">{{ user.first_name }} {{ user.last_name }}</span>
+        </div>
+        <div class="info-field">
+          <span class="info-field-key">Phone</span>
+          <span class="info-field-value">{{ user.phone }}</span>
+        </div>
+        <div class="info-field">
+          <span class="info-field-key">Email</span>
+          <span class="info-field-value">{{ user.email }}</span>
+        </div>
+        <div class="info-field">
+          <span class="info-field-key">Address</span>
+          <span class="info-field-value">{{ user.address }}</span>
+        </div>
+      </div>
+    </div>
 
-<a href="{% url 'instructors:instructor_list' %}">← Back to Instructor List</a> |
-<a href="{% url 'instructors:instructor_create' %}">Register Another Instructor</a>
+    <!-- Instructor Details -->
+    <div class="info-card">
+      <p class="info-card-label">Instructor Details</p>
+      <div class="info-row">
+        <div class="info-field">
+          <span class="info-field-key">License Number</span>
+          <span class="info-field-value">{{ user.instructor.license_number }}</span>
+        </div>
+        <div class="info-field">
+          <span class="info-field-key">Status</span>
+          <span class="status-badge">{{ user.instructor.get_status_display }}</span>
+        </div>
+      </div>
+    </div>
 
+  </div>
+
+</div>
 {% endblock %}

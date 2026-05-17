@@ -1,0 +1,561 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vehicle Usage{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    padding: 32px 36px 48px;
+    overflow: hidden;
+  }
+
+  .page-wrapper::before {
+    content: 'USAGE';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 14vw, 160px);
+    color: rgba(255, 255, 255, 0.028);
+    position: absolute;
+    top: 0;
+    right: -8px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--yellow);
+    margin-bottom: 4px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  /* ── Summary grid ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .summary-most::before  { background: #4ade80; }
+  .summary-least::before { background: #f87171; }
+  .summary-total::before { background: var(--yellow); }
+
+  .summary-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .summary-most  .summary-icon { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.18); color: #4ade80; }
+  .summary-least .summary-icon { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); color: #f87171; }
+  .summary-total .summary-icon { background: var(--yellow-dim); border: 1px solid var(--yellow-border); color: var(--yellow); }
+
+  .summary-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .summary-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .summary-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .summary-sub {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* ── Two-column layout for chart + table ── */
+  .analytics-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 14px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Shared card style ── */
+  .chart-card,
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 18px 11px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.80);
+  }
+
+  /* ── Chart ── */
+  .chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .legend-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 4px;
+  }
+
+  .legend-completed { background: rgba(250, 204, 21, 0.85); }
+  .legend-booked    { background: rgba(59, 130, 246, 0.65); }
+
+  .legend-text {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .chart-wrap {
+    padding: 14px 16px;
+    height: 260px;
+  }
+
+  .chart-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* ── Table ── */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .usage-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .usage-table thead tr {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .usage-table th {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-muted);
+    padding: 11px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .usage-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s ease;
+  }
+
+  .usage-table tbody tr:last-child { border-bottom: none; }
+  .usage-table tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+
+  .usage-table td {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 11px 16px;
+    vertical-align: middle;
+  }
+
+  /* Row highlights */
+  .row-top    { background: rgba(74, 222, 128, 0.04); }
+  .row-top td { color: rgba(255, 255, 255, 0.78); }
+  .row-bottom { background: rgba(248, 113, 113, 0.04); }
+
+  .td-num {
+    color: rgba(255, 255, 255, 0.22) !important;
+    font-size: 11px !important;
+    font-weight: 300;
+    width: 28px;
+  }
+
+  .td-name { display: flex; flex-direction: column; gap: 1px; }
+
+  .veh-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+  }
+
+  .veh-nick {
+    font-size: 10px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.30);
+  }
+
+  .reg-pill {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.80);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 5px;
+    padding: 2px 7px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .td-muted {
+    color: rgba(255, 255, 255, 0.32) !important;
+    font-size: 12px;
+  }
+
+  .count-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 5px;
+  }
+
+  .count-completed {
+    background: rgba(250, 204, 21, 0.10);
+    color: var(--yellow);
+    border: 1px solid var(--yellow-border);
+  }
+
+  .count-booked {
+    background: rgba(59, 130, 246, 0.10);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.20);
+  }
+
+  /* ── Utilisation bar ── */
+  .td-bar { min-width: 100px; }
+
+  .bar-track {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .analytics-layout { grid-template-columns: 1fr; }
+    .chart-wrap { height: 220px; }
+  }
+
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 24px 16px 40px; }
+    .summary-grid { grid-template-columns: 1fr; gap: 8px; }
+    .page-title { font-size: 40px; }
+
+    /* Hide less critical columns on mobile */
+    .usage-table th:nth-child(4),
+    .usage-table td:nth-child(4),
+    .usage-table th:nth-child(7),
+    .usage-table td:nth-child(7) { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <p class="page-label">Fleet Analytics</p>
+    <h1 class="page-title">Vehicle Usage</h1>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+
+    <div class="summary-card summary-most">
+      <div class="summary-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="summary-body">
+        <span class="summary-label">Most Used</span>
+        {% if most_used %}
+          <span class="summary-value">{{ most_used.brand }} {{ most_used.model }}</span>
+          <span class="summary-sub">{{ most_used.completed_sessions }} session{{ most_used.completed_sessions|pluralize }}</span>
+        {% else %}
+          <span class="summary-value">—</span>
+          <span class="summary-sub">No data yet</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="summary-card summary-least">
+      <div class="summary-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+      </div>
+      <div class="summary-body">
+        <span class="summary-label">Least Used</span>
+        {% if least_used %}
+          <span class="summary-value">{{ least_used.brand }} {{ least_used.model }}</span>
+          <span class="summary-sub">{{ least_used.completed_sessions }} session{{ least_used.completed_sessions|pluralize }}</span>
+        {% else %}
+          <span class="summary-value">—</span>
+          <span class="summary-sub">No data yet</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="summary-card summary-total">
+      <div class="summary-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </div>
+      <div class="summary-body">
+        <span class="summary-label">Total Vehicles</span>
+        <span class="summary-value">{{ vehicles|length }}</span>
+        <span class="summary-sub">in fleet</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Chart + Table side by side -->
+  <div class="analytics-layout">
+
+    <!-- Bar chart -->
+    <div class="chart-card">
+      <div class="card-header">
+        <span class="card-title">Sessions per Vehicle</span>
+        <div class="chart-legend">
+          <span class="legend-dot legend-completed"></span><span class="legend-text">Completed</span>
+          <span class="legend-dot legend-booked"></span><span class="legend-text">Booked</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="vehicleChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="card-header">
+        <span class="card-title">Breakdown</span>
+      </div>
+      <div class="table-wrap">
+        <table class="usage-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Vehicle</th>
+              <th>Reg. No.</th>
+              <th>Type</th>
+              <th>Completed</th>
+              <th>Booked</th>
+              <th>Utilisation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in vehicles %}
+            <tr class="{% if forloop.first %}row-top{% elif forloop.last %}row-bottom{% endif %}">
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td class="td-name">
+                <span class="veh-name">{{ v.brand }} {{ v.model }}</span>
+                {% if v.name %}<span class="veh-nick">{{ v.name }}</span>{% endif %}
+              </td>
+              <td><span class="reg-pill">{{ v.registration_number }}</span></td>
+              <td class="td-muted">{{ v.get_vehicle_type_display }}</td>
+              <td><span class="count-badge count-completed">{{ v.completed_sessions }}</span></td>
+              <td><span class="count-badge count-booked">{{ v.booked_sessions }}</span></td>
+              <td class="td-bar">
+                {% with total=v.completed_sessions|add:v.booked_sessions %}
+                {% if total > 0 %}
+                  <div class="bar-track">
+                    <div class="bar-fill"
+                         data-completed="{{ v.completed_sessions }}"
+                         data-total="{{ total }}"></div>
+                  </div>
+                {% else %}
+                  <span class="td-muted">—</span>
+                {% endif %}
+                {% endwith %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Utilisation bars — max-relative scaling with completed/booked gradient
+  (function () {
+    const rows = document.querySelectorAll('.bar-fill');
+    let maxTotal = 0;
+    rows.forEach(r => {
+      const t = parseInt(r.dataset.total) || 0;
+      if (t > maxTotal) maxTotal = t;
+    });
+    rows.forEach(r => {
+      const completed = parseInt(r.dataset.completed) || 0;
+      const total     = parseInt(r.dataset.total) || 0;
+      const pct = total > 0 ? (completed / total * 100).toFixed(1) : 0;
+      r.style.width = maxTotal > 0 ? ((total / maxTotal) * 100) + '%' : '0%';
+      r.style.background = `linear-gradient(to right,
+        rgba(250,204,21,0.85) ${pct}%,
+        rgba(59,130,246,0.45) ${pct}%)`;
+    });
+  })();
+
+  // Chart.js bar chart
+  const labels    = [{% for v in vehicles %}"{{ v.brand }} {{ v.model }}",{% endfor %}];
+  const completed = [{% for v in vehicles %}{{ v.completed_sessions }},{% endfor %}];
+  const booked    = [{% for v in vehicles %}{{ v.booked_sessions }},{% endfor %}];
+
+  new Chart(document.getElementById('vehicleChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Completed',
+          data: completed,
+          backgroundColor: 'rgba(250,204,21,0.80)',
+          borderRadius: 3,
+          borderSkipped: false,
+        },
+        {
+          label: 'Booked',
+          data: booked,
+          backgroundColor: 'rgba(59,130,246,0.45)',
+          borderRadius: 3,
+          borderSkipped: false,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111111',
+          borderColor: 'rgba(255,255,255,0.10)',
+          borderWidth: 1,
+          titleColor: '#ffffff',
+          bodyColor: 'rgba(255,255,255,0.55)',
+          padding: 9,
+          cornerRadius: 6,
+        }
+      },
+      scales: {
+        x: {
+          stacked: false,
+          ticks: {
+            color: 'rgba(255,255,255,0.32)',
+            font: { family: "'DM Sans', sans-serif", size: 10 },
+            maxRotation: 30,
+          },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: 'rgba(255,255,255,0.32)',
+            font: { family: "'DM Sans', sans-serif", size: 10 },
+            stepSize: 1,
+          },
+          grid: { color: 'rgba(255,255,255,0.06)' },
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

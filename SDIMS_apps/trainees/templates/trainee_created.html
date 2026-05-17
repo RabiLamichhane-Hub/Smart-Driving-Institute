@@ -1,54 +1,590 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Trainee Registered</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-<h2>Trainee Registered Successfully</h2>
+{% block title %}Trainee Registered — SDIMS{% endblock %}
 
-<p>Share these credentials with the trainee. <strong>This page will not be shown again.</strong></p>
+{% block extra_css %}
+<style>
 
-<hr>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    max-width: 860px;
+  }
 
-<h3>Login Credentials</h3>
-<p><strong>Username:</strong> {{ username }}</p>
-<p><strong>Password:</strong> {{ password }}</p>
+  .page-wrapper::before {
+    content: 'TRAINEE';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(90px, 18vw, 200px);
+    color: rgba(255, 255, 255, 0.028);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
 
-<hr>
+  /* ── Page header ── */
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 1;
+  }
 
-<h3>Personal Information</h3>
-<p><strong>Full Name:</strong> {{ trainee.user.first_name }} {{ trainee.user.last_name }}</p>
-<p><strong>Phone:</strong> {{ trainee.user.phone }}</p>
-<p><strong>Email:</strong> {{ trainee.user.email }}</p>
-<p><strong>Gender:</strong> {{ trainee.get_gender_display }}</p>
-<p><strong>Date of Birth:</strong> {{ trainee.date_of_birth }}</p>
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 28px;
+    position: relative;
+    z-index: 1;
+  }
 
-<hr>
+  /* ── Success banner ── */
+  .success-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(34, 197, 94, 0.07);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+  }
 
-<h3>Course & Fee</h3>
-{% if trainee.course %}
-    <p><strong>Course:</strong> {{ trainee.course.course_name }}</p>
-    <p><strong>Vehicle Type:</strong> {{ trainee.course.get_vehicle_type_display }}</p>
-    <p><strong>Level:</strong> {{ trainee.course.get_level_display }}</p>
-    <p><strong>Course Fee:</strong> Rs. {{ trainee.course.fee }}</p>
-    <p><strong>Discount:</strong> Rs. {{ trainee.discount }}</p>
-    <p><strong>Final Fee:</strong> Rs. {{ trainee.final_fee }}</p>
-{% else %}
-    <p>No course assigned.</p>
-{% endif %}
+  .success-banner-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4ade80;
+    flex-shrink: 0;
+  }
 
-<hr>
+  .success-banner-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.5;
+  }
 
-{% if trainee.guardian_name %}
-<h3>Guardian Information</h3>
-<p><strong>Guardian Name:</strong> {{ trainee.guardian_name }}</p>
-<p><strong>Guardian Phone:</strong> {{ trainee.guardian_phone }}</p>
-<hr>
-{% endif %}
+  .success-banner-text strong {
+    color: #4ade80;
+    font-weight: 500;
+  }
 
-<a href="{% url 'trainees:trainee_list' %}">← Back to Trainee List</a>
-| <a href="{% url 'trainees:register' %}">Register Another Trainee</a>
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+  }
 
-</body>
-</html>
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    border-radius: 8px;
+    padding: 10px 22px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, border-color 0.18s, color 0.18s;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: var(--yellow);
+    color: #0a0a0a;
+  }
+
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 400;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Info sections ── */
+  .info-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Info card ── */
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .info-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  /* credentials card uses green tint */
+  .info-card.credentials .info-card-icon {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+  }
+
+  .info-card-tag {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(250, 204, 21, 0.7);
+    margin-bottom: 2px;
+  }
+
+  .info-card.credentials .info-card-tag {
+    color: rgba(74, 222, 128, 0.7);
+  }
+
+  .info-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin: 0;
+    line-height: 1;
+  }
+
+  /* ── Info grid (fields) ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .info-grid.single-col {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .info-grid.single-col .info-row {
+    border-right: none;
+  }
+
+  .info-row:nth-child(even) {
+    border-right: none;
+  }
+
+  .info-row:last-child,
+  .info-row:nth-last-child(2):nth-child(odd) {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .info-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-sec);
+  }
+
+  /* ── Credential values — monospace-style, highlighted ── */
+  .cred-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 6px 12px;
+    letter-spacing: 0.06em;
+    display: inline-block;
+    margin-top: 2px;
+    word-break: break-all;
+  }
+
+  /* password gets yellow tint */
+  .cred-value.password {
+    color: var(--yellow);
+    background: var(--yellow-dim);
+    border-color: var(--yellow-border);
+    letter-spacing: 0.12em;
+  }
+
+  /* ── Fee breakdown row ── */
+  .fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .fee-row:last-child {
+    border-bottom: none;
+  }
+
+  .fee-row.final {
+    background: rgba(250, 204, 21, 0.04);
+    border-top: 1px solid rgba(250, 204, 21, 0.12);
+    border-bottom: none;
+  }
+
+  .fee-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .fee-row.final .fee-label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-sec);
+  }
+
+  .fee-amount {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-sec);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fee-row.final .fee-amount {
+    font-size: 16px;
+    color: var(--yellow);
+  }
+
+  .fee-discount {
+    color: #4ade80;
+  }
+
+  /* ── No course state ── */
+  .no-course {
+    padding: 28px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 300;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Trainee photo strip ── */
+  .trainee-photo-strip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .trainee-photo-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(250, 204, 21, 0.3);
+    flex-shrink: 0;
+  }
+
+  .trainee-photo-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .trainee-photo-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .trainee-photo-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-wrapper::before { display: none; }
+    .info-grid { grid-template-columns: 1fr; }
+    .info-row { border-right: none; }
+    .info-row:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .info-row:last-child { border-bottom: none; }
+    .action-bar { flex-direction: column; }
+    .btn { justify-content: center; }
+  }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page header -->
+  <p class="page-label">Trainees</p>
+  <h1 class="page-title">Trainee Registered</h1>
+
+  <!-- Success notice -->
+  <div class="success-banner">
+    <div class="success-banner-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <p class="success-banner-text">
+      <strong>Registration successful.</strong> Share the credentials below with the trainee. This page will not be shown again.
+    </p>
+  </div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <a href="{% url 'trainees:register' %}" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Register Another
+    </a>
+    <a href="{% url 'trainees:trainee_list' %}" class="btn btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Trainee List
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="info-sections">
+
+    <!-- ── Login Credentials ── -->
+    <div class="info-card credentials">
+      <div class="info-card-header">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <span class="info-card-tag">Share with trainee</span>
+          <h2 class="info-card-title">Login Credentials</h2>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Username</span>
+          <span class="cred-value">{{ username }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Password</span>
+          <span class="cred-value password">{{ password }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Personal Information ── -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <span class="info-card-tag">Step 1</span>
+          <h2 class="info-card-title">Personal Information</h2>
+        </div>
+      </div>
+
+      {% if trainee.images %}
+      <div class="trainee-photo-strip">
+        <img src="{{ trainee.images.url }}" alt="{{ trainee.user.first_name }} {{ trainee.user.last_name }}" class="trainee-photo-img">
+        <div class="trainee-photo-meta">
+          <span class="trainee-photo-label">Profile Photo</span>
+          <span class="trainee-photo-name">{{ trainee.user.first_name }} {{ trainee.user.last_name }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Full Name</span>
+          <span class="info-value">{{ trainee.user.first_name }} {{ trainee.user.last_name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Phone</span>
+          <span class="info-value">{{ trainee.user.phone }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ trainee.user.email|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Gender</span>
+          <span class="info-value">{{ trainee.get_gender_display }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date of Birth</span>
+          <span class="info-value">{{ trainee.date_of_birth }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Course & Fee ── -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <div>
+          <span class="info-card-tag">Step 2</span>
+          <h2 class="info-card-title">Course &amp; Fee</h2>
+        </div>
+      </div>
+
+      {% if trainee.course %}
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">Course</span>
+            <span class="info-value">{{ trainee.course.course_name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Vehicle Type</span>
+            <span class="info-value">{{ trainee.course.get_vehicle_type_display }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Level</span>
+            <span class="info-value">{{ trainee.course.get_level_display }}</span>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.07);">
+          <div class="fee-row">
+            <span class="fee-label">Course Fee</span>
+            <span class="fee-amount">Rs. {{ trainee.course.fee }}</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-label">Discount</span>
+            <span class="fee-amount fee-discount">− Rs. {{ trainee.discount }}</span>
+          </div>
+          <div class="fee-row final">
+            <span class="fee-label">Final Fee</span>
+            <span class="fee-amount">Rs. {{ trainee.final_fee }}</span>
+          </div>
+        </div>
+
+      {% else %}
+        <p class="no-course">No course assigned.</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Guardian Information (conditional) ── -->
+    {% if trainee.guardian_name %}
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <span class="info-card-tag">Optional</span>
+          <h2 class="info-card-title">Guardian Information</h2>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Guardian Name</span>
+          <span class="info-value">{{ trainee.guardian_name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Guardian Phone</span>
+          <span class="info-value">{{ trainee.guardian_phone }}</span>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

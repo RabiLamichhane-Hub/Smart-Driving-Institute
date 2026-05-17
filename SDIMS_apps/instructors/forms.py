@@ -7,4 +7,8 @@ class InstructorForm(forms.ModelForm):
         fields = [
             'license_number',
             'status',
+            'images'
         ]
+        widgets ={
+            'images': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }   

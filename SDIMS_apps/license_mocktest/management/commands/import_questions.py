@@ -1,6 +1,6 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
-from SDIMS_apps.license_mocktest.models import Question  # change to your app name
+from SDIMS_apps.license_mocktest.models import Question
 
 OPTION_MAP = {
     "क": "A",

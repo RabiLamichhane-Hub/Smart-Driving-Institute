@@ -7,6 +7,7 @@ from SDIMS_apps.trainees.models import Trainee
 from .models import FeeRecord, Expense
 from .forms import PaymentForm, ExpenseForm
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 
 
 @login_required
@@ -85,12 +86,42 @@ def expense_list(request):
 
 @login_required
 def fee_overview(request):
+    search_query = request.GET.get('q', '').strip()
+ 
+    # ── Base queryset ────────────────────────────────────────────────────────
+    # prefetch_related('payments') is critical: final_fee(), total_paid(), and
+    # remaining() all hit the payments relation. Prefetching avoids N+1 queries.
     fee_records = FeeRecord.objects.select_related(
-        'trainee', 'course'
-    ).prefetch_related('payments').all()
-
+        'trainee', 'trainee__user', 'course'
+    ).prefetch_related('payments')
+ 
+    if search_query:
+        fee_records = fee_records.filter(
+            Q(trainee__user__first_name__icontains=search_query) |
+            Q(trainee__user__last_name__icontains=search_query)
+        )
+ 
+    # Evaluate once so the queryset isn't re-hit multiple times in the template.
+    fee_records = list(fee_records)
+ 
+    # ── Unpaid / partially-paid records ─────────────────────────────────────
+    # `status` is stored on the model and kept in sync by Payment.save() via
+    # update_status(), so filtering on it is reliable and cheap.
+    # `remaining()` is a Python method (not a DB field), so we sort in Python.
+    unpaid_records = sorted(
+        [r for r in fee_records if r.status in ('unpaid', 'partial')],
+        key=lambda r: (-r.remaining(), r.trainee.user.first_name)
+    )
+ 
+    # Sum in Python — remaining() calls final_fee() and total_paid(), both of
+    # which use the already-prefetched payments cache, so no extra DB hits.
+    total_outstanding = sum(r.remaining() for r in unpaid_records)
+ 
     context = {
-        'fee_records': fee_records,
+        'fee_records':       fee_records,
+        'unpaid_records':    unpaid_records,
+        'total_outstanding': total_outstanding,
+        'search_query':      search_query,
     }
     return render(request, 'fee_overview.html', context)
 

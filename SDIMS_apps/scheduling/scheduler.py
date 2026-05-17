@@ -35,16 +35,35 @@ from .models import (
 logger = logging.getLogger(__name__)
 User   = get_user_model()
 
+def is_working_day(target_date: date_type) -> bool:
+    """
+    Returns True only when the given date is a working day:
+      - NOT Saturday (weekday 5)
+      - NOT Sunday   (weekday 6)
+      - NOT in the HolidayOrDayOff table
+
+    Import locally to avoid circular imports at module load time.
+    """
+    if target_date.weekday() in (5, 6):   # Sat=5, Sun=6
+        return False
+    from .models import HolidayOrDayOff
+    return not HolidayOrDayOff.objects.filter(date=target_date).exists()
 
 # Public entry point
 
-def run_scheduler(target_date: date_type, triggered_by=None) -> DailyScheduleRun:
+def run_scheduler(target_date: date_type, triggered_by=None) -> DailyScheduleRun | None:
     """
     Schedule sessions for target_date.
-
-    Returns the DailyScheduleRun audit record (always, even on failure).
-    Raises nothing — all errors are caught, logged, and written to run.notes.
+    Returns None if target_date is a day-off / weekend.
+    Returns the DailyScheduleRun audit record otherwise.
     """
+    if not is_working_day(target_date):
+        day_name = target_date.strftime('%A')   # e.g. "Saturday"
+        logger.info(
+            "Scheduler skipped %s (%s) — not a working day.", target_date, day_name
+        )
+        return None
+
     run = DailyScheduleRun.objects.create(
         run_date     = target_date,
         triggered_by = triggered_by,
@@ -284,9 +303,6 @@ def _build_capacity_map(target_date, slots, config):
     Accounts for sessions already existing for target_date (e.g. from a
     previous partial run or manually created sessions).
 
-    FIX [Bug 5]: Independent capacity now uses unguided_total (track + vehicle
-    only) instead of guided_total so that instructor shortages don't
-    incorrectly cap independent trainee slots.
 
     Structure per slot_id:
     {
@@ -388,16 +404,17 @@ def _find_slot(trainee, target_date, capacity_map, trainee_type):
 
     base_num  = preferences[0].slot.slot_number
     all_slots = {s.slot_number: s for s in TimeSlot.objects.all()}
+    max_slot  = max(all_slots.keys(), default=8)  # dynamic — respects however many slots exist
 
     low  = base_num - 1
     high = base_num + 1
 
-    while low >= 1 or high <= 6:
+    while low >= 1 or high <= max_slot:
         if low >= 1:
             candidate = all_slots.get(low)
             if candidate and _slot_has_capacity(candidate, capacity_map, trainee_type):
                 return candidate
-        if high <= 6:
+        if high <= max_slot:
             candidate = all_slots.get(high)
             if candidate and _slot_has_capacity(candidate, capacity_map, trainee_type):
                 return candidate
@@ -544,13 +561,28 @@ def _pick_instructor(instructors, cap):
 
 def _get_default_supervisor():
     """
-    Fetch a fallback supervisor. Replace with a smarter strategy
-    (e.g. on-duty roster, round-robin) when that feature is built.
+    Returns the active supervisor with the fewest sessions scheduled today.
+    This provides basic load-balancing across supervisors rather than
+    always assigning the same one.
+    Returns None if no active supervisor exists.
     """
-    return (
-        User.objects.filter(role='supervisor', is_active=True)
-        .order_by('id')
-        .first()
+    from datetime import date as date_type_local
+    supervisors = list(
+        User.objects.filter(role='supervisor', is_active=True).order_by('id')
+    )
+    if not supervisors:
+        return None
+    if len(supervisors) == 1:
+        return supervisors[0]
+
+    today = date_type_local.today()
+    # Pick the supervisor who has the fewest sessions today
+    return min(
+        supervisors,
+        key=lambda s: Session.objects.filter(
+            supervisor=s,
+            date=today,
+        ).count(),
     )
 
 
@@ -561,9 +593,6 @@ def _trainee_at_daily_limit(trainee, target_date, built_sessions, config):
     Check if trainee has already hit their daily session cap,
     counting both DB-persisted sessions and sessions queued in this run.
 
-    FIX [Bug 4]: Compare trainee objects directly instead of raw .id
-    to avoid false mismatches on unsaved objects whose trainee_id may
-    not yet be populated.
     """
     db_count = Session.objects.filter(
         trainee=trainee,

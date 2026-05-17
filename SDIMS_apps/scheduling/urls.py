@@ -27,4 +27,12 @@ urlpatterns = [
     path('run-scheduler/bulk/', views.run_scheduler_bulk_view, name='run_scheduler_bulk'),
     path('runs/', views.schedule_run_list_view, name='run_list'),
     path('runs/<int:pk>/', views.schedule_run_detail_view, name='run_detail'),
+
+    path('reschedule/request/<int:session_pk>/', views.trainee_reschedule_request_view, name='reschedule_request'),
+    path('reschedule/requests/', views.reschedule_requests_view, name='reschedule_requests'),
+
+    path('day-off/',            views.day_off_list_view,   name='day_off_list'),
+    path('day-off/<int:pk>/delete/', views.day_off_delete_view, name='day_off_delete'),
+
+
 ]

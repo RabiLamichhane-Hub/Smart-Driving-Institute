@@ -1,3 +1,4 @@
+import functools
 from django.shortcuts import render, redirect
 
 def get_dashboard_url(user):
@@ -6,7 +7,7 @@ def get_dashboard_url(user):
     elif user.role == 'instructor':
         return 'homesandall:instructor_dashboard'
     elif user.role == 'supervisor':
-        return 'homesandall:instructor_dashboard'
+        return 'homesandall:supervisor_dashboard'
     elif user.role == 'trainee':
         return 'homesandall:trainee_dashboard'
     return 'login'
@@ -14,6 +15,7 @@ def get_dashboard_url(user):
 
 def role_required(allowed_roles):
     def decorator(view_func):
+        @functools.wraps(view_func)
         def wrapper(request, *args, **kwargs):
 
             # Not logged in → login page

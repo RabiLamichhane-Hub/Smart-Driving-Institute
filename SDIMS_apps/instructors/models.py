@@ -13,6 +13,13 @@ class Instructor(models.Model):
 
     # REMOVE duplicated fields like email, phone
     license_number = models.CharField(max_length=50, unique=True)
+
+    # Photo
+    images = models.ImageField(
+        upload_to='trainees/images/',
+        blank=True,
+        null=True
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     date_joined = models.DateField(auto_now_add=True)
 

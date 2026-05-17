@@ -1,4 +1,3 @@
-
 from django.db import models
 
 class Vehicle(models.Model):
@@ -45,6 +44,12 @@ class Vehicle(models.Model):
     insurance_expiry = models.DateField(null=True, blank=True)
 
     dual_control = models.BooleanField(default=False)
+
+    image = models.ImageField(
+        upload_to='vehicles/images/',
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         return f"{self.brand} {self.model} ({self.registration_number})"

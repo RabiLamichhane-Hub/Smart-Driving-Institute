@@ -20,3 +20,6 @@ Thumbs.db
 
 # Django static files (optional)
 staticfiles/
+
+
+media

@@ -13,6 +13,7 @@ class TraineeForm(forms.ModelForm):
             'status',
             'guardian_name',
             'guardian_phone',
+            'images',
         ]
         widgets = {
             'gender': forms.Select(attrs={'class': 'form-select'}),
@@ -27,4 +28,5 @@ class TraineeForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-select'}),
             'guardian_name': forms.TextInput(attrs={'class': 'form-control'}),
             'guardian_phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'images': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }

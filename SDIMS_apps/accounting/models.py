@@ -82,7 +82,7 @@ class FeeRecord(models.Model):
 class Payment(models.Model):
     METHOD_CHOICES = [
         ('cash', 'Cash'),
-        ('online', 'Online'),
+        ('e-wallets', 'e-Wallets'),
         ('bank_transfer', 'Bank Transfer'),
     ]
 

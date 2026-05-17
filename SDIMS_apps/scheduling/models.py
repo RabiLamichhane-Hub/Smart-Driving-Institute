@@ -10,10 +10,23 @@ from django.utils import timezone
 class Track(models.Model):
     """
     Physical driving track on the premises.
+
+    Track types:
+        - 'car'        : Only used for Car courses/vehicles.
+        - 'two_wheeler': Used for Bike and Scooter courses/vehicles.
+
     Rule: 1 track handles at most 2 vehicles simultaneously per slot.
     This is enforced in Session.clean() — not here — because it depends
     on cross-row aggregate logic.
+
+    Track ↔ vehicle compatibility is also enforced in Session.clean()
+    by calling Track.is_compatible_with(vehicle_type).
     """
+
+    TRACK_TYPE_CHOICES = [
+        ('car',          'Car Track'),
+        ('two_wheeler',  'Two-Wheeler Track (Bike & Scooter)'),
+    ]
 
     STATUS_CHOICES = [
         ('active',       'Active'),
@@ -21,29 +34,50 @@ class Track(models.Model):
         ('maintenance',  'Under Maintenance'),
     ]
 
-    name   = models.CharField(max_length=50, unique=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    notes  = models.TextField(blank=True)
+    # Single source of truth: maps Vehicle.vehicle_type → required track_type.
+    # Update this dict if new vehicle types are ever added to the system.
+    TRACK_COMPATIBILITY = {
+        'car':     'car',
+        'bike':    'two_wheeler',
+        'scooter': 'two_wheeler',
+    }
+
+    name       = models.CharField(max_length=50, unique=True)
+    track_type = models.CharField(
+        max_length=20,
+        choices=TRACK_TYPE_CHOICES,
+        help_text="Determines which vehicle types are permitted on this track.",
+    )
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    notes      = models.TextField(blank=True)
 
     class Meta:
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.get_track_type_display()})"
+
+    def is_compatible_with(self, vehicle_type: str) -> bool:
+        """
+        Returns True if this track may be used for the given vehicle_type
+        string ('Car', 'Bike', or 'Scooter').
+        Unknown vehicle types always return False.
+        """
+        return self.TRACK_COMPATIBILITY.get(vehicle_type) == self.track_type
 
 
 # 2. TimeSlot  (seeded once — never created via UI)
 
 class TimeSlot(models.Model):
     """
-    Fixed, non-overlapping 2-hour slots shared across all days.
+    Fixed, non-overlapping 1-hour slots shared across all days.
     Populated via: python manage.py seed_slots
-    Slot numbers: 1=06:00, 2=08:00, 3=10:00, 4=14:00, 5=16:00, 6=18:00
+    Slot numbers: 1=08:00, 2=09:00, 3=10:00, 4=11:00, 5=12:00, 6=13:00, [break 14:00], 7=15:00, 8=16:00
     """
 
     slot_number = models.PositiveSmallIntegerField(
         unique=True,
-        validators=[MinValueValidator(1), MaxValueValidator(6)],
+        validators=[MinValueValidator(1), MaxValueValidator(8)],
     )
     label      = models.CharField(max_length=30)
     start_time = models.TimeField()
@@ -60,8 +94,8 @@ class TimeSlot(models.Model):
             from datetime import datetime
             start_dt = datetime.combine(datetime.today(), self.start_time)
             end_dt   = datetime.combine(datetime.today(), self.end_time)
-            if (end_dt - start_dt).seconds != 7200:
-                raise ValidationError("Each slot must be exactly 2 hours.")
+            if (end_dt - start_dt).seconds != 3600:
+                raise ValidationError("Each slot must be exactly 1 hour.")
 
 
 # 3. SchedulingConfig  (singleton — edited only via Django admin)
@@ -111,6 +145,51 @@ class SchedulingConfig(models.Model):
     def load(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+    
+
+# 3b.  HolidayOrDayOff  (custom day-off calendar)
+class HolidayOrDayOff(models.Model):
+    """
+    A single date that is declared as a non-working day.
+    Rules:
+      - Saturdays (weekday 5) and Sundays (weekday 6) are ALWAYS off,
+        enforced in Session.clean() and scheduler.is_working_day().
+        They do NOT need an entry here.
+      - This table is for extra off-days: public holidays, institute
+        closures, special events, etc.
+      - Created by admin or supervisor via the UI.
+      - The scheduler and Session.clean() both consult is_working_day().
+    """
+    date        = models.DateField(unique=True, help_text="The date that is off.")
+    reason      = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional: e.g. 'Dashain', 'Institute Annual Day', etc.",
+    )
+    declared_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='declared_days_off',
+    )
+    declared_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering            = ['date']
+        verbose_name        = "Holiday / Day Off"
+        verbose_name_plural = "Holidays / Days Off"
+    def __str__(self):
+        label = self.reason or "Day Off"
+        return f"{self.date} — {label}"
+    def clean(self):
+        super().clean()
+        if self.date:
+            # Prevent redundant entries for weekends (they're already always off)
+            if self.date.weekday() in (5, 6):
+                day_name = "Saturday" if self.date.weekday() == 5 else "Sunday"
+                raise ValidationError(
+                    f"{self.date} is a {day_name}. Weekends are always off — "
+                    "no need to add a separate entry."
+                )
 
 
 # 4. TraineePreference
@@ -132,8 +211,8 @@ class TraineePreference(models.Model):
         related_name='trainee_preferences',
     )
     priority = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(6)],
-        help_text="1 = top choice, 6 = last resort.",
+        validators=[MinValueValidator(1), MaxValueValidator(8)],
+        help_text="1 = top choice, 8 = last resort.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -329,6 +408,40 @@ class Session(models.Model):
 
     def clean(self):
         super().clean()
+
+        # --- [Issue 9] Prevent sessions on weekends or declared day-off days ----
+        if self.date:
+            from .scheduler import is_working_day
+            if not is_working_day(self.date):
+                day_name = self.date.strftime('%A')
+                raise ValidationError(
+                    f"{self.date} ({day_name}) is a non-working day. "
+                    "Sessions cannot be scheduled on weekends or declared holidays."
+                )
+
+
+        # --- [Track compatibility] Vehicle type must match track type --------
+        if self.track_id and self.vehicle_id:
+            try:
+                from SDIMS_apps.vehicles.models import Vehicle as VehicleModel
+                vehicle_type = VehicleModel.objects.filter(
+                    pk=self.vehicle_id
+                ).values_list('vehicle_type', flat=True).first()
+
+                if vehicle_type and not self.track.is_compatible_with(vehicle_type):
+                    raise ValidationError({
+                        'track': (
+                            f"Track '{self.track.name}' is a "
+                            f"{self.track.get_track_type_display()} and cannot be used "
+                            f"for a {vehicle_type} vehicle. "
+                            "Please select a compatible track."
+                        )
+                    })
+            except ValidationError:
+                raise
+            except Exception:
+                # Relation not yet resolvable during unsaved creation — skip.
+                pass
 
         # --- [Issue 1] Track capacity: max 2 vehicles per track per slot ---
         if self.track_id and self.slot_id and self.date:
@@ -565,3 +678,97 @@ class RescheduleQueue(models.Model):
         self.save(update_fields=[
             'resolved', 'resolved_session', 'last_attempted_at'
         ])
+
+
+# 9. RescheduleRequest  (trainee-initiated reschedule requests)
+
+class RescheduleRequest(models.Model):
+    """
+    A trainee-initiated request to reschedule a specific upcoming session.
+
+    Workflow:
+      - Trainee submits via 'Request Reschedule' button on My Schedule page.
+      - Supervisor/admin reviews and either approves or rejects.
+      - On approval: the original session is cancelled and a RescheduleQueue
+        entry is created so the scheduler picks the trainee up on the next run.
+      - On rejection: the trainee's original session remains unchanged.
+
+    Key rules:
+      - Only sessions with status 'scheduled' or 'pending' may be requested.
+      - A trainee cannot have two pending requests for the same session
+        (enforced via UniqueConstraint + view-level guard).
+    """
+
+    STATUS_CHOICES = [
+        ('pending',  'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    trainee    = models.ForeignKey(
+        'trainees.Trainee',
+        on_delete=models.CASCADE,
+        related_name='reschedule_requests',
+    )
+    session    = models.ForeignKey(
+        Session,
+        on_delete=models.CASCADE,
+        related_name='reschedule_requests',
+    )
+    reason     = models.TextField(
+        blank=True,
+        help_text="Optional: trainee's reason for requesting a reschedule.",
+    )
+    status     = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending',
+    )
+
+    # --- Review fields (populated by supervisor/admin) --------------------
+    reviewed_by    = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='reviewed_reschedule_requests',
+        help_text="The supervisor or admin who handled this request.",
+    )
+    reviewed_at    = models.DateTimeField(null=True, blank=True)
+    rejection_note = models.TextField(
+        blank=True,
+        help_text="Supervisor's note explaining why the request was rejected.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name        = "Reschedule Request"
+        verbose_name_plural = "Reschedule Requests"
+        constraints = [
+            # Prevent duplicate pending requests for the same trainee+session.
+            # A trainee can submit again only after a previous one is resolved.
+            models.UniqueConstraint(
+                fields=['trainee', 'session'],
+                condition=models.Q(status='pending'),
+                name='unique_pending_reschedule_request_per_trainee_session',
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.trainee} → Session #{self.session_id} "
+            f"[{self.get_status_display()}]"
+        )
+
+    def clean(self):
+        super().clean()
+        # Only allow requests for sessions that are still reschedulable.
+        if self.session_id:
+            reschedulable = ('scheduled', 'pending')
+            if self.session.status not in reschedulable:
+                raise ValidationError(
+                    f"Cannot request a reschedule for a session with "
+                    f"status '{self.session.status}'. "
+                    "Only scheduled or pending sessions are eligible."
+                )

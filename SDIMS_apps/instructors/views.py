@@ -39,7 +39,7 @@ def instructor_create(request):
 
     if request.method == "POST":
         user_form = CreateUserForm(request.POST)
-        instructor_form = InstructorForm(request.POST)
+        instructor_form = InstructorForm(request.POST, request.FILES)
 
         if user_form.is_valid() and instructor_form.is_valid():
             data = user_form.cleaned_data
@@ -90,7 +90,7 @@ def instructor_update(request, pk):
 
     if request.method == 'POST':
         user_form = CreateUserForm(request.POST, instance=user)
-        instructor_form = InstructorForm(request.POST, instance=instructor)
+        instructor_form = InstructorForm(request.POST, request.FILES, instance=instructor)
 
         if user_form.is_valid() and instructor_form.is_valid():
             user_form.save()
@@ -116,3 +116,11 @@ def instructor_delete(request, pk):
         user.delete() 
         return redirect('instructors:instructor_list')
     return render(request, 'instructor_confirm_delete.html', {'instructor': instructor})
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def instructor_detail(request, pk):
+    instructor = get_object_or_404(Instructor, pk=pk)
+    return render(request, 'instructor_detail.html', {
+        'instructor': instructor,
+    })

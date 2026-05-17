@@ -1,0 +1,593 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Holiday & Day-Off Calendar — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ─────────────────────────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'HOLIDAYS';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 160px;
+    color: rgba(255,255,255,0.028);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    user-select: none;
+    line-height: 1;
+  }
+
+  /* ── Page Header ─────────────────────────────────────────────── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 10px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 28px;
+  }
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250,204,21,0.4);
+    color: var(--yellow);
+  }
+  .btn-danger-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  }
+  .btn-danger-sm:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.5);
+    transform: translateY(-1px);
+  }
+
+  /* ── Info Box ─────────────────────────────────────────────────── */
+  .info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 36px;
+  }
+  .info-box-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .info-box-text {
+    font-size: 13px;
+    color: var(--text-sec);
+    line-height: 1.6;
+  }
+  .info-box-text strong {
+    color: var(--yellow);
+    font-weight: 600;
+  }
+
+  /* ── Add Form Card ────────────────────────────────────────────── */
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 28px 24px;
+    margin-bottom: 40px;
+  }
+  .form-card-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+  .form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .form-group.date-group { flex: 0 0 180px; }
+  .form-group.reason-group { flex: 1 1 260px; }
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .form-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    transition: border-color 0.18s;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .form-input:focus {
+    border-color: var(--yellow-focus);
+  }
+  .form-input::placeholder {
+    color: var(--text-muted);
+  }
+  /* date input calendar icon color */
+  .form-input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+  }
+
+  /* ── Section Sub-heading ──────────────────────────────────────── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+
+  /* ── Tables ───────────────────────────────────────────────────── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-card thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-card thead th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+  }
+  .table-card thead th.col-action {
+    text-align: right;
+  }
+  .table-card tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.15s;
+  }
+  .table-card tbody tr:last-child {
+    border-bottom: none;
+  }
+  .table-card tbody tr:hover {
+    background: rgba(255,255,255,0.025);
+  }
+  .table-card tbody td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+  .table-card tbody td.col-date {
+    font-weight: 500;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .td-dayofweek {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    display: block;
+    margin-top: 3px;
+  }
+  .td-reason-empty {
+    font-size: 13px;
+    color: rgba(255,255,255,0.25);
+    font-style: italic;
+  }
+  .col-action-cell {
+    text-align: right;
+  }
+
+  /* Declared-by cell */
+  .avatar-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar-initials {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: rgba(255,255,255,0.28);
+    letter-spacing: 0.06em;
+    margin: 0 0 8px;
+  }
+  .empty-state-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Past Entries Collapsible ─────────────────────────────────── */
+  .collapsible-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 20px;
+    width: fit-content;
+  }
+  .collapsible-toggle .section-tag { margin: 0; }
+  .collapsible-toggle .section-heading { margin: 0; }
+  .toggle-chevron {
+    font-size: 18px;
+    color: var(--text-muted);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .toggle-chevron.open { transform: rotate(180deg); }
+  .collapsible-body {
+    display: none;
+  }
+  .collapsible-body.open {
+    display: block;
+  }
+
+  /* Past table muted */
+  .table-card.past thead th {
+    color: rgba(255,255,255,0.28);
+  }
+  .table-card.past tbody td.col-date {
+    color: var(--text-sec);
+    font-weight: 400;
+  }
+  .table-card.past tbody td {
+    color: rgba(255,255,255,0.35);
+    font-size: 13px;
+    padding: 13px 20px;
+  }
+  .td-dayofweek.past {
+    color: rgba(250,204,21,0.45);
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────── */
+  @media (max-width: 700px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .form-row { flex-direction: column; }
+    .form-group.date-group { flex: unset; width: 100%; }
+    .th-hide, .td-hide { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- ── Page Header ─────────────────────────────────────────── -->
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Holiday &amp; Day-Off Calendar</h1>
+
+  <div class="action-bar">
+    <a href="{% url 'homesandall:index' %}" class="btn-ghost">← Back to Home</a>
+  </div>
+  <hr class="section-divider">
+
+  <!-- ── Info Box ────────────────────────────────────────────── -->
+  <div class="info-box">
+    <span class="info-box-icon">ℹ️</span>
+    <p class="info-box-text">
+      <strong>Weekends (Saturday &amp; Sunday) are automatically treated as off-days</strong>
+      and do not need to be added here. Use this calendar only to declare
+      public holidays, institute closures, or any other mid-week day off.
+    </p>
+  </div>
+
+  <!-- ── Add New Entry Form ──────────────────────────────────── -->
+  <div class="form-card">
+    <p class="form-card-heading">Declare a Day Off</p>
+    <form method="post" action="{% url 'scheduling:day_off_list' %}">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group date-group">
+          <label class="form-label" for="id_date">Date</label>
+          <input
+            class="form-input"
+            type="date"
+            id="id_date"
+            name="date"
+            required
+            min="{{ today|date:'Y-m-d' }}"
+          >
+        </div>
+        <div class="form-group reason-group">
+          <label class="form-label" for="id_reason">Reason <span style="color:var(--text-muted);font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input
+            class="form-input"
+            type="text"
+            id="id_reason"
+            name="reason"
+            placeholder="e.g. Dashain, Institute Event…"
+            maxlength="200"
+          >
+        </div>
+        <div class="form-group" style="justify-content:flex-end;">
+          <button type="submit" class="btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Day Off
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── Upcoming Off-Days ───────────────────────────────────── -->
+  <p class="section-tag">Upcoming</p>
+  <h2 class="section-heading">Scheduled Off-Days</h2>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th class="th-hide">Day</th>
+          <th>Reason</th>
+          <th class="th-hide">Declared By</th>
+          <th class="col-action">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in upcoming %}
+        <tr>
+          <td class="col-date">
+            {{ entry.date|date:"d M Y" }}
+            <span class="td-dayofweek td-hide-inline">{{ entry.date|date:"l" }}</span>
+          </td>
+          <td class="th-hide">
+            <span style="font-size:13px;color:var(--yellow);font-weight:500;text-transform:uppercase;letter-spacing:0.07em;">
+              {{ entry.date|date:"l" }}
+            </span>
+          </td>
+          <td>
+            {% if entry.reason %}
+              {{ entry.reason }}
+            {% else %}
+              <span class="td-reason-empty">No reason given</span>
+            {% endif %}
+          </td>
+          <td class="th-hide">
+            <div class="avatar-cell">
+              <div class="avatar-initials">
+                {{ entry.declared_by.first_name|slice:":1" }}{{ entry.declared_by.last_name|slice:":1" }}
+              </div>
+              <span style="font-size:13px;color:var(--text-sec);">
+                {{ entry.declared_by.get_full_name }}
+              </span>
+            </div>
+          </td>
+          <td class="col-action-cell">
+            <form method="post" action="{% url 'scheduling:day_off_delete' entry.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger-sm"
+                onclick="return confirm('Remove {{ entry.date|date:"d M Y" }} from day-off list?')">
+                Remove
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="empty-state">
+              <p class="empty-state-label">No Upcoming Off-Days</p>
+              <p class="empty-state-sub">Use the form above to declare a holiday or closure.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── Past Entries (collapsible) ─────────────────────────── -->
+  <div class="collapsible-toggle" id="pastToggle" onclick="togglePast()">
+    <div>
+      <p class="section-tag" style="margin-bottom:4px;">History</p>
+      <h2 class="section-heading">Past Off-Days</h2>
+    </div>
+    <span class="toggle-chevron" id="pastChevron">▾</span>
+  </div>
+
+  <div class="collapsible-body" id="pastBody">
+    <div class="table-card past">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th class="th-hide">Day</th>
+            <th>Reason</th>
+            <th class="th-hide">Declared By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in past %}
+          <tr>
+            <td class="col-date">{{ entry.date|date:"d M Y" }}</td>
+            <td class="th-hide">
+              <span style="font-size:12px;color:rgba(250,204,21,0.45);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">
+                {{ entry.date|date:"l" }}
+              </span>
+            </td>
+            <td>
+              {% if entry.reason %}
+                {{ entry.reason }}
+              {% else %}
+                <span class="td-reason-empty">—</span>
+              {% endif %}
+            </td>
+            <td class="th-hide">
+              <div class="avatar-cell">
+                <div class="avatar-initials" style="opacity:0.55;">
+                  {{ entry.declared_by.first_name|slice:":1" }}{{ entry.declared_by.last_name|slice:":1" }}
+                </div>
+                <span style="font-size:12px;color:rgba(255,255,255,0.35);">
+                  {{ entry.declared_by.get_full_name }}
+                </span>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <p class="empty-state-label">No Past Records</p>
+                <p class="empty-state-sub">Historical entries will appear here.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function togglePast() {
+    const body    = document.getElementById('pastBody');
+    const chevron = document.getElementById('pastChevron');
+    const isOpen  = body.classList.toggle('open');
+    chevron.classList.toggle('open', isOpen);
+  }
+</script>
+{% endblock %}

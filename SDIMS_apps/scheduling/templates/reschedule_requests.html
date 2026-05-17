@@ -1,0 +1,675 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reschedule Requests — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'REQUESTS';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.028);
+    pointer-events: none;
+    line-height: 1;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .page-title .hl { color: var(--yellow); }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Section headers ── */
+  .section-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+
+  /* ── Pending count badge ── */
+  .pending-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 99px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--yellow);
+    color: #000;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
+
+  /* ── Request cards (pending) ── */
+  .request-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    transition: border-color .2s;
+  }
+  .request-card:hover { border-color: rgba(250,204,21,0.18); }
+
+  .request-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .trainee-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--yellow);
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+  .trainee-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .trainee-meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .request-time {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  /* ── Session info chips inside a request card ── */
+  .request-session-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 9px;
+    white-space: nowrap;
+  }
+
+  /* ── Reason text ── */
+  .request-reason {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-sec);
+    line-height: 1.65;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-left: 2px solid var(--border);
+    border-radius: 0 6px 6px 0;
+  }
+  .request-reason-empty {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* ── Action row ── */
+  .request-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-approve {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--yellow);
+    color: #000;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+  }
+  .btn-approve:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-reject {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(239,68,68,0.3);
+    background: transparent;
+    color: rgba(239,68,68,0.8);
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .btn-reject:hover {
+    background: rgba(239,68,68,0.08);
+    border-color: rgba(239,68,68,0.5);
+    transform: translateY(-1px);
+  }
+
+  /* ── Reject panel (hidden by default) ── */
+  .reject-panel {
+    display: none;
+    width: 100%;
+    margin-top: 12px;
+    background: var(--surface);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .reject-panel.open { display: block; }
+  .reject-panel label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .reject-panel textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.65;
+    padding: 10px 12px;
+    resize: vertical;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color .15s;
+    margin-bottom: 10px;
+  }
+  .reject-panel textarea::placeholder { color: var(--text-muted); }
+  .reject-panel textarea:focus { border-color: rgba(239,68,68,0.4); }
+  .reject-panel-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-confirm-reject {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: none;
+    background: #ef4444;
+    color: #fff;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+  }
+  .btn-confirm-reject:hover { background: #dc2626; transform: translateY(-1px); }
+  .btn-cancel-reject {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-cancel-reject:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+
+  /* ── Empty state ── */
+  .empty-card {
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 52px 24px;
+    text-align: center;
+  }
+  .empty-label {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.30);
+    margin-bottom: 8px;
+  }
+  .empty-card p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+
+  /* ── History table ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background .12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 14px 20px;
+    vertical-align: middle;
+  }
+  td:first-child { font-weight: 500; color: var(--text); }
+
+  /* ── History status badges ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 5px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .badge-approved {
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border-color: var(--yellow-border);
+  }
+  .badge-rejected {
+    background: rgba(239,68,68,0.08);
+    color: rgba(239,68,68,0.75);
+    border-color: rgba(239,68,68,0.22);
+  }
+  .badge-pending {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+
+  .td-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .td-note {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+  }
+
+  /* ── Avatar inline ── */
+  .avatar-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+  }
+  .trainee-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title   { font-size: 40px; }
+    .th-hide, .td-hide { display: none; }
+    .request-card-top { flex-direction: column; gap: 6px; }
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Reschedule <span class="hl">Requests</span></h1>
+
+  <hr class="section-divider">
+
+  <p class="section-tag">Awaiting Review</p>
+  <p class="section-heading">
+    Pending Requests
+    {% if pending_requests %}
+      <span class="pending-count">{{ pending_requests|length }}</span>
+    {% endif %}
+  </p>
+
+  {% if pending_requests %}
+    {% for rr in pending_requests %}
+    <div class="request-card" id="request-{{ rr.pk }}">
+
+      <div class="request-card-top">
+        <div class="trainee-row">
+          <div class="avatar" aria-hidden="true">
+            {{ rr.trainee.user.first_name|slice:":1" }}{{ rr.trainee.user.last_name|slice:":1" }}
+          </div>
+          <div>
+            <p class="trainee-name">
+              {{ rr.trainee.user.first_name }} {{ rr.trainee.user.last_name }}
+            </p>
+            <p class="trainee-meta">Submitted {{ rr.created_at|date:"N j, Y · g:i A" }}</p>
+          </div>
+        </div>
+        <p class="request-time">{{ rr.created_at|timesince }} ago</p>
+      </div>
+
+      <div class="request-session-info">
+        <span class="chip">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M2 7h12M6 2v2M10 2v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          {{ rr.session.date|date:"l, F j, Y" }}
+        </span>
+        <span class="chip">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M8 5v3.2l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          {{ rr.session.slot.label|default:"Session" }}
+        </span>
+        {% if rr.session.vehicle %}
+        <span class="chip">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 9h10M2 11h12M4 6l1.5-3h5L12 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="4.5" cy="12.5" r="1.5" fill="currentColor"/>
+            <circle cx="11.5" cy="12.5" r="1.5" fill="currentColor"/>
+          </svg>
+          {{ rr.session.vehicle }}
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="request-reason">
+        {% if rr.reason %}
+          {{ rr.reason }}
+        {% else %}
+          <span class="request-reason-empty">No reason provided.</span>
+        {% endif %}
+      </div>
+
+      {# ── Approve / Reject actions ── #}
+      <div class="request-actions">
+        {# Approve form — one click, no extra input needed #}
+        <form method="post" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="approve">
+          <input type="hidden" name="request_id" value="{{ rr.pk }}">
+          <button type="submit" class="btn-approve"
+            onclick="return confirm('Approve this reschedule request? The original session will be cancelled and the trainee added to the reschedule queue.');">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8.5l3.5 3.5 6.5-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Approve
+          </button>
+        </form>
+
+        {# Reject — reveals inline panel #}
+        <button
+          type="button"
+          class="btn-reject"
+          onclick="toggleRejectPanel({{ rr.pk }})"
+          aria-expanded="false"
+          id="reject-toggle-{{ rr.pk }}"
+        >
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Reject
+        </button>
+
+        {# Reject panel — hidden until toggle #}
+        <div class="reject-panel" id="reject-panel-{{ rr.pk }}" role="region" aria-label="Rejection details">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <input type="hidden" name="request_id" value="{{ rr.pk }}">
+            <label for="rejection-note-{{ rr.pk }}">Rejection Note <span style="font-weight:300;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <textarea
+              id="rejection-note-{{ rr.pk }}"
+              name="rejection_note"
+              rows="3"
+              placeholder="Briefly explain why this request is being rejected…"
+            ></textarea>
+            <div class="reject-panel-actions">
+              <button type="submit" class="btn-confirm-reject">Confirm Rejection</button>
+              <button type="button" class="btn-cancel-reject" onclick="toggleRejectPanel({{ rr.pk }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+      </div>{# /.request-actions #}
+    </div>{# /.request-card #}
+    {% endfor %}
+
+  {% else %}
+    <div class="empty-card" role="status">
+      <span class="empty-label">All Clear</span>
+      <p>No pending reschedule requests right now.</p>
+    </div>
+  {% endif %}
+
+  <hr class="section-divider">
+
+  <p class="section-tag">History</p>
+  <p class="section-heading">Resolved Requests</p>
+
+  {% if resolved_requests %}
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Trainee</th>
+          <th>Session</th>
+          <th class="th-hide">Reason</th>
+          <th>Status</th>
+          <th class="th-hide">Reviewed By</th>
+          <th>Resolved</th>
+          <th class="th-hide">Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rr in resolved_requests %}
+        <tr>
+          <td>
+            <div class="trainee-cell">
+              <span class="avatar-sm" aria-hidden="true">
+                {{ rr.trainee.user.first_name|slice:":1" }}{{ rr.trainee.user.last_name|slice:":1" }}
+              </span>
+              {{ rr.trainee.user.first_name }} {{ rr.trainee.user.last_name }}
+            </div>
+          </td>
+          <td>
+            {{ rr.session.slot.label|default:"Session" }}<br>
+            <span class="td-date">{{ rr.session.date|date:"N j, Y" }}</span>
+          </td>
+          <td class="td-hide td-note">
+            {% if rr.reason %}{{ rr.reason|truncatechars:60 }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <span class="badge badge-{{ rr.status }}">{{ rr.get_status_display }}</span>
+          </td>
+          <td class="td-hide">
+            {% if rr.reviewed_by %}
+              {{ rr.reviewed_by.get_full_name|default:rr.reviewed_by.username }}
+            {% else %}—{% endif %}
+          </td>
+          <td class="td-date">
+            {% if rr.reviewed_at %}{{ rr.reviewed_at|date:"N j, Y" }}{% else %}—{% endif %}
+          </td>
+          <td class="td-hide td-note">
+            {% if rr.rejection_note %}{{ rr.rejection_note|truncatechars:60 }}{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty-card" role="status">
+      <span class="empty-label">No History</span>
+      <p>Resolved requests will appear here.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+(function () {
+  'use strict';
+
+  window.toggleRejectPanel = function (requestId) {
+    var panel  = document.getElementById('reject-panel-' + requestId);
+    var toggle = document.getElementById('reject-toggle-' + requestId);
+    if (!panel || !toggle) return;
+
+    var isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+
+    if (!isOpen) {
+      var ta = panel.querySelector('textarea');
+      if (ta) ta.focus();
+    }
+  };
+}());
+</script>
+{% endblock %}

@@ -28,6 +28,9 @@
       {% if user.role == 'admin' %}
         <a href="{% url 'homesandall:admin_dashboard' %}"
            class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+      {% elif user.role == 'supervisor' %}
+        <a href="{% url 'homesandall:supervisor_dashboard' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'supervisor_dashboard' %}active{% endif %}">
       {% elif user.role == 'instructor' %}
         <a href="{% url 'homesandall:instructor_dashboard' %}"
            class="sidebar-link {% if request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}">
@@ -63,8 +66,8 @@
       </a>
     </li>
 
-    <!-- Trainees — admin + instructor only -->
-    {% if user.role == 'admin' or user.role == 'instructor' %}
+    <!-- Trainees — admin + supervisor + instructor only -->
+    {% if user.role == 'admin' or user.role == 'supervisor' or user.role == 'instructor' %}
     <li class="sidebar-item">
       <a href="{% url 'trainees:trainee_list' %}"
          class="sidebar-link {% if 'trainee' in request.resolver_match.url_name %}active{% endif %}">
@@ -82,8 +85,8 @@
     </li>
     {% endif %}
 
-    <!-- Instructors — admin sees full list; trainee sees browse view -->
-    {% if user.role == 'admin' %}
+    <!-- Instructors — admin + supervisor see full list; trainee sees browse view -->
+    {% if user.role == 'admin' or user.role == 'supervisor' %}
     <li class="sidebar-item">
       <a href="{% url 'instructors:instructor_list' %}"
          class="sidebar-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}">
@@ -115,8 +118,8 @@
     </li>
     {% endif %}
 
-    <!-- Vehicles — admin + instructor only -->
-    {% if user.role == 'admin' or user.role == 'instructor' %}
+    <!-- Vehicles — admin + supervisor + instructor only -->
+    {% if user.role == 'admin' or user.role == 'supervisor' or user.role == 'instructor' %}
     <li class="sidebar-item">
       <a href="{% url 'vehicles:vehicles_list' %}"
          class="sidebar-link {% if 'vehicle' in request.resolver_match.url_name %}active{% endif %}">
@@ -233,6 +236,95 @@
 
     {% endif %}
 
+    <!-- ── Supervisor-only section ───────────────── -->
+    {% if user.role == 'supervisor' %}
+
+    <li class="sidebar-section-label">Operations</li>
+
+    <!-- Schedules -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:session_list' %}"
+         class="sidebar-link {% if 'scheduling' in request.resolver_match.namespace or 'schedule' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Schedules</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Pending Approvals -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:approve' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'pending_approvals' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Pending Approvals</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Reschedule Queue -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:reschedule_queue' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'reschedule_queue' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.28"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Reschedule Queue</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Reschedule Requests -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:reschedule_requests' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'reschedule_requests' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Reschedule Requests</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Days Off -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:day_off_list' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'day_off_list' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="10" y1="15" x2="14" y2="19"/>
+            <line x1="14" y1="15" x2="10" y2="19"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Days Off</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    {% endif %}
+    
+
     <!-- ── Admin-only section ─────────────────── -->
     {% if user.role == 'admin' %}
 
@@ -255,6 +347,42 @@
       </a>
     </li>
 
+    <!-- Reschedule Requests -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:reschedule_requests' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'reschedule_requests' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Reschedule Requests</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
+    <!-- Days Off -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:day_off_list' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'day_off_list' %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="10" y1="15" x2="14" y2="19"/>
+            <line x1="14" y1="15" x2="10" y2="19"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Days Off</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
     <!-- Payments -->
     <li class="sidebar-item">
       <a href="{% url "accounting:fee_overview" %}"
@@ -265,7 +393,7 @@
             <line x1="1" y1="10" x2="23" y2="10"/>
           </svg>
         </span>
-        <span class="sidebar-label">Payments</span>
+        <span class="sidebar-label">Payments Overview</span>
         <span class="sidebar-active-bar"></span>
       </a>
     </li>

@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request Reschedule — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'RESCHEDULE';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 160px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.028);
+    pointer-events: none;
+    line-height: 1;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .page-title .hl { color: var(--yellow); }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: var(--text);
+    transition: border-color .15s, color .15s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250,204,21,0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Session summary card ── */
+  .session-summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .session-summary::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--yellow);
+  }
+  .summary-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 12px;
+  }
+  .summary-slot {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  .summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 9px;
+    white-space: nowrap;
+  }
+
+  /* ── Form section ── */
+  .form-section {
+    margin-bottom: 32px;
+  }
+  .section-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+
+  .field-group {
+    margin-bottom: 20px;
+  }
+  .field-label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .form-textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+    padding: 12px 14px;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color .15s;
+    outline: none;
+  }
+  .form-textarea::placeholder { color: var(--text-muted); }
+  .form-textarea:focus { border-color: var(--yellow-focus); }
+
+  .field-hint {
+    margin-top: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ── Notice box ── */
+  .notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 32px;
+  }
+  .notice-icon {
+    color: var(--yellow);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .notice p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-sec);
+    line-height: 1.65;
+    margin: 0;
+  }
+  .notice strong {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ── Form footer ── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    background: var(--yellow);
+    color: #000;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title   { font-size: 40px; }
+    .summary-slot { font-size: 22px; }
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Header ── #}
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Request <span class="hl">Reschedule</span></h1>
+
+  <div class="action-bar">
+    <a href="{% url 'scheduling:my_schedule' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to Schedule
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ── Session summary ── #}
+  <div class="session-summary" aria-label="Session being rescheduled">
+    <p class="summary-label">Session to Reschedule</p>
+    <p class="summary-slot">{{ session.slot.label|default:"Session" }}</p>
+    <ul class="summary-chips">
+      <li class="chip">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M2 7h12M6 2v2M10 2v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        {{ session.date|date:"l, F j, Y" }}
+      </li>
+      {% if session.vehicle %}
+      <li class="chip">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 9h10M2 11h12M4 6l1.5-3h5L12 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="4.5" cy="12.5" r="1.5" fill="currentColor"/>
+          <circle cx="11.5" cy="12.5" r="1.5" fill="currentColor"/>
+        </svg>
+        {{ session.vehicle }}
+      </li>
+      {% endif %}
+      {% if session.track %}
+      <li class="chip">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 2C5.79 2 4 3.79 4 6c0 3.5 4 8 4 8s4-4.5 4-8c0-2.21-1.79-4-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <circle cx="8" cy="6" r="1.5" fill="currentColor"/>
+        </svg>
+        {{ session.track }}
+      </li>
+      {% endif %}
+      {% if session.instructor %}
+      <li class="chip">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        {{ session.instructor }}
+      </li>
+      {% endif %}
+      <li class="chip">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M8 5v3.2l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        {{ session.get_status_display|default:"Pending" }}
+      </li>
+    </ul>
+  </div>
+
+  {# ── Notice ── #}
+  <div class="notice" role="note">
+    <span class="notice-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <p>
+      <strong>Your session will not be cancelled immediately.</strong>
+      A supervisor will review this request and notify you of the outcome.
+      If approved, your session will be cancelled and you'll be placed in the reschedule queue.
+    </p>
+  </div>
+
+  {# ── Request form ── #}
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-section">
+      <p class="section-tag">Request Details</p>
+      <p class="section-heading">Why do you need to reschedule?</p>
+
+      <div class="field-group">
+        <label for="{{ form.reason.id_for_label }}" class="field-label">
+          Reason <span style="color: var(--text-muted); font-weight: 300; text-transform: none; letter-spacing: 0;">(optional)</span>
+        </label>
+        {{ form.reason }}
+        {% if form.reason.errors %}
+          {% for error in form.reason.errors %}
+            <p class="field-hint" style="color: #ef4444;">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+        <p class="field-hint">
+          Briefly explain why you need a different session. This helps supervisors prioritise your request.
+        </p>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+    <div class="form-footer">
+      <button type="submit" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M13.5 2.5v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13.5 6.5A6 6 0 1 1 10 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Submit Request
+      </button>
+      <a href="{% url 'scheduling:my_schedule' %}" class="btn-ghost">Cancel</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

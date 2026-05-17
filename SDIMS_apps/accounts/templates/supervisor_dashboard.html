@@ -1,0 +1,982 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supervisor Dashboard — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Wrapper ───────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+
+  .page-wrapper::before {
+    content: 'OVERVIEW';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    color: rgba(255, 255, 255, 0.028);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  /* ── Page Header ────────────────────────────── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Date Banner ────────────────────────────── */
+  .date-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .date-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--yellow);
+    letter-spacing: 0.03em;
+  }
+
+  .date-badge svg { opacity: 0.7; }
+
+  /* ── Stat Cards Grid ────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.22s, transform 0.22s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+    transform: translateY(-3px);
+  }
+
+  /* yellow top-border reveal */
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--yellow);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .stat-card:hover::after { transform: scaleX(1); }
+
+  .stat-card--alert { border-color: rgba(239, 68, 68, 0.25); }
+  .stat-card--alert::after { background: #ef4444; }
+  .stat-card--alert:hover { border-color: rgba(239, 68, 68, 0.45); }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--yellow);
+    margin-bottom: 18px;
+  }
+
+  .stat-icon--alert {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .stat-value--yellow { color: var(--yellow); }
+  .stat-value--alert  { color: #f87171; }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .stat-sub {
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .stat-sub strong {
+    color: var(--text-sec);
+    font-weight: 500;
+  }
+
+  /* ── Content Grid ───────────────────────────── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  /* ── Section Title ──────────────────────────── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  /* ── Sessions Table ─────────────────────────── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-card thead {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table-card th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+  }
+
+  .table-card tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s;
+  }
+
+  .table-card tbody tr:last-child { border-bottom: none; }
+
+  .table-card tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+
+  .table-card td {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+  }
+
+  .td-primary {
+    font-weight: 500 !important;
+    color: var(--text) !important;
+  }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .status-badge--completed {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    color: var(--yellow);
+  }
+
+  .status-badge--ongoing {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-sec);
+  }
+
+  .status-badge--pending {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* Slot badge */
+  .slot-badge {
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    border-radius: 6px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    color: var(--yellow);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Avatar */
+  .avatar-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .avatar-sm {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--yellow-dim);
+    border: 1.5px solid var(--yellow-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--yellow);
+    line-height: 1;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.30);
+    margin-bottom: 8px;
+  }
+
+  .empty-state-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Right Column ───────────────────────────── */
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── Alert Cards ────────────────────────────── */
+  .alert-cards { display: flex; flex-direction: column; gap: 12px; }
+
+  .alert-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.22s, transform 0.22s;
+    text-decoration: none;
+  }
+
+  .alert-card:hover {
+    border-color: rgba(250, 204, 21, 0.18);
+    transform: translateY(-2px);
+  }
+
+  .alert-card--danger:hover {
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .alert-card-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alert-card-icon--yellow {
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    color: var(--yellow);
+  }
+
+  .alert-card-icon--danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+
+  .alert-card-body { flex: 1; min-width: 0; }
+
+  .alert-card-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .alert-card-count--yellow { color: var(--yellow); }
+  .alert-card-count--danger  { color: #f87171; }
+
+  .alert-card-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .alert-card-arrow {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: color 0.18s, transform 0.18s;
+  }
+
+  .alert-card:hover .alert-card-arrow {
+    color: var(--yellow);
+    transform: translateX(3px);
+  }
+
+  /* ── Fleet Widget ───────────────────────────── */
+  .fleet-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .fleet-ring-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .fleet-ring {
+    flex-shrink: 0;
+    position: relative;
+    width: 88px;
+    height: 88px;
+  }
+
+  .fleet-ring svg { transform: rotate(-90deg); }
+
+  .fleet-ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+  }
+
+  .fleet-ring-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--yellow);
+  }
+
+  .fleet-ring-sub {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .fleet-legend { flex: 1; }
+
+  .fleet-legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .fleet-legend-item:last-child { margin-bottom: 0; }
+
+  .fleet-legend-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-sec);
+  }
+
+  .fleet-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .fleet-dot--yellow { background: var(--yellow); }
+  .fleet-dot--muted  { background: rgba(255,255,255,0.15); }
+
+  .fleet-legend-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  /* ── Instructor Performance ─────────────────── */
+  .instructors-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .instructor-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .instructor-row:last-child { margin-bottom: 0; }
+
+  .instructor-rank {
+    flex-shrink: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    width: 18px;
+    text-align: center;
+  }
+
+  .instructor-rank--top { color: var(--yellow); }
+
+  .instructor-info { flex: 1; min-width: 0; }
+
+  .instructor-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .instructor-bar-wrap {
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .instructor-bar {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .instructor-count {
+    flex-shrink: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--text-sec);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* ── Session Progress Bar ───────────────────── */
+  .session-progress {
+    margin-bottom: 28px;
+  }
+
+  .session-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .session-progress-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .session-progress-frac {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  .session-progress-frac span { color: var(--yellow); }
+
+  .session-bar-wrap {
+    height: 6px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .session-bar {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 6px;
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── Mobile ─────────────────────────────────── */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .right-col { flex-direction: row; flex-wrap: wrap; }
+    .alert-cards { flex-direction: row; flex: 1; }
+    .alert-card { flex: 1; }
+    .fleet-card, .instructors-card { flex: 1; min-width: 280px; }
+  }
+
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-value { font-size: 36px; }
+    .right-col { flex-direction: column; }
+    .alert-cards { flex-direction: column; }
+    table th:nth-child(3),
+    table td:nth-child(3),
+    table th:nth-child(5),
+    table td:nth-child(5) { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- ── Header ───────────────────────────────── -->
+  <p class="page-label">Control Center</p>
+  <h1 class="page-title">Supervisor Dashboard</h1>
+
+  <!-- Date banner + session progress -->
+  <div class="date-banner">
+    <div class="date-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Today's Overview
+    </div>
+  </div>
+
+  <!-- Session completion progress -->
+  <div class="session-progress">
+    <div class="session-progress-header">
+      <span class="session-progress-label">Sessions Completed Today</span>
+      <span class="session-progress-frac">
+        <span>{{ sessions_completed_today }}</span> / {{ sessions_today }}
+      </span>
+    </div>
+    <div class="session-bar-wrap">
+      <div class="session-bar" style="width: {% if sessions_today > 0 %}{% widthratio sessions_completed_today sessions_today 100 %}%{% else %}0%{% endif %}"></div>
+    </div>
+  </div>
+
+  <!-- ── Stats Grid ────────────────────────────── -->
+  <div class="stats-grid">
+
+    <!-- Total Trainees -->
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="stat-value">{{ total_trainees }}</div>
+      <div class="stat-label">Total Trainees</div>
+      <p class="stat-sub"><strong>{{ active_trainees }}</strong> currently active</p>
+    </div>
+
+    <!-- Sessions Today -->
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="stat-value stat-value--yellow">{{ sessions_today }}</div>
+      <div class="stat-label">Sessions Today</div>
+      <p class="stat-sub"><strong>{{ sessions_remaining_today }}</strong> remaining</p>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="stat-card {% if pending_count > 0 %}stat-card--alert{% endif %}">
+      <div class="stat-icon {% if pending_count > 0 %}stat-icon--alert{% endif %}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="stat-value {% if pending_count > 0 %}stat-value--alert{% endif %}">{{ pending_count }}</div>
+      <div class="stat-label">Pending Approvals</div>
+      <p class="stat-sub">{% if pending_count > 0 %}<strong style="color:#f87171">Requires action</strong>{% else %}All clear{% endif %}</p>
+    </div>
+
+    <!-- Reschedule Queue -->
+    <div class="stat-card {% if reschedule_queue_count > 0 %}stat-card--alert{% endif %}">
+      <div class="stat-icon {% if reschedule_queue_count > 0 %}stat-icon--alert{% endif %}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.28"/>
+        </svg>
+      </div>
+      <div class="stat-value {% if reschedule_queue_count > 0 %}stat-value--alert{% endif %}">{{ reschedule_queue_count }}</div>
+      <div class="stat-label">Reschedule Queue</div>
+      <p class="stat-sub">{% if reschedule_queue_count > 0 %}<strong style="color:#f87171">Unresolved</strong>{% else %}Queue empty{% endif %}</p>
+    </div>
+
+    <!-- Reschedule Requests -->
+    <div class="stat-card {% if reschedule_requests_count > 0 %}stat-card--alert{% endif %}">
+      <div class="stat-icon {% if reschedule_requests_count > 0 %}stat-icon--alert{% endif %}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <div class="stat-value {% if reschedule_requests_count > 0 %}stat-value--alert{% endif %}">{{ reschedule_requests_count }}</div>
+      <div class="stat-label">Reschedule Requests</div>
+      <p class="stat-sub">{% if reschedule_requests_count > 0 %}<strong style="color:#f87171">Awaiting review</strong>{% else %}No pending requests{% endif %}</p>
+    </div>
+
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── Content Grid ──────────────────────────── -->
+  <div class="content-grid">
+
+    <!-- Left: Today's Sessions Table -->
+    <div class="left-col">
+      <p class="section-tag">Live Schedule</p>
+      <h2 class="section-heading">Today's Sessions</h2>
+
+      <div class="table-card">
+        {% if todays_sessions %}
+        <table>
+          <thead>
+            <tr>
+              <th>Slot</th>
+              <th>Trainee</th>
+              <th>Instructor</th>
+              <th>Vehicle</th>
+              <th>Track</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for session in todays_sessions %}
+            <tr>
+              <td>
+                <span class="slot-badge">{{ session.slot.slot_number }}</span>
+              </td>
+              <td>
+                <div class="avatar-cell">
+                  <div class="avatar-sm">
+                    {{ session.trainee.user.first_name|slice:":1" }}{{ session.trainee.user.last_name|slice:":1" }}
+                  </div>
+                  <span class="td-primary">
+                    {{ session.trainee.user.first_name }} {{ session.trainee.user.last_name }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="avatar-cell">
+                  <div class="avatar-sm">
+                    {{ session.instructor.user.first_name|slice:":1" }}{{ session.instructor.user.last_name|slice:":1" }}
+                  </div>
+                  {{ session.instructor.user.first_name }} {{ session.instructor.user.last_name }}
+                </div>
+              </td>
+              <td>{{ session.vehicle.brand }} {{ session.vehicle.model }}</td>
+              <td>{{ session.track }}</td>
+              <td>
+                {% if session.status == 'completed' %}
+                  <span class="status-badge status-badge--completed">
+                    <span class="status-dot"></span> Done
+                  </span>
+                {% elif session.status == 'pending' %}
+                  <span class="status-badge status-badge--pending">
+                    <span class="status-dot"></span> Pending
+                  </span>
+                {% else %}
+                  <span class="status-badge status-badge--ongoing">
+                    <span class="status-dot"></span> {{ session.status|capfirst }}
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+          <p class="empty-state-label">No Sessions Scheduled</p>
+          <p class="empty-state-sub">There are no active sessions for today.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-col">
+
+      <!-- Quick alerts -->
+      <div class="alert-cards">
+        <a href="{% url 'scheduling:approve' %}" class="alert-card {% if pending_count > 0 %}alert-card--danger{% endif %}">
+          <div class="alert-card-icon {% if pending_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--yellow{% endif %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="alert-card-body">
+            <div class="alert-card-count {% if pending_count > 0 %}alert-card-count--danger{% else %}alert-card-count--yellow{% endif %}">
+              {{ pending_count }}
+            </div>
+            <div class="alert-card-label">Pending Approvals</div>
+          </div>
+          <svg class="alert-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="{% url 'scheduling:reschedule_queue' %}" class="alert-card {% if reschedule_queue_count > 0 %}alert-card--danger{% endif %}">
+          <div class="alert-card-icon {% if reschedule_queue_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--yellow{% endif %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.28"/>
+            </svg>
+          </div>
+          <div class="alert-card-body">
+            <div class="alert-card-count {% if reschedule_queue_count > 0 %}alert-card-count--danger{% else %}alert-card-count--yellow{% endif %}">
+              {{ reschedule_queue_count }}
+            </div>
+            <div class="alert-card-label">Reschedule Queue</div>
+          </div>
+          <svg class="alert-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="{% url 'scheduling:reschedule_requests' %}" class="alert-card {% if reschedule_requests_count > 0 %}alert-card--danger{% endif %}">
+          <div class="alert-card-icon {% if reschedule_requests_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--yellow{% endif %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="alert-card-body">
+            <div class="alert-card-count {% if reschedule_requests_count > 0 %}alert-card-count--danger{% else %}alert-card-count--yellow{% endif %}">
+              {{ reschedule_requests_count }}
+            </div>
+            <div class="alert-card-label">Reschedule Requests</div>
+          </div>
+          <svg class="alert-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="{% url 'scheduling:day_off_list' %}" class="alert-card">
+          <div class="alert-card-icon alert-card-icon--yellow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="10" y1="15" x2="14" y2="19"/>
+              <line x1="14" y1="15" x2="10" y2="19"/>
+            </svg>
+          </div>
+          <div class="alert-card-body">
+            <div class="alert-card-count alert-card-count--yellow">—</div>
+            <div class="alert-card-label">Days Off</div>
+          </div>
+          <svg class="alert-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+
+      <!-- Fleet Status -->
+      <div class="fleet-card">
+        <p class="section-tag">Fleet</p>
+        <h2 class="section-heading">Vehicle Status</h2>
+
+        <div class="fleet-ring-wrap">
+          <div class="fleet-ring">
+            <svg width="88" height="88" viewBox="0 0 88 88">
+              <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+              <circle
+                cx="44" cy="44" r="36" fill="none"
+                stroke="#facc15" stroke-width="8"
+                stroke-linecap="round"
+                stroke-dasharray="226.19"
+                stroke-dashoffset="{% if total_vehicles > 0 %}{% widthratio vehicles_on_duty total_vehicles 226 %}{% else %}226{% endif %}"
+                style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1);"
+              />
+            </svg>
+            <div class="fleet-ring-label">
+              <span class="fleet-ring-num">{{ vehicles_on_duty }}</span>
+              <span class="fleet-ring-sub">on duty</span>
+            </div>
+          </div>
+
+          <div class="fleet-legend">
+            <div class="fleet-legend-item">
+              <span class="fleet-legend-left">
+                <span class="fleet-dot fleet-dot--yellow"></span> On Duty
+              </span>
+              <span class="fleet-legend-val">{{ vehicles_on_duty }}</span>
+            </div>
+            <div class="fleet-legend-item">
+              <span class="fleet-legend-left">
+                <span class="fleet-dot fleet-dot--muted"></span> Available
+              </span>
+              <span class="fleet-legend-val">{{ total_vehicles|add:"-"|add:vehicles_on_duty }}</span>
+            </div>
+            <div class="fleet-legend-item" style="margin-top:12px; padding-top:10px; border-top: 1px solid var(--border);">
+              <span class="fleet-legend-left" style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted);">Total Fleet</span>
+              <span class="fleet-legend-val">{{ total_vehicles }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructor Performance -->
+      <div class="instructors-card">
+        <p class="section-tag">This Month</p>
+        <h2 class="section-heading">Top Instructors</h2>
+
+        {% if top_instructors %}
+          {% for inst in top_instructors %}
+          <div class="instructor-row">
+            <div class="instructor-rank {% if forloop.first %}instructor-rank--top{% endif %}">
+              {{ forloop.counter }}
+            </div>
+            <div class="avatar-sm">
+              {{ inst.user.first_name|slice:":1" }}{{ inst.user.last_name|slice:":1" }}
+            </div>
+            <div class="instructor-info">
+              <div class="instructor-name">{{ inst.user.first_name }} {{ inst.user.last_name }}</div>
+              <div class="instructor-bar-wrap">
+                <div class="instructor-bar" style="width: {{ inst.sessions_pct }}%"></div>
+              </div>
+            </div>
+            <div class="instructor-count">{{ inst.sessions_this_month }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state" style="padding: 32px 0;">
+            <p class="empty-state-label" style="font-size:16px;">No Data</p>
+            <p class="empty-state-sub">No sessions recorded this month.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div><!-- /.right-col -->
+  </div><!-- /.content-grid -->
+
+</div><!-- /.page-wrapper -->
+{% endblock %}

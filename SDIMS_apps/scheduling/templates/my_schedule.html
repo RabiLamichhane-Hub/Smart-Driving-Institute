@@ -1,120 +1,125 @@
-{% extends "base_scheduling.html" %}
-{% load tz %}
+{% extends "base.html" %}
+{% load static tz %}
+
+{% block title %}My Schedule — SDIMS{% endblock %}
 
 {% block extra_css %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Geist+Mono:wght@300;400;500&display=swap');
-
-  :root {
-    --bg:       #09090b;
-    --s1:       #111113;
-    --s2:       #18181b;
-    --s3:       #27272a;
-    --b1:       #27272a;
-    --b2:       #3f3f46;
-    --text:     #fafafa;
-    --muted:    #71717a;
-    --dim:      #52525b;
-    --green:    #34d399;
-    --green-bg: rgba(52,211,153,.08);
-    --blue:     #60a5fa;
-    --blue-bg:  rgba(96,165,250,.08);
-    --amber:    #fbbf24;
-    --amber-bg: rgba(251,191,36,.08);
-    --purple:   #a78bfa;
-    --r:        10px;
-    --r-sm:     6px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
+  /* ── SDIMS Schedule Page ── */
 
   .page-wrapper {
-    max-width: 740px;
-    margin: 0 auto;
-    padding: 40px 24px 100px;
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'SCHEDULE';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.028);
+    pointer-events: none;
+    line-height: 1;
+    z-index: 0;
   }
 
   /* ── Header ── */
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--yellow);
+    flex-shrink: 0;
+    animation: blink 2.5s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .3; transform: scale(.7); }
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .page-title .hl { color: var(--yellow); }
+
   .page-header {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 40px;
-    padding-bottom: 32px;
-    border-bottom: 1px solid var(--b1);
+    margin-bottom: 32px;
   }
-  .page-eyebrow {
-    font-family: 'Geist Mono', monospace;
-    font-size: .68rem;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .live-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    flex-shrink: 0;
-    animation: blink 2.5s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.3; transform:scale(.75); } }
-
-  h1 {
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: -.04em;
-    line-height: 1;
-  }
-  h1 .hl { color: var(--green); }
-
   .page-header-date {
-    font-family: 'Geist Mono', monospace;
-    font-size: .7rem;
-    color: var(--dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
     text-align: right;
     line-height: 1.7;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
   }
 
   /* ── Stats ── */
   .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 10px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
   }
   .stat-card {
-    background: var(--s1);
-    border: 1px solid var(--b1);
-    border-radius: var(--r);
-    padding: 20px 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    transition: border-color .2s, transform .2s;
   }
-  .stat-num {
-    font-family: 'Geist Mono', monospace;
-    font-size: 2.2rem;
-    font-weight: 500;
-    line-height: 1;
-    color: var(--card-accent, var(--text));
-    margin-bottom: 7px;
+  .stat-card:hover {
+    border-color: rgba(250,204,21,0.18);
+    transform: translateY(-3px);
   }
   .stat-label {
-    font-family: 'Geist Mono', monospace;
-    font-size: .65rem;
-    letter-spacing: .14em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--card-accent, var(--text));
   }
 
   /* ── Filter bar ── */
@@ -126,25 +131,35 @@
     flex-wrap: wrap;
   }
   .filter-btn {
-    font-family: 'Geist Mono', monospace;
-    font-size: .67rem;
-    letter-spacing: .08em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: 4px;
-    border: 1px solid var(--b1);
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
     background: transparent;
-    color: var(--muted);
+    color: var(--text-muted);
     cursor: pointer;
     transition: background .15s, color .15s, border-color .15s;
   }
-  .filter-btn:hover  { background: var(--s2); color: var(--text); border-color: var(--b2); }
-  .filter-btn.active { background: var(--s3); color: var(--text); border-color: var(--b2); }
+  .filter-btn:hover {
+    background: var(--surface);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .filter-btn.active {
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border-color: var(--yellow-border);
+  }
   .filter-spacer { flex: 1; }
   .session-count {
-    font-family: 'Geist Mono', monospace;
-    font-size: .67rem;
-    color: var(--dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
   }
 
   /* ── Day group ── */
@@ -155,20 +170,22 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .day-dow {
-    font-family: 'Geist Mono', monospace;
-    font-size: .7rem;
-    letter-spacing: .12em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--text-muted);
     flex-shrink: 0;
   }
   .day-full {
-    font-size: .88rem;
-    font-weight: 500;
-    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-sec);
     flex-shrink: 0;
   }
   .today-tag {
@@ -177,25 +194,27 @@
     gap: 5px;
     padding: 3px 10px;
     border-radius: 99px;
-    font-size: .63rem;
-    font-weight: 600;
-    letter-spacing: .08em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: var(--green-bg);
-    color: var(--green);
-    border: 1px solid rgba(52,211,153,.18);
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border: 1px solid var(--yellow-border);
     flex-shrink: 0;
   }
   .today-tag::before {
     content: '';
-    width: 5px; height: 5px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: currentColor;
   }
   .day-rule {
     flex: 1;
     height: 1px;
-    background: var(--b1);
+    background: var(--border);
   }
 
   /* ── Session card ── */
@@ -204,36 +223,41 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    background: var(--s1);
-    border: 1px solid var(--b1);
-    border-radius: var(--r-sm);
-    padding: 16px 18px 16px 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px 16px 24px;
     margin-bottom: 8px;
     position: relative;
     overflow: hidden;
-    transition: background .15s, border-color .15s;
+    transition: background .15s, border-color .2s, transform .2s;
   }
-  .session-card:hover { background: var(--s2); border-color: var(--b2); }
+  .session-card:hover {
+    border-color: rgba(250,204,21,0.18);
+    transform: translateY(-2px);
+  }
   .session-card[hidden] { display: none; }
 
   .session-card::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    width: 2px;
-    background: var(--stripe, var(--b1));
+    width: 3px;
+    background: var(--stripe, var(--border));
   }
-  .session-card.status-scheduled   { --stripe: var(--green); }
-  .session-card.status-in_progress { --stripe: var(--blue); }
-  .session-card.status-pending     { --stripe: var(--amber); }
-  .session-card.status-completed   { --stripe: var(--dim); opacity: .6; }
+  .session-card.status-scheduled   { --stripe: var(--yellow); }
+  .session-card.status-in_progress { --stripe: rgba(255,255,255,0.5); }
+  .session-card.status-pending     { --stripe: rgba(255,255,255,0.2); }
+  .session-card.status-completed   { --stripe: rgba(255,255,255,0.1); opacity: .55; }
+  .session-card.status-absent      { --stripe: rgba(239,68,68,0.5); opacity: .60; }
 
   .session-body { flex: 1; min-width: 0; }
 
   .session-slot {
-    font-size: .95rem;
-    font-weight: 600;
-    letter-spacing: -.015em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
     margin-bottom: 10px;
     white-space: nowrap;
     overflow: hidden;
@@ -245,91 +269,165 @@
     flex-wrap: wrap;
     gap: 6px;
     list-style: none;
+    padding: 0;
+    margin: 0;
   }
   .chip {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-family: 'Geist Mono', monospace;
-    font-size: .7rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
     padding: 3px 9px;
-    border-radius: 4px;
-    background: var(--s3);
-    border: 1px solid var(--b1);
-    color: var(--muted);
     white-space: nowrap;
   }
 
+  /* ── Session aside (badge + button) ── */
   .session-aside {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 8px;
+    gap: 10px;
     flex-shrink: 0;
-    padding-top: 2px;
   }
 
-  /* ── Status badge ── */
   .status-badge {
-    font-family: 'Geist Mono', monospace;
-    font-size: .63rem;
-    letter-spacing: .08em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 5px;
     white-space: nowrap;
-    font-weight: 500;
     border: 1px solid transparent;
   }
-  .badge-scheduled   { background: var(--green-bg); color: var(--green); border-color: rgba(52,211,153,.15); }
-  .badge-in_progress { background: var(--blue-bg);  color: var(--blue);  border-color: rgba(96,165,250,.15); }
-  .badge-pending     { background: var(--amber-bg); color: var(--amber); border-color: rgba(251,191,36,.15); }
-  .badge-completed   { background: var(--s3); color: var(--dim); border-color: var(--b1); }
+  .badge-scheduled {
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border-color: var(--yellow-border);
+  }
+  .badge-in_progress {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .badge-pending {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  .badge-completed {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  .badge-absent {
+    background: rgba(239,68,68,0.08);
+    color: rgba(239,68,68,0.75);
+    border-color: rgba(239,68,68,0.22);
+  }
 
-  /* ── No-results ── */
+  /* ── Reschedule button ── */
+  .btn-reschedule {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: var(--text-sec);
+    white-space: nowrap;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-reschedule:hover {
+    border-color: rgba(250,204,21,0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Reschedule "requested" pill ── */
+  .badge-requested {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .badge-requested svg { opacity: 0.5; }
+
+  /* ── No results ── */
   .no-results {
     display: none;
-    padding: 40px 0;
+    padding: 48px 0;
     text-align: center;
-    font-family: 'Geist Mono', monospace;
-    font-size: .75rem;
-    letter-spacing: .12em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--text-muted);
   }
   .no-results.visible { display: block; }
 
   /* ── Empty state ── */
   .empty-card {
-    background: var(--s1);
-    border: 1px dashed var(--b1);
-    border-radius: var(--r);
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
     padding: 64px 24px;
     text-align: center;
   }
   .empty-label {
-    font-family: 'Geist Mono', monospace;
-    font-size: .75rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--muted);
     display: block;
-    margin-bottom: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.30);
+    margin-bottom: 10px;
   }
-  .empty-card p { font-size: .875rem; color: var(--dim); }
+  .empty-card p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
 
   /* ── Responsive ── */
-  @media (max-width: 520px) {
-    h1 { font-size: 1.9rem; }
-    .page-header-date { display: none; }
-    .session-card { padding: 14px 14px 14px 20px; }
-    .status-badge { display: none; }
+  @media (max-width: 768px) {
+    .page-wrapper      { padding: 28px 20px 60px; }
+    .page-title        { font-size: 40px; }
+    .page-header-date  { display: none; }
+    .session-card      { padding: 14px 14px 14px 20px; }
+    .status-badge      { display: none; }
+    .btn-reschedule,
+    .badge-requested   { font-size: 10px; padding: 4px 10px; }
   }
 </style>
 {% endblock %}
 
 
-{% block scheduling_content %}
+{% block content %}
 {% now "Y-m-d" as today_str %}
 
 <div class="page-wrapper">
@@ -337,31 +435,33 @@
   {# ── Header ── #}
   <header class="page-header">
     <div>
-      <p class="page-eyebrow">
+      <p class="page-label">
         <span class="live-dot" aria-hidden="true"></span>
-        Live schedule
+        Live Schedule
       </p>
-      <h1>My <span class="hl">Schedule</span></h1>
+      <h1 class="page-title">My <span class="hl">Schedule</span></h1>
     </div>
     <p class="page-header-date" aria-label="Today's date">
       {% now "l" %}<br>{% now "N j, Y" %}
     </p>
   </header>
 
+  <hr class="section-divider">
+
   {% if sessions %}
 
   {# ── Stats ── #}
   <dl class="stats-row" aria-label="Schedule summary">
-    <div class="stat-card" style="--card-accent: var(--blue);">
+    <div class="stat-card" style="--card-accent: var(--yellow);">
       <dt class="stat-label">Upcoming</dt>
       <dd class="stat-num">{{ sessions|length }}</dd>
     </div>
-    <div class="stat-card" style="--card-accent: var(--green);">
+    <div class="stat-card" style="--card-accent: var(--text);">
       <dt class="stat-label">Today</dt>
       <dd class="stat-num">{{ today_count }}</dd>
     </div>
     {% if role == 'instructor' %}
-    <div class="stat-card" style="--card-accent: var(--purple);">
+    <div class="stat-card" style="--card-accent: var(--text-sec);">
       <dt class="stat-label">Trainees</dt>
       <dd class="stat-num">{{ trainee_count }}</dd>
     </div>
@@ -372,9 +472,10 @@
   <div class="filter-bar" role="group" aria-label="Filter sessions by status">
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="scheduled">Scheduled</button>
-    <button class="filter-btn" data-filter="in_progress">In progress</button>
+    <button class="filter-btn" data-filter="in_progress">In Progress</button>
     <button class="filter-btn" data-filter="pending">Pending</button>
     <button class="filter-btn" data-filter="completed">Completed</button>
+    <button class="filter-btn" data-filter="absent">Absent</button>
     <span class="filter-spacer"></span>
     <span class="session-count" id="session-count" aria-live="polite">
       {{ sessions|length }} session{{ sessions|length|pluralize }}
@@ -450,9 +551,37 @@
         </div>
 
         <aside class="session-aside">
+          {# Status badge — always shown #}
           <span class="status-badge badge-{{ session.status }}" role="status">
             {{ session.get_status_display|default:"Pending" }}
           </span>
+
+          {# Reschedule button — trainees only, reschedulable statuses only #}
+          {% if role == 'trainee' and session.status in 'scheduled,pending' %}
+            {% if session.pk in pending_request_session_ids %}
+              {# Already has a pending request — show muted indicator #}
+              <span class="badge-requested" aria-label="Reschedule already requested">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M8 5v3.5l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Requested
+              </span>
+            {% else %}
+              {# No pending request yet — show the action link #}
+              <a
+                href="{% url 'scheduling:reschedule_request' session.pk %}"
+                class="btn-reschedule"
+                aria-label="Request reschedule for this session"
+              >
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M13.5 2.5v4h-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13.5 6.5A6 6 0 1 1 10 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                Reschedule
+              </a>
+            {% endif %}
+          {% endif %}
         </aside>
       </article>
       {% endfor %}
@@ -466,7 +595,7 @@
   {% else %}
 
   <div class="empty-card" role="status">
-    <span class="empty-label">No sessions</span>
+    <span class="empty-label">No Sessions</span>
     <p>Nothing scheduled yet — check back later.</p>
   </div>
 
@@ -474,6 +603,10 @@
 
 </div>
 
+{% endblock %}
+
+
+{% block extra_js %}
 <script>
 (function () {
   'use strict';
@@ -521,4 +654,3 @@
 }());
 </script>
 {% endblock %}
-

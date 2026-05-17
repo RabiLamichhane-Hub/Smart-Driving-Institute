@@ -19,8 +19,9 @@
   <!-- Toolbar -->
   <div class="list-toolbar">
     <p class="record-count">
-      <span class="count-num">{{ fee_records|length }}</span>
-      fee record{{ fee_records|length|pluralize }}
+      <span class="count-num">{{ trainees|length }}</span>
+      trainee{{ trainees|length|pluralize }}
+      {% if search_query %}<span class="search-hint"> for "{{ search_query }}"</span>{% endif %}
     </p>
     <div class="toolbar-actions">
       <a href="{% url 'accounting:expense_list' %}" class="btn-ghost">
@@ -34,6 +35,27 @@
     </div>
   </div>
 
+  <!-- Search bar -->
+  <form method="get" action="" class="search-form">
+    <div class="search-wrap">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input
+        type="text"
+        name="q"
+        value="{{ search_query }}"
+        placeholder="Search trainee by name…"
+        class="search-input"
+        autocomplete="off"
+      >
+      {% if search_query %}
+      <a href="?" class="search-clear" title="Clear search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </a>
+      {% endif %}
+      <button type="submit" class="search-btn">Search</button>
+    </div>
+  </form>
+
   <!-- Django messages -->
   {% if messages %}
     <div class="messages-block">
@@ -43,111 +65,212 @@
     </div>
   {% endif %}
 
-  <!-- Fee cards -->
+  <!-- Fee Table -->
   {% if fee_records %}
-  <div class="fee-grid">
+  <div class="table-wrap">
+    <table class="fee-table">
+      <thead>
+        <tr>
+          <th>Trainee</th>
+          <th>Course</th>
+          <th class="col-num">Course Fee</th>
+          <th class="col-num">Paid</th>
+          <th class="col-num">Remaining</th>
+          <th>Progress</th>
+          <th>Status</th>
+          <th class="col-action"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in fee_records %}
+        <tr class="fee-row">
 
-    {% for record in fee_records %}
-    <div class="fee-card">
+          <!-- Trainee -->
+          <td>
+            <div class="trainee-cell">
+              <div class="avatar">{{ record.trainee|truncatechars:1 }}</div>
+              <span class="trainee-name">{{ record.trainee }}</span>
+            </div>
+          </td>
 
-      <!-- Top accent bar via ::before -->
-
-      <!-- Card header: trainee + course + status -->
-      <div class="card-header">
-        <div class="header-left">
-          <div class="avatar">
-            {{ record.trainee|truncatechars:1 }}
-          </div>
-          <div class="header-identity">
-            <span class="trainee-name">{{ record.trainee }}</span>
+          <!-- Course — always present on FeeRecord -->
+          <td>
             <span class="course-name">{{ record.course }}</span>
-          </div>
-        </div>
-        <span class="status-pill status-{{ record.get_status_display|lower|slugify }}">
-          {{ record.get_status_display }}
-        </span>
-      </div>
+          </td>
 
-      <div class="card-divider"></div>
+          <!-- Course Fee — always present -->
+          <td class="col-num">
+            <span class="amt-base">Rs. {{ record.final_fee }}</span>
+            {% if record.discount_amount %}
+            <span class="amt-discount" title="Discount applied">− Rs. {{ record.discount_amount }}</span>
+            {% endif %}
+          </td>
 
-      <!-- Fee breakdown -->
-      <div class="fee-breakdown">
+          <!-- Paid — 0 if no payments yet -->
+          <td class="col-num">
+            <span class="amt-paid {% if record.total_paid == 0 %}amt-zero{% endif %}">
+              Rs. {{ record.total_paid }}
+            </span>
+          </td>
 
-        <div class="breakdown-row">
-          <span class="breakdown-label">Total Fee</span>
-          <span class="breakdown-value">Rs. {{ record.total_fee }}</span>
-        </div>
-
-        {% if record.discount_amount %}
-        <div class="breakdown-row breakdown-discount">
-          <span class="breakdown-label">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
-            Discount
-          </span>
-          <span class="breakdown-value discount-val">− Rs. {{ record.discount_amount }}</span>
-        </div>
-        {% endif %}
-
-        <div class="breakdown-row breakdown-final">
-          <span class="breakdown-label">Final Fee</span>
-          <span class="breakdown-value final-val">Rs. {{ record.final_fee }}</span>
-        </div>
-
-      </div>
-
-      <div class="card-divider"></div>
-
-      <!-- Payment progress -->
-      <div class="payment-section">
-
-        <div class="payment-numbers">
-          <div class="payment-item">
-            <span class="payment-label">Paid</span>
-            <span class="payment-paid">Rs. {{ record.total_paid }}</span>
-          </div>
-          <div class="payment-item payment-item-right">
-            <span class="payment-label">Remaining</span>
-            <span class="payment-remaining {% if record.remaining == 0 %}remaining-clear{% endif %}">
+          <!-- Remaining -->
+          <td class="col-num">
+            <span class="amt-remaining {% if record.remaining == 0 %}remaining-clear{% endif %}">
               Rs. {{ record.remaining }}
             </span>
-          </div>
-        </div>
+          </td>
 
-        <!-- Progress bar -->
-        {% if record.final_fee %}
-        <div class="progress-track">
-          <div class="progress-fill"
-               style="width: {% widthratio record.total_paid record.final_fee 100 %}%">
-          </div>
-        </div>
-        <div class="progress-label">
-          {% widthratio record.total_paid record.final_fee 100 %}% paid
-        </div>
-        {% endif %}
+          <!-- Progress -->
+          <td class="col-progress">
+            {% if record.final_fee %}
+            <div class="progress-track">
+              <div class="progress-fill" style="width: {% widthratio record.total_paid record.final_fee 100 %}%"></div>
+            </div>
+            <span class="progress-label">{% widthratio record.total_paid record.final_fee 100 %}%</span>
+            {% else %}
+            <span class="progress-label">—</span>
+            {% endif %}
+          </td>
 
-      </div>
+          <!-- Status -->
+          <td>
+            <span class="status-pill status-{{ record.get_status_display|lower|slugify }}">
+              {{ record.get_status_display }}
+            </span>
+          </td>
 
-      <!-- Add payment CTA -->
-      <div class="card-footer">
-        <a href="{% url 'accounting:add_payment' record.trainee.pk %}" class="btn-payment">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Add Payment
-        </a>
-      </div>
+          <!-- Action -->
+          <td class="col-action">
+            <a href="{% url 'accounting:add_payment' record.trainee.pk %}" class="btn-payment">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Add Payment
+            </a>
+          </td>
 
-    </div>
-    {% endfor %}
-
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+
+  <!-- ── Unpaid / Partial Section ── -->
+  {% if unpaid_records %}
+  <div class="unpaid-section">
+
+    <div class="unpaid-header">
+      <div class="unpaid-header-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span class="unpaid-title">Outstanding Dues</span>
+        <span class="unpaid-count">{{ unpaid_records|length }} trainee{{ unpaid_records|length|pluralize }}</span>
+      </div>
+      <div class="unpaid-total-badge">
+        Total Unpaid: <strong>Rs. {{ total_outstanding }}</strong>
+      </div>
+    </div>
+
+    <div class="table-wrap unpaid-table-wrap">
+      <table class="fee-table">
+        <thead>
+          <tr>
+            <th>Trainee</th>
+            <th>Course</th>
+            <th class="col-num">Course Fee</th>
+            <th class="col-num">Paid</th>
+            <th class="col-num">Outstanding</th>
+            <th>Progress</th>
+            <th>Status</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in unpaid_records %}
+          <tr class="fee-row unpaid-row">
+
+            <!-- Trainee -->
+            <td>
+              <div class="trainee-cell">
+                <div class="avatar avatar-unpaid">{{ record.trainee|truncatechars:1 }}</div>
+                <span class="trainee-name">{{ record.trainee }}</span>
+              </div>
+            </td>
+
+            <!-- Course -->
+            <td>
+              <span class="course-name">{{ record.course }}</span>
+            </td>
+
+            <!-- Course Fee -->
+            <td class="col-num">
+              <span class="amt-base">Rs. {{ record.final_fee }}</span>
+              {% if record.discount_amount %}
+              <span class="amt-discount" title="Discount applied">− Rs. {{ record.discount_amount }}</span>
+              {% endif %}
+            </td>
+
+            <!-- Paid -->
+            <td class="col-num">
+              <span class="amt-paid {% if record.total_paid == 0 %}amt-zero{% endif %}">
+                Rs. {{ record.total_paid }}
+              </span>
+            </td>
+
+            <!-- Outstanding / Remaining -->
+            <td class="col-num">
+              <span class="amt-outstanding">Rs. {{ record.remaining }}</span>
+            </td>
+
+            <!-- Progress -->
+            <td class="col-progress">
+              {% if record.final_fee %}
+              <div class="progress-track">
+                <div class="progress-fill unpaid-progress-fill" style="width: {% widthratio record.total_paid record.final_fee 100 %}%"></div>
+              </div>
+              <span class="progress-label">{% widthratio record.total_paid record.final_fee 100 %}%</span>
+              {% else %}
+              <span class="progress-label">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span class="status-pill status-{{ record.get_status_display|lower|slugify }}">
+                {{ record.get_status_display }}
+              </span>
+            </td>
+
+            <!-- Action -->
+            <td class="col-action">
+              <a href="{% url 'accounting:add_payment' record.trainee.pk %}" class="btn-payment btn-payment-urgent">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Collect Now
+              </a>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
 
   {% else %}
   <!-- Empty state -->
   <div class="empty-state">
     <div class="empty-icon">
+      {% if search_query %}
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      {% else %}
       <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      {% endif %}
     </div>
+    {% if search_query %}
+    <p class="empty-title">No Results</p>
+    <p class="empty-sub">No trainee matches "{{ search_query }}". <a href="?" class="empty-reset">Clear search</a></p>
+    {% else %}
     <p class="empty-title">No Fee Records</p>
     <p class="empty-sub">Fee records will appear here once trainees are enrolled.</p>
+    {% endif %}
   </div>
   {% endif %}
 
@@ -322,64 +445,174 @@
     color: rgba(255,255,255,0.75);
   }
 
-  /* ── Fee grid ── */
-  .fee-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
+  /* ── Search bar ── */
+  .search-form {
+    margin-bottom: 24px;
     position: relative;
     z-index: 1;
   }
 
-  /* ── Fee card ── */
-  .fee-card {
-    background: #1a1a1a;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 22px 22px 18px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: border-color 0.22s ease, transform 0.22s ease;
-  }
-
-  .fee-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: #facc15;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.28s ease;
-  }
-
-  .fee-card:hover {
-    border-color: rgba(250,204,21,0.25);
-    transform: translateY(-3px);
-  }
-
-  .fee-card:hover::before {
-    transform: scaleX(1);
-  }
-
-  /* ── Card header ── */
-  .card-header {
+  .search-wrap {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 0 6px 0 14px;
+    transition: border-color 0.18s, background 0.18s;
   }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
+  .search-wrap:focus-within {
+    border-color: rgba(250,204,21,0.45);
+    background: rgba(255,255,255,0.055);
+  }
+
+  .search-icon {
+    color: rgba(255,255,255,0.28);
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+
+  .search-input {
     flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: #ffffff;
+    padding: 11px 0;
+    min-width: 0;
   }
+
+  .search-input::placeholder { color: rgba(255,255,255,0.28); }
+
+  .search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.30);
+    padding: 6px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+
+  .search-clear:hover { color: #f87171; background: rgba(248,113,113,0.08); }
+
+  .search-btn {
+    flex-shrink: 0;
+    background: #facc15;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 18px;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background 0.16s, transform 0.14s;
+  }
+
+  .search-btn:hover { background: #eab308; transform: translateY(-1px); }
+
+  .search-hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.28);
+    font-style: italic;
+  }
+
+  /* ── No-record row ── */
+  .row-no-record { opacity: 0.52; }
+  .muted { color: rgba(255,255,255,0.25) !important; }
+
+  .status-no-record {
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.28);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .empty-reset {
+    color: #facc15;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .empty-reset:hover { text-decoration: underline; }
+
+  /* ── Fee table ── */
+  .table-wrap {
+    position: relative;
+    z-index: 1;
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.09);
+    background: rgba(255,255,255,0.025);
+  }
+
+  .fee-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .fee-table thead tr {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .fee-table thead th {
+    padding: 14px 18px;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: rgba(255,255,255,0.30);
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .fee-row {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.16s ease;
+  }
+
+  .fee-row:last-child { border-bottom: none; }
+  .fee-row:hover { background: rgba(255,255,255,0.03); }
+
+  .fee-table tbody td {
+    padding: 14px 18px;
+    vertical-align: middle;
+  }
+
+  .col-num { text-align: right; }
+  .col-num .amt-base,
+  .col-num .amt-paid,
+  .col-num .amt-remaining { display: block; }
+  .col-num .amt-discount {
+    display: block;
+    font-size: 11px;
+    color: #4ade80;
+    margin-top: 2px;
+  }
+
+  .col-progress { min-width: 130px; }
+  .col-action   { width: 1%; white-space: nowrap; text-align: right; }
+
+  .amt-base      { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.80); }
+  .amt-paid      { font-size: 13px; font-weight: 600; color: #4ade80; }
+  .amt-remaining { font-size: 13px; font-weight: 600; color: #f87171; }
+  .remaining-clear { color: rgba(255,255,255,0.28) !important; }
+
+  .trainee-cell {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  /* placeholder so existing selectors below don't break */
+  .card-header, .header-left { display: none; }
 
   .avatar {
     width: 40px;
@@ -627,13 +860,113 @@
     margin: 0;
   }
 
+  /* ── Unpaid / Outstanding section ── */
+  .unpaid-section {
+    margin-top: 52px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .unpaid-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .unpaid-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f87171;
+  }
+
+  .unpaid-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: #f87171;
+    line-height: 1;
+  }
+
+  .unpaid-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(248,113,113,0.65);
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 5px;
+    padding: 3px 8px;
+  }
+
+  .unpaid-total-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    background: rgba(248,113,113,0.07);
+    border: 1px solid rgba(248,113,113,0.18);
+    border-radius: 8px;
+    padding: 7px 16px;
+  }
+
+  .unpaid-total-badge strong {
+    color: #f87171;
+    font-weight: 600;
+  }
+
+  .unpaid-table-wrap {
+    border-color: rgba(248,113,113,0.18) !important;
+    background: rgba(248,113,113,0.025) !important;
+  }
+
+  .unpaid-row:hover {
+    background: rgba(248,113,113,0.04) !important;
+  }
+
+  .avatar-unpaid {
+    background: rgba(248,113,113,0.10) !important;
+    border-color: rgba(248,113,113,0.28) !important;
+    color: #f87171 !important;
+  }
+
+  .amt-outstanding {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f87171;
+  }
+
+  .unpaid-progress-fill {
+    background: #f87171 !important;
+  }
+
+  .btn-payment-urgent {
+    background: rgba(248,113,113,0.10) !important;
+    color: #f87171 !important;
+    border-color: rgba(248,113,113,0.28) !important;
+  }
+
+  .btn-payment-urgent:hover {
+    background: rgba(248,113,113,0.18) !important;
+    border-color: rgba(248,113,113,0.45) !important;
+  }
+
+  .amt-zero {
+    color: rgba(255,255,255,0.25) !important;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .fee-section { padding: 36px 20px 60px; }
     .ghost-text { font-size: 100px; }
     .list-toolbar { flex-direction: column; align-items: flex-start; gap: 14px; }
     .toolbar-actions { width: 100%; }
-    .fee-grid { grid-template-columns: 1fr; }
+    .table-wrap { border-radius: 0; }
   }
 </style>
 

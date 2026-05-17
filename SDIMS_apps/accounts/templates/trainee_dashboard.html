@@ -332,6 +332,34 @@
     color: var(--muted);
   }
 
+  /* ── Trainee photo ── */
+  .profile-photo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .profile-photo {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--yellow);
+    box-shadow: 0 0 0 4px rgba(250,204,21,0.12);
+    background: var(--surface);
+  }
+  .profile-photo-fallback {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 2px solid var(--yellow);
+    box-shadow: 0 0 0 4px rgba(250,204,21,0.12);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--yellow);
+  }
+
   /* ── Section spacing ── */
   .section { margin-top: 36px; }
   .divider  { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
@@ -395,6 +423,15 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         My Profile
       </p>
+      <div class="profile-photo-wrap">
+        {% if trainee.images %}
+          <img src="{{ trainee.images.url }}" alt="{{ trainee.user.first_name }} {{ trainee.user.last_name }}" class="profile-photo">
+        {% else %}
+          <div class="profile-photo-fallback">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+        {% endif %}
+      </div>
       <div class="info-row"><span class="info-label">Name</span>        <span class="info-value">{{ trainee.user.first_name }} {{ trainee.user.last_name }}</span></div>
       <div class="info-row"><span class="info-label">Email</span>       <span class="info-value">{{ trainee.user.email }}</span></div>
       <div class="info-row"><span class="info-label">Phone</span>       <span class="info-value">{{ trainee.user.phone }}</span></div>

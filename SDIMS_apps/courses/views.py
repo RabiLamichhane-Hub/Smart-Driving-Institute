@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from SDIMS_apps.accounts.decorators import role_required
 from SDIMS_apps.vehicles.models import Vehicle
@@ -29,7 +29,7 @@ def add_course(request):
 @login_required
 @role_required(['admin'])
 def edit_course(request, pk):
-    course = Course.objects.get(pk=pk)
+    course = get_object_or_404(Course, pk=pk)
     if request.method == 'POST':
         form = CourseForm(request.POST, instance=course)
         if form.is_valid():

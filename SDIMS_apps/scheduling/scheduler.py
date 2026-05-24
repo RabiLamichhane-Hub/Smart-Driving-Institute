@@ -6,7 +6,6 @@ The core scheduling engine for SDIMS.
 Entry point:  run_scheduler(target_date, triggered_by=None)
 
 Called by:
-  - Celery beat task (daily, automated)
   - Manual trigger view (POST /scheduling/run-scheduler/)
 
 The entire run executes inside a single database transaction.
@@ -35,6 +34,7 @@ from .models import (
 logger = logging.getLogger(__name__)
 User   = get_user_model()
 
+
 def is_working_day(target_date: date_type) -> bool:
     """
     Returns True only when the given date is a working day:
@@ -49,7 +49,59 @@ def is_working_day(target_date: date_type) -> bool:
     from .models import HolidayOrDayOff
     return not HolidayOrDayOff.objects.filter(date=target_date).exists()
 
+
+# ---------------------------------------------------------------------------
+# FIX Bug 1 + Bug 2 — Single source of truth for capacity maths
+# ---------------------------------------------------------------------------
+
+def compute_slot_capacities(config):
+    """
+    Return (course_reserved, independent_base) for any given day.
+
+    This is the SINGLE authoritative calculation used by both the scheduler
+    (_build_capacity_map) and the public vacancy display (views._build_public_vacancy).
+    Having it in one place ensures both consumers are always in sync.
+
+    Formula
+    -------
+    track_capacity      = active_tracks  × 2   (2 vehicles per track)
+    guided_total        = min(track_capacity, active_vehicles, active_instructors)
+    unguided_total      = min(track_capacity, active_vehicles)
+
+    course_reserved     = round(guided_total  × course_capacity_pct)
+                          — zero when guided_total is zero (no max(1, …) floor)
+    independent_base    = max(0, unguided_total - course_reserved)
+
+    FIX Bug 1: the old code used max(1, round(...)) which forced course_reserved
+    to at least 1 even when there were zero guided resources, making
+    independent_base always 0 on small / empty setups.
+    """
+    from SDIMS_apps.vehicles.models import Vehicle
+    from SDIMS_apps.instructors.models import Instructor
+    import math
+
+    tracks             = list(Track.objects.filter(status='active'))
+    active_vehicles    = Vehicle.objects.filter(status='available').count()
+    active_instructors = Instructor.objects.filter(status='active').count()
+    active_tracks      = len(tracks)
+
+    track_capacity   = active_tracks * 2
+    guided_total     = min(track_capacity, active_vehicles, active_instructors)
+    unguided_total   = min(track_capacity, active_vehicles)
+
+    # Use int() (floor), NOT round(), so the course reservation is always
+    # rounded DOWN.  round() was the root cause of independent_base=0 on
+    # small resource pools: round(1 × 0.70) = 1, stealing the only slot.
+    # int(1 × 0.70) = 0, correctly leaving 1 slot for walk-ins.
+    course_reserved = math.ceil(guided_total * config.course_capacity_pct) if guided_total > 0 else 0
+    independent_base = max(0, unguided_total - course_reserved)
+
+    return course_reserved, independent_base
+
+
+# ---------------------------------------------------------------------------
 # Public entry point
+# ---------------------------------------------------------------------------
 
 def run_scheduler(target_date: date_type, triggered_by=None) -> DailyScheduleRun | None:
     """
@@ -89,7 +141,9 @@ def run_scheduler(target_date: date_type, triggered_by=None) -> DailyScheduleRun
     return run
 
 
+# ---------------------------------------------------------------------------
 # Internal execution (wrapped in a transaction)
+# ---------------------------------------------------------------------------
 
 @transaction.atomic
 def _execute(target_date: date_type, run: DailyScheduleRun):
@@ -105,14 +159,10 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
     notes  = []
     slots  = list(TimeSlot.objects.order_by('slot_number'))
 
-    
     # Step 1: Build capacity map for the day
-    
     capacity_map = _build_capacity_map(target_date, slots, config)
 
-    
     # Step 2: Identify available resources
-    
     available_vehicles    = list(Vehicle.objects.filter(status='available'))
     available_instructors = list(
         Instructor.objects.filter(status='active')
@@ -127,9 +177,7 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
         notes.append("WARNING: No active tracks found. No sessions created.")
         return [], notes
 
-    
     # Step 3: Collect trainees to schedule — in priority order
-    
 
     # Priority 1: Reschedule queue (unresolved, under attempt limit)
     reschedule_entries = list(
@@ -164,9 +212,7 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
         ).order_by('id')
     )
 
-    
     # Step 4: Process each group — collect built sessions
-    
     built_sessions  = []   # list of (Session instance, RescheduleQueue entry or None)
 
     # --- 4a. Reschedule queue ---
@@ -177,7 +223,8 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
             continue
 
         trainee_type = 'course' if trainee.course_id else 'independent'
-        slot = _find_slot(trainee, target_date, capacity_map, trainee_type)
+        # FIX: pass the authoritative slots list so _find_slot never re-queries the DB
+        slot = _find_slot(trainee, capacity_map, trainee_type, slots)
         if not slot:
             entry.increment_attempt()
             notes.append(
@@ -211,7 +258,8 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
         if _trainee_at_daily_limit(trainee, target_date, built_sessions, config):
             continue
 
-        slot = _find_slot(trainee, target_date, capacity_map, trainee_type='course')
+        # FIX: pass the authoritative slots list so _find_slot never re-queries the DB
+        slot = _find_slot(trainee, capacity_map, trainee_type='course', slots=slots)
         if not slot:
             notes.append(f"SKIP (course): No available slot for {trainee}.")
             continue
@@ -236,7 +284,8 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
         if _trainee_at_daily_limit(trainee, target_date, built_sessions, config):
             continue
 
-        slot = _find_slot(trainee, target_date, capacity_map, trainee_type='independent')
+        # FIX: pass the authoritative slots list so _find_slot never re-queries the DB
+        slot = _find_slot(trainee, capacity_map, trainee_type='independent', slots=slots)
         if not slot:
             notes.append(f"SKIP (independent): No available slot for {trainee}.")
             continue
@@ -256,12 +305,10 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
         if session:
             built_sessions.append((session, None))
 
-    
     # Step 5: FIX [Bug 1] — Save each session individually so that
     #         Session.clean() (full_clean) is always called.
     #         bulk_create skips clean() entirely, which bypassed all
     #         model-level validation (track capacity, daily limits, etc.)
-    
     saved_sessions = []
     for session, reschedule_entry in built_sessions:
         try:
@@ -295,14 +342,15 @@ def _execute(target_date: date_type, run: DailyScheduleRun):
     return saved_sessions, notes
 
 
+# ---------------------------------------------------------------------------
 # Capacity map
+# ---------------------------------------------------------------------------
 
 def _build_capacity_map(target_date, slots, config):
     """
     Build an in-memory dict tracking remaining capacity per slot.
     Accounts for sessions already existing for target_date (e.g. from a
     previous partial run or manually created sessions).
-
 
     Structure per slot_id:
     {
@@ -313,30 +361,11 @@ def _build_capacity_map(target_date, slots, config):
         'track_usage':            {track_id: count},   # max 2 per track
     }
     """
-    from SDIMS_apps.vehicles.models import Vehicle
-    from SDIMS_apps.instructors.models import Instructor
-
     tracks = list(Track.objects.filter(status='active'))
 
-    active_vehicles     = Vehicle.objects.filter(status='available').count()
-    active_instructors = Instructor.objects.filter(status='active').count()
-    active_tracks = len(tracks)
-
-    track_capacity      = active_tracks * 2        # 2 vehicles per track
-    vehicle_capacity    = active_vehicles
-    instructor_capacity = active_instructors
-
-    # Guided sessions need track + vehicle + instructor
-    guided_total   = min(track_capacity, vehicle_capacity, instructor_capacity)
-
-    # FIX [Bug 5]: Unguided/independent sessions only need track + vehicle
-    unguided_total = min(track_capacity, vehicle_capacity)
-
-    # Course slots reserved from guided capacity
-    course_reserved = max(1, round(guided_total * config.course_capacity_pct))
-    # Independent slots come from unguided capacity, minus what course already uses
-    # (course trainees also occupy tracks/vehicles even though they're guided)
-    independent_reserved = max(0, unguided_total - course_reserved)
+    # FIX Bug 1 + Bug 2: delegate to shared helper so the formula lives in
+    # exactly one place and the max(1, …) floor bug cannot recur here.
+    course_reserved, independent_reserved = compute_slot_capacities(config)
 
     capacity_map = {}
     for slot in slots:
@@ -372,18 +401,46 @@ def _build_capacity_map(target_date, slots, config):
         else:
             cap['independent_remaining'] = max(0, cap['independent_remaining'] - 1)
 
+    # Also deduct confirmed PublicBookings (walk-in / pay-per-session).
+    # These consume independent capacity and their assigned resources.
+    from .models import PublicBooking
+    confirmed_public = PublicBooking.objects.filter(
+        date=target_date,
+        status__in=('confirmed', 'completed'),
+    ).values('slot_id', 'vehicle_id', 'instructor_id', 'track_id')
+
+    for pb in confirmed_public:
+        sid = pb['slot_id']
+        if sid not in capacity_map:
+            continue
+        cap = capacity_map[sid]
+        cap['independent_remaining'] = max(0, cap['independent_remaining'] - 1)
+        if pb['vehicle_id']:
+            cap['booked_vehicle_ids'].add(pb['vehicle_id'])
+        if pb['instructor_id']:
+            cap['booked_instructor_ids'].add(pb['instructor_id'])
+        if pb['track_id']:
+            cap['track_usage'][pb['track_id']] += 1
+
     return capacity_map
 
 
+# ---------------------------------------------------------------------------
 # Slot finder — preferred slots first, then nearest-available fallback
+# ---------------------------------------------------------------------------
 
-def _find_slot(trainee, target_date, capacity_map, trainee_type):
+def _find_slot(trainee, capacity_map, trainee_type, slots):
     """
     Try the trainee's preferred slots in priority order.
     If all are full, expand outward from the top preference:
         earlier → later → earlier → later …
 
     Returns a TimeSlot instance or None.
+
+    FIX: accepts the authoritative `slots` list built at the start of _execute
+    rather than re-querying TimeSlot from the DB. This ensures _find_slot only
+    ever considers slots that exist in capacity_map, preventing valid slots from
+    being silently treated as full due to a missing capacity_map entry.
     """
     preferences = list(
         trainee.slot_preferences.select_related('slot').order_by('priority')
@@ -394,18 +451,22 @@ def _find_slot(trainee, target_date, capacity_map, trainee_type):
         if _slot_has_capacity(pref.slot, capacity_map, trainee_type):
             return pref.slot
 
+    # Build a slot_number → slot lookup from the authoritative list
+    all_slots = {s.slot_number: s for s in slots}
+    max_slot  = max(all_slots.keys(), default=0)
+
+    if not max_slot:
+        return None
+
     # No preferred slot available — expand outward from top preference
     if not preferences:
         # Trainee has no preferences — try all slots in order
-        for slot in TimeSlot.objects.order_by('slot_number'):
+        for slot in sorted(slots, key=lambda s: s.slot_number):
             if _slot_has_capacity(slot, capacity_map, trainee_type):
                 return slot
         return None
 
-    base_num  = preferences[0].slot.slot_number
-    all_slots = {s.slot_number: s for s in TimeSlot.objects.all()}
-    max_slot  = max(all_slots.keys(), default=8)  # dynamic — respects however many slots exist
-
+    base_num = preferences[0].slot.slot_number
     low  = base_num - 1
     high = base_num + 1
 
@@ -434,7 +495,9 @@ def _slot_has_capacity(slot, capacity_map, trainee_type):
     return cap['independent_remaining'] > 0
 
 
+# ---------------------------------------------------------------------------
 # Resource assignment — builds an unsaved Session
+# ---------------------------------------------------------------------------
 
 def _build_session(
     trainee, slot, target_date, capacity_map,
@@ -453,11 +516,7 @@ def _build_session(
     session_type = _determine_session_type(trainee)
 
     # Pick vehicle (matching course vehicle type if applicable)
-    required_vehicle_type = (
-        trainee.course.vehicle_type
-        if (hasattr(trainee, 'course') and trainee.course)
-        else None
-    )
+    required_vehicle_type = trainee.effective_vehicle_type
     vehicle = _pick_vehicle(vehicles, cap, required_vehicle_type)
     if not vehicle:
         notes.append(
@@ -467,9 +526,12 @@ def _build_session(
         return None
 
     # Pick track (least loaded that has room)
-    track = _pick_track(tracks, cap)
+    track = _pick_track(tracks, cap, vehicle)
     if not track:
-        notes.append(f"SKIP: No available track for {trainee} in {slot}.")
+        notes.append(
+            f"SKIP: No compatible track for {trainee}'s {vehicle.vehicle_type} "
+            f"in {slot}."
+        )
         return None
 
     # Pick instructor (guided only)
@@ -515,18 +577,19 @@ def _build_session(
     )
 
 
+# ---------------------------------------------------------------------------
 # Helper pickers
+# ---------------------------------------------------------------------------
 
 def _determine_session_type(trainee):
     """
-    Guided  → beginner or intermediate course level.
-    Unguided → advanced course level or independent (no course).
+    Uses the trainee's effective_guidance property which respects:
+      1. Manual override by supervisor/admin  (guided / free)
+      2. Auto-policy based on course level    (beginner/intermediate → guided)
+      3. Default 'free' for independent trainees
     """
-    if hasattr(trainee, 'course') and trainee.course:
-        if trainee.course.level in ('Beginner', 'Intermediate'):
-            return 'guided'
-        return 'unguided'
-    return 'unguided'
+    guidance = trainee.effective_guidance
+    return 'guided' if guidance == 'guided' else 'unguided'
 
 
 def _pick_vehicle(vehicles, cap, required_type=None):
@@ -540,12 +603,12 @@ def _pick_vehicle(vehicles, cap, required_type=None):
     return None
 
 
-def _pick_track(tracks, cap):
-    """
-    Return the active track with the least current usage that still has
-    room (track capacity = 2 vehicles per slot).
-    """
-    available = [t for t in tracks if cap['track_usage'][t.id] < 2]
+def _pick_track(tracks, cap, vehicle):
+    available = [
+        t for t in tracks
+        if cap['track_usage'][t.id] < 2
+        and t.is_compatible_with(vehicle.vehicle_type)
+    ]
     if not available:
         return None
     return min(available, key=lambda t: cap['track_usage'][t.id])
@@ -586,13 +649,14 @@ def _get_default_supervisor():
     )
 
 
+# ---------------------------------------------------------------------------
 # Daily limit guard
+# ---------------------------------------------------------------------------
 
 def _trainee_at_daily_limit(trainee, target_date, built_sessions, config):
     """
     Check if trainee has already hit their daily session cap,
     counting both DB-persisted sessions and sessions queued in this run.
-
     """
     db_count = Session.objects.filter(
         trainee=trainee,

@@ -13,7 +13,8 @@ from SDIMS_apps.scheduling.models import AttendanceRecord
 
 User = get_user_model()
 
-
+@login_required
+@role_required(['admin', 'supervisor'])
 def register(request):
     if request.method == 'POST':
         user_form = CreateUserForm(request.POST)
@@ -49,14 +50,15 @@ def register(request):
         'trainee_form': trainee_form,
     })
 
-
+@login_required
+@role_required(['admin', 'supervisor', 'instructor'])
 def trainee_list(request):
     trainees = Trainee.objects.all()
     return render(request, 'trainee_list.html', {'trainees': trainees})
 
 
 @login_required
-@role_required(['admin'])
+@role_required(['admin', 'supervisor'])
 def trainee_edit(request, pk):
     trainee = get_object_or_404(Trainee, pk=pk)
 
@@ -80,7 +82,7 @@ def trainee_edit(request, pk):
 
 
 @login_required
-@role_required(['admin'])
+@role_required(['admin', 'supervisor'])
 def trainee_delete(request, pk):
     trainee = get_object_or_404(Trainee, pk=pk)
     if request.method == 'POST':
@@ -92,6 +94,7 @@ def trainee_delete(request, pk):
 
 
 @login_required
+@role_required(['admin', 'supervisor', 'instructor'])
 def details(request, pk):
     trainee = get_object_or_404(Trainee, pk=pk)
 

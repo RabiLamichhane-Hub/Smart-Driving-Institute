@@ -59,11 +59,16 @@ class Track(models.Model):
 
     def is_compatible_with(self, vehicle_type: str) -> bool:
         """
-        Returns True if this track may be used for the given vehicle_type
-        string ('Car', 'Bike', or 'Scooter').
+        Returns True if this track may be used for the given vehicle_type.
+        Accepts both lowercase ('car', 'bike', 'scooter') and title-case
+        ('Car', 'Bike', 'Scooter') — the value is normalised internally.
         Unknown vehicle types always return False.
+
+        FIX Bug 4: added .lower() so callers using title-case strings (e.g.
+        from Vehicle.get_vehicle_type_display()) no longer silently return
+        False and block track assignment.
         """
-        return self.TRACK_COMPATIBILITY.get(vehicle_type) == self.track_type
+        return self.TRACK_COMPATIBILITY.get(vehicle_type.lower()) == self.track_type
 
 
 # 2. TimeSlot  (seeded once — never created via UI)
@@ -125,6 +130,21 @@ class SchedulingConfig(models.Model):
     schedule_days_ahead = models.PositiveSmallIntegerField(
         default=1,
         help_text="How many calendar days ahead each daily run targets.",
+    )
+
+    # --- Public / pay-per-session booking controls ---
+    public_session_fee = models.DecimalField(
+        max_digits=8, decimal_places=2,
+        default=500.00,
+        help_text="Fee charged per public/pay-per-session booking (Rs.).",
+    )
+    public_booking_enabled = models.BooleanField(
+        default=True,
+        help_text="Master switch to enable/disable public slot bookings.",
+    )
+    public_booking_cutoff_hours = models.PositiveSmallIntegerField(
+        default=24,
+        help_text="How many hours before a slot's start time public bookings close.",
     )
 
     class Meta:
@@ -354,6 +374,20 @@ class Session(models.Model):
 
     status       = models.CharField(
         max_length=12, choices=STATUS_CHOICES, default='pending',
+    )
+
+    # --- Booking source ---------------------------------------------------
+
+    BOOKING_SOURCE_CHOICES = [
+        ('scheduler', 'Auto-Scheduler'),
+        ('manual',    'Manual (Admin/Supervisor)'),
+    ]
+
+    booking_source = models.CharField(
+        max_length=10,
+        choices=BOOKING_SOURCE_CHOICES,
+        default='scheduler',
+        help_text="How this session was created.",
     )
 
     # --- Audit / linkage --------------------------------------------------
@@ -771,4 +805,197 @@ class RescheduleRequest(models.Model):
                     f"Cannot request a reschedule for a session with "
                     f"status '{self.session.status}'. "
                     "Only scheduled or pending sessions are eligible."
+                )
+
+
+# 10. PublicBooking  (walk-in / pay-per-session booking)
+
+class PublicBooking(models.Model):
+    """
+    Standalone booking for walk-in / pay-per-session trainees.
+
+    These are people who want a one-time or occasional driving practice
+    session WITHOUT enrolling in a course or creating a user account.
+    This model is completely independent of the Trainee/Session system.
+
+    Workflow:
+      1. Walk-in arrives at the institute (or calls ahead).
+      2. Supervisor/admin creates a PublicBooking with guest info + slot.
+      3. Resources (vehicle, track, optionally instructor) are assigned.
+      4. Fee is charged immediately → fee_paid=True.
+         OR fee is recorded as debt → fee_paid=False (outstanding).
+      5. After the session: status → 'completed' or 'no_show'.
+
+    Key rules:
+      - Walk-ins do NOT get a User account or Trainee profile.
+      - Their bookings consume only independent/leftover capacity.
+      - The scheduler deducts confirmed PublicBookings from independent_remaining.
+      - Unpaid bookings (fee_paid=False) are tracked as outstanding debt.
+    """
+
+    STATUS_CHOICES = [
+        ('pending',   'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('no_show',   'No Show'),
+    ]
+
+    SESSION_TYPE_CHOICES = [
+        ('guided',   'Guided (with instructor)'),
+        ('unguided', 'Unguided (supervisor only)'),
+    ]
+
+    VEHICLE_TYPE_CHOICES = [
+        ('car',     'Car'),
+        ('bike',    'Bike'),
+        ('scooter', 'Scooter'),
+    ]
+
+    # --- Guest information (no user account) ------------------------------
+
+    guest_name = models.CharField(
+        max_length=200,
+        help_text="Full name of the walk-in trainee.",
+    )
+    guest_phone = models.CharField(
+        max_length=15,
+        help_text="Phone number for contact.",
+    )
+    guest_address = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Optional address.",
+    )
+
+    # --- Booking details --------------------------------------------------
+
+    slot = models.ForeignKey(
+        TimeSlot,
+        on_delete=models.PROTECT,
+        related_name='public_bookings',
+    )
+    date = models.DateField()
+    vehicle_type = models.CharField(
+        max_length=20,
+        choices=VEHICLE_TYPE_CHOICES,
+        help_text="The vehicle type requested for this session.",
+    )
+    session_type = models.CharField(
+        max_length=10,
+        choices=SESSION_TYPE_CHOICES,
+        default='unguided',
+        help_text="Whether an instructor is needed for this walk-in session.",
+    )
+
+    # --- Resource assignment (filled by supervisor/admin on confirmation) --
+
+    vehicle = models.ForeignKey(
+        'vehicles.Vehicle',
+        null=True, blank=True,
+        on_delete=models.PROTECT,
+        related_name='public_bookings',
+        help_text="Assigned vehicle.",
+    )
+    track = models.ForeignKey(
+        Track,
+        null=True, blank=True,
+        on_delete=models.PROTECT,
+        related_name='public_bookings',
+        help_text="Assigned track.",
+    )
+    instructor = models.ForeignKey(
+        'instructors.Instructor',
+        null=True, blank=True,
+        on_delete=models.PROTECT,
+        related_name='public_bookings',
+        help_text="Assigned instructor (guided sessions only).",
+    )
+    supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.PROTECT,
+        related_name='public_bookings_supervised',
+        help_text="The supervisor on duty.",
+    )
+
+    # --- Status -----------------------------------------------------------
+
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending',
+    )
+
+    # --- Fee & debt tracking ----------------------------------------------
+
+    fee_amount = models.DecimalField(
+        max_digits=8, decimal_places=2,
+        help_text="Fee for this session (snapshot from SchedulingConfig at booking time).",
+    )
+    fee_paid = models.BooleanField(
+        default=False,
+        help_text=(
+            "True = fee has been collected. "
+            "False = outstanding debt (walk-in did not pay yet)."
+        ),
+    )
+
+    # --- Audit ------------------------------------------------------------
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='public_bookings_created',
+        help_text="The supervisor/admin who created this booking.",
+    )
+    created_at   = models.DateTimeField(auto_now_add=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes        = models.TextField(
+        blank=True,
+        help_text="Internal notes about this booking.",
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name        = "Public Booking"
+        verbose_name_plural = "Public Bookings"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['guest_phone', 'slot', 'date'],
+                condition=models.Q(status__in=['pending', 'confirmed']),
+                name='unique_active_public_booking_per_guest_slot_date',
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.guest_name} → {self.slot} "
+            f"on {self.date} [{self.get_status_display()}]"
+        )
+
+    @property
+    def is_debt(self):
+        """True if this booking is confirmed/completed but not yet paid."""
+        return self.status in ('confirmed', 'completed') and not self.fee_paid
+
+    def clean(self):
+        super().clean()
+        # Guided sessions require an instructor
+        if self.status == 'confirmed':
+            if self.session_type == 'guided' and not self.instructor_id:
+                raise ValidationError(
+                    "Guided public sessions require an instructor to be assigned."
+                )
+            if not self.vehicle_id:
+                raise ValidationError(
+                    "A vehicle must be assigned before confirming a public booking."
+                )
+            if not self.track_id:
+                raise ValidationError(
+                    "A track must be assigned before confirming a public booking."
+                )
+            if not self.supervisor_id:
+                raise ValidationError(
+                    "A supervisor must be assigned before confirming a public booking."
                 )

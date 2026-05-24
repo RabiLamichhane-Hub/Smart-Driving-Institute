@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+)!!0fj1$y^=me)(lq%99m2451073u7^mfv2!+a_vg+en&!7m3'
+# Loaded from .env — never hard-code this value.
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -44,7 +46,6 @@ INSTALLED_APPS = [
     'SDIMS_apps.accounts',
     'SDIMS_apps.vehicles',
     'SDIMS_apps.instructors',
-    'SDIMS_apps.training',
     'SDIMS_apps.license_mocktest',
     'SDIMS_apps.accounting',
     'SDIMS_apps.scheduling',
@@ -58,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Redirects users with must_change_password=True to the change-password page.
+    'SDIMS_apps.accounts.middleware.ForcePasswordChangeMiddleware',
 ]
 
 ROOT_URLCONF = 'Driving_Institute.urls'
@@ -86,11 +89,11 @@ WSGI_APPLICATION = 'Driving_Institute.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'driving_institute_db',
-        'USER': 'rabi',
-        'PASSWORD': 'letitallworkout',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 
@@ -124,13 +127,12 @@ USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -140,40 +142,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'redirect_user'
-
-
-# Redis as broker (install: pip install redis)
-CELERY_BROKER_URL     = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
-CELERY_ACCEPT_CONTENT  = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-
-
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'daily-scheduler': {
-        'task': 'scheduling.tasks.run_daily_scheduler',
-        'schedule': crontab(hour=22, minute=0),
-    },
-    'mark-ongoing': {
-        'task': 'scheduling.tasks.mark_sessions_ongoing',
-        'schedule': crontab(minute=0),
-    },
-    'mark-completed': {
-        'task': 'scheduling.tasks.mark_sessions_completed',
-        'schedule': crontab(minute=0),
-    },
-    'schedule-reminders': {
-        'task': 'scheduling.tasks.send_schedule_reminders',
-        'schedule': crontab(hour=20, minute=0),
-    },
-}

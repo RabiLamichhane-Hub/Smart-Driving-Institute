@@ -27,7 +27,6 @@ urlpatterns = [
     path('courses/', include('SDIMS_apps.courses.urls')),
     path('vehicles/',include('SDIMS_apps.vehicles.urls')),
     path('instructors/', include('SDIMS_apps.instructors.urls')),
-    path('training/', include('SDIMS_apps.training.urls')),
     path('mocktest/', include('SDIMS_apps.license_mocktest.urls')),
     path('accounts/', include('SDIMS_apps.accounts.urls')),
     path('accounting/', include('SDIMS_apps.accounting.urls')),

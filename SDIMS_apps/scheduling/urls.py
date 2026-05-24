@@ -34,5 +34,19 @@ urlpatterns = [
     path('day-off/',            views.day_off_list_view,   name='day_off_list'),
     path('day-off/<int:pk>/delete/', views.day_off_delete_view, name='day_off_delete'),
 
+    # Public / walk-in bookings
+    path('public/bookings/',                       views.public_booking_list_view,        name='public_booking_list'),
+    path('public/bookings/create/',                views.public_booking_create_view,      name='public_booking_create'),
+    path('public/bookings/slots-api/',             views.public_booking_slots_api,        name='public_booking_slots_api'),
+    path('public/bookings/<int:pk>/confirm/',      views.public_booking_confirm_view,     name='public_booking_confirm'),
+    path('public/bookings/<int:pk>/cancel/',       views.public_booking_cancel_view,      name='public_booking_cancel'),
+    path('public/bookings/<int:pk>/complete/',     views.public_booking_complete_view,    name='public_booking_complete'),
+    path('public/bookings/<int:pk>/no-show/',      views.public_booking_noshow_view,      name='public_booking_noshow'),
+    path('public/bookings/<int:pk>/collect-fee/',  views.public_booking_collect_fee_view, name='public_booking_collect_fee'),
 
+    # Tracks
+    path('tracks/',                       views.track_list_view,          name='track_list'),
+    path('tracks/create/',                views.track_create_view,        name='track_create'),
+    path('tracks/<int:pk>/edit/',         views.track_edit_view,          name='track_edit'),
+    path('tracks/<int:pk>/toggle-status/', views.track_toggle_status_view, name='track_toggle_status'),
 ]

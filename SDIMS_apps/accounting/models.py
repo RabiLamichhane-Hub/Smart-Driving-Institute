@@ -175,3 +175,48 @@ class Expense(models.Model):
 
     def __str__(self):
         return f"{self.title} — Rs.{self.amount} ({self.category})"
+
+
+class SessionPayment(models.Model):
+    """
+    Payment record for a single pay-per-session booking.
+    Separate from course-based FeeRecord/Payment flow.
+
+    Created when a supervisor/admin confirms a PublicBooking after
+    collecting payment from the trainee.
+    """
+
+    METHOD_CHOICES = Payment.METHOD_CHOICES
+
+    public_booking = models.OneToOneField(
+        'scheduling.PublicBooking',
+        on_delete=models.CASCADE,
+        related_name='payment',
+    )
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES)
+    received_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='session_payments_received',
+    )
+    date = models.DateTimeField(auto_now_add=True)
+    notes = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ['-date']
+
+    def clean(self):
+        if self.amount is not None and self.amount <= 0:
+            raise ValidationError("Payment amount must be greater than zero.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return (
+            f"Session payment: Rs.{self.amount} "
+            f"via {self.get_method_display()} — {self.public_booking}"
+        )

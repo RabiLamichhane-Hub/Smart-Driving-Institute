@@ -9,6 +9,7 @@ from . models import AttendanceRecord
 from . models import RescheduleQueue
 from . models import RescheduleRequest
 from .models import HolidayOrDayOff
+from .models import PublicBooking
 
 # Register your models here.
 
@@ -28,3 +29,14 @@ class HolidayOrDayOffAdmin(admin.ModelAdmin):
     list_filter   = ('declared_at',)
     search_fields = ('date', 'reason')
     ordering      = ('date',)
+
+
+@admin.register(PublicBooking)
+class PublicBookingAdmin(admin.ModelAdmin):
+    list_display  = (
+        'guest_name', 'guest_phone', 'slot', 'date',
+        'vehicle_type', 'session_type', 'status', 'fee_amount', 'fee_paid',
+    )
+    list_filter   = ('status', 'fee_paid', 'vehicle_type', 'session_type', 'date')
+    search_fields = ('guest_name', 'guest_phone')
+    ordering      = ('-date', 'slot__slot_number')

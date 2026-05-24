@@ -16,7 +16,7 @@ class Instructor(models.Model):
 
     # Photo
     images = models.ImageField(
-        upload_to='trainees/images/',
+        upload_to='instructors/images/',
         blank=True,
         null=True
     )

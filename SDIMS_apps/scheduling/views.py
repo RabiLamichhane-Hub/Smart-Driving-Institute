@@ -19,9 +19,14 @@ URL map (see urls.py):
   POST      /scheduling/run-scheduler/                      → run_scheduler_view         (supervisor+)
   GET       /scheduling/runs/                               → schedule_run_list_view     (supervisor+)
   GET       /scheduling/runs/<pk>/                          → schedule_run_detail_view   (supervisor+)
+  GET       /scheduling/public/bookings/slots-api/          → public_booking_slots_api   (supervisor+)
+  GET       /scheduling/tracks/                             → track_list_view             (supervisor+)
+  GET/POST  /scheduling/tracks/create/                      → track_create_view           (supervisor+)
+  GET/POST  /scheduling/tracks/<pk>/edit/                   → track_edit_view             (supervisor+)
+  POST      /scheduling/tracks/<pk>/toggle-status/          → track_toggle_status_view    (supervisor+)
 """
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime as dt
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -29,6 +34,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.timezone import localdate, now
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -36,14 +42,16 @@ from django.views import View
 from .models import (
     AttendanceRecord,
     DailyScheduleRun,
+    PublicBooking,
     RescheduleQueue,
     RescheduleRequest,
     SchedulingConfig,
     Session,
     TimeSlot,
+    Track,
     TraineePreference,
 )
-from .forms import RescheduleRequestForm
+from .forms import RescheduleRequestForm, PublicBookingForm, PublicBookingConfirmForm, TrackForm
 from .scheduler import run_scheduler
 
 # Reuse the decorators already defined in accounts app
@@ -676,7 +684,7 @@ def run_scheduler_view(request):
     """POST only. Manually triggers the scheduler for tomorrow (or a given date)."""
     if request.method != 'POST':
         return redirect('scheduling:run_list')
-    
+
     from .scheduler import is_working_day
 
     config      = SchedulingConfig.load()
@@ -863,3 +871,516 @@ def day_off_delete_view(request, pk):
         entry.delete()
         messages.success(request, f"Day-off entry for {date_str} has been removed.")
     return redirect('scheduling:day_off_list')
+
+
+# ==========================================================================
+# PUBLIC / WALK-IN BOOKING VIEWS
+# ==========================================================================
+
+# 17. Public Booking List  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_list_view(request):
+    """
+    Overview of all public/walk-in bookings.
+    Shows pending, confirmed, completed, and outstanding debts.
+    """
+    bookings = PublicBooking.objects.select_related(
+        'slot', 'vehicle', 'track', 'instructor__user', 'supervisor', 'created_by'
+    ).order_by('-date', 'slot__slot_number')
+
+    # Filters
+    filter_status = request.GET.get('status', '').strip()
+    filter_date   = request.GET.get('date', '').strip()
+    filter_debt   = request.GET.get('debt', '').strip()
+
+    if filter_status:
+        bookings = bookings.filter(status=filter_status)
+    if filter_date:
+        bookings = bookings.filter(date=filter_date)
+    if filter_debt == 'yes':
+        bookings = bookings.filter(
+            fee_paid=False,
+            status__in=('confirmed', 'completed'),
+        )
+
+    # Debt summary
+    outstanding_bookings = PublicBooking.objects.filter(
+        fee_paid=False,
+        status__in=('confirmed', 'completed'),
+    )
+    total_debt = sum(b.fee_amount for b in outstanding_bookings)
+    debt_count = outstanding_bookings.count()
+
+    paginator = Paginator(bookings, 25)
+    page      = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'public_booking_list.html', {
+        'page':            page,
+        'status_choices':  PublicBooking.STATUS_CHOICES,
+        'filter_status':   filter_status,
+        'filter_date':     filter_date,
+        'filter_debt':     filter_debt,
+        'total_debt':      total_debt,
+        'debt_count':      debt_count,
+    })
+
+
+# 18. Slots & Vehicles API  (supervisor / admin — AJAX)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_slots_api(request):
+    """
+    AJAX endpoint used by the walk-in booking form for dynamic filtering.
+
+    Returns available vehicles and open time slots for a given
+    vehicle_type + date combination.
+
+    GET params
+    ----------
+    vehicle_type  — 'car' | 'bike' | 'scooter'  (required)
+    date          — YYYY-MM-DD                   (optional; slots omitted if absent)
+
+    Response JSON
+    -------------
+    {
+      "vehicles":     [{"id": 1, "name": "Honda CB500 (Bike)"}],
+      "slots":        [{"id": 3, "label": "10:00–11:00", "vacancies": 2}],
+      "cutoff_hours": 24
+    }
+
+    Slot filtering rules
+    --------------------
+    1. Cutoff:   slot must start at least cutoff_hours from now().
+                 cutoff_hours comes from SchedulingConfig — admin-tunable.
+    2. Vacancy:  (# available vehicles of the type)
+                 minus (# pending/confirmed PublicBookings for slot/date/type) > 0.
+                 A slot that has no free vehicle is hidden entirely.
+    """
+    from SDIMS_apps.vehicles.models import Vehicle
+
+    vehicle_type = request.GET.get('vehicle_type', '').strip().lower()
+    date_str     = request.GET.get('date', '').strip()
+
+    VALID_TYPES = {'car', 'bike', 'scooter'}
+    if vehicle_type not in VALID_TYPES:
+        return JsonResponse({'error': 'Invalid vehicle_type.'}, status=400)
+
+    config       = SchedulingConfig.load()
+    cutoff_hours = config.public_booking_cutoff_hours
+
+    # ── Vehicles ─────────────────────────────────────────────────────────────
+    vehicles_qs   = (
+        Vehicle.objects
+        .filter(vehicle_type=vehicle_type, status='available')
+        .order_by('name')
+    )
+    vehicles_data = [{'id': v.pk, 'name': str(v)} for v in vehicles_qs]
+    vehicle_count = len(vehicles_data)
+
+    # ── Slots (only when a date is supplied) ─────────────────────────────────
+    slots_data = []
+    if date_str:
+        try:
+            booking_date = date.fromisoformat(date_str)
+        except ValueError:
+            return JsonResponse(
+                {'error': 'Invalid date format. Expected YYYY-MM-DD.'}, status=400
+            )
+
+        now_dt = now()   # timezone-aware
+
+        for slot in TimeSlot.objects.order_by('slot_number'):
+
+            # 1. Cutoff check — booking window must still be open
+            slot_start   = timezone.make_aware(
+                dt.combine(booking_date, slot.start_time)
+            )
+            hours_until  = (slot_start - now_dt).total_seconds() / 3600
+            if hours_until < cutoff_hours:
+                continue  # booking window closed for this slot
+
+            # 2. Vacancy check — at least one vehicle of this type must be free
+            already_booked = PublicBooking.objects.filter(
+                date=booking_date,
+                slot=slot,
+                vehicle_type=vehicle_type,
+                status__in=['pending', 'confirmed'],
+            ).count()
+
+            vacancies = vehicle_count - already_booked
+            if vacancies > 0:
+                slots_data.append({
+                    'id':       slot.pk,
+                    'label':    slot.label,
+                    'vacancies': vacancies,
+                })
+
+    return JsonResponse({
+        'vehicles':     vehicles_data,
+        'slots':        slots_data,
+        'cutoff_hours': cutoff_hours,
+    })
+
+
+# 19. Create Public Booking  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_create_view(request):
+    """
+    Supervisor/admin creates a walk-in booking.
+    Fee amount is auto-populated from SchedulingConfig.public_session_fee.
+    """
+    config = SchedulingConfig.load()
+
+    if not config.public_booking_enabled:
+        messages.warning(request, "Public bookings are currently disabled.")
+        return redirect('scheduling:public_booking_list')
+
+    if request.method == 'POST':
+        form = PublicBookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            # fee_amount comes from the form (editable, pre-filled from config)
+            booking.created_by = request.user
+            booking.status     = 'pending'
+            booking.save()
+
+            messages.success(
+                request,
+                f"Walk-in booking created for {booking.guest_name} "
+                f"on {booking.date} ({booking.slot}). "
+                f"Fee: Rs.{booking.fee_amount}. "
+                "Assign resources and confirm to finalize."
+            )
+            return redirect('scheduling:public_booking_list')
+    else:
+        # Pre-populate fee_amount from config so staff rarely need to change it
+        form = PublicBookingForm(initial={'fee_amount': config.public_session_fee})
+
+    return render(request, 'public_booking_create.html', {
+        'form':        form,
+        'session_fee': config.public_session_fee,
+    })
+
+
+# 20. Confirm Public Booking  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_confirm_view(request, pk):
+    """
+    Assign vehicle, track, instructor (if guided), supervisor.
+    Mark fee as paid or record as debt.
+    Changes status from 'pending' → 'confirmed'.
+    """
+    booking = get_object_or_404(PublicBooking, pk=pk)
+
+    if booking.status != 'pending':
+        messages.error(
+            request,
+            f"Cannot confirm a booking with status '{booking.get_status_display()}'."
+        )
+        return redirect('scheduling:public_booking_list')
+
+    from SDIMS_apps.vehicles.models import Vehicle
+    from SDIMS_apps.instructors.models import Instructor
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    if request.method == 'POST':
+        form = PublicBookingConfirmForm(request.POST, instance=booking)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.status       = 'confirmed'
+            booking.confirmed_at = now()
+            try:
+                booking.full_clean()
+                booking.save()
+                messages.success(
+                    request,
+                    f"Booking for {booking.guest_name} confirmed! "
+                    + ("Fee collected." if booking.fee_paid else "Fee recorded as outstanding debt.")
+                )
+            except Exception as exc:
+                messages.error(request, f"Validation error: {exc}")
+                return redirect('scheduling:public_booking_confirm', pk=pk)
+
+            return redirect('scheduling:public_booking_list')
+    else:
+        # Pre-filter resource querysets to matching types
+        form = PublicBookingConfirmForm(instance=booking)
+
+        # Filter vehicles by requested type
+        form.fields['vehicle'].queryset = Vehicle.objects.filter(
+            status='available',
+            vehicle_type=booking.vehicle_type,
+        )
+        # Filter tracks compatible with the vehicle type
+        compatible_track_type = Track.TRACK_COMPATIBILITY.get(booking.vehicle_type)
+        form.fields['track'].queryset = Track.objects.filter(
+            status='active',
+            track_type=compatible_track_type,
+        ) if compatible_track_type else Track.objects.filter(status='active')
+
+        # Active instructors only
+        form.fields['instructor'].queryset = Instructor.objects.filter(status='active')
+
+        # Supervisors only
+        form.fields['supervisor'].queryset = User.objects.filter(
+            role='supervisor', is_active=True,
+        )
+        # Default to current user if they're a supervisor
+        if request.user.role == 'supervisor':
+            form.fields['supervisor'].initial = request.user.pk
+
+    return render(request, 'public_booking_confirm.html', {
+        'form':    form,
+        'booking': booking,
+    })
+
+
+# 21. Cancel Public Booking  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_cancel_view(request, pk):
+    """POST only. Cancels a public booking that hasn't been completed."""
+    if request.method != 'POST':
+        return redirect('scheduling:public_booking_list')
+
+    booking = get_object_or_404(PublicBooking, pk=pk)
+    if booking.status in ('completed', 'cancelled'):
+        messages.error(
+            request,
+            f"Cannot cancel a booking with status '{booking.get_status_display()}'."
+        )
+    else:
+        booking.status = 'cancelled'
+        booking.save(update_fields=['status'])
+        messages.success(request, f"Booking for {booking.guest_name} cancelled.")
+
+    return redirect('scheduling:public_booking_list')
+
+
+# 22. Complete Public Booking  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_complete_view(request, pk):
+    """POST only. Marks a confirmed booking as completed after the session."""
+    if request.method != 'POST':
+        return redirect('scheduling:public_booking_list')
+
+    booking = get_object_or_404(PublicBooking, pk=pk)
+    if booking.status != 'confirmed':
+        messages.error(
+            request,
+            f"Only confirmed bookings can be marked as completed. "
+            f"Current status: '{booking.get_status_display()}'."
+        )
+    else:
+        booking.status       = 'completed'
+        booking.completed_at = now()
+        booking.save(update_fields=['status', 'completed_at'])
+        messages.success(
+            request,
+            f"Session for {booking.guest_name} marked as completed."
+            + ("" if booking.fee_paid else " ⚠ Fee is still outstanding.")
+        )
+
+    return redirect('scheduling:public_booking_list')
+
+
+# 23. Mark No-Show  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_noshow_view(request, pk):
+    """POST only. Marks a confirmed booking as no-show."""
+    if request.method != 'POST':
+        return redirect('scheduling:public_booking_list')
+
+    booking = get_object_or_404(PublicBooking, pk=pk)
+    if booking.status != 'confirmed':
+        messages.error(request, "Only confirmed bookings can be marked as no-show.")
+    else:
+        booking.status = 'no_show'
+        booking.save(update_fields=['status'])
+        messages.success(request, f"{booking.guest_name} marked as no-show.")
+
+    return redirect('scheduling:public_booking_list')
+
+
+# 24. Collect Outstanding Fee  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def public_booking_collect_fee_view(request, pk):
+    """POST only. Marks an outstanding debt as paid."""
+    if request.method != 'POST':
+        return redirect('scheduling:public_booking_list')
+
+    booking = get_object_or_404(PublicBooking, pk=pk)
+    if booking.fee_paid:
+        messages.info(request, "Fee was already collected.")
+    else:
+        booking.fee_paid = True
+        booking.save(update_fields=['fee_paid'])
+        messages.success(
+            request,
+            f"Rs.{booking.fee_amount} collected from {booking.guest_name}. Debt cleared."
+        )
+
+    return redirect('scheduling:public_booking_list')
+
+
+# ==========================================================================
+# TRACK MANAGEMENT VIEWS
+# ==========================================================================
+
+# 25. Track List  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def track_list_view(request):
+    """
+    GET  → Paginated list of all tracks with live session counts for the
+           current month.  Supports filtering by status and track_type.
+    """
+    from django.db.models import Count, Q
+
+    month_start = date.today().replace(day=1)
+
+    tracks = (
+        Track.objects
+        .annotate(
+            sessions_this_month=Count(
+                'sessions',
+                filter=Q(
+                    sessions__date__gte=month_start,
+                    sessions__date__lte=date.today(),
+                ),
+            )
+        )
+        .order_by('name')
+    )
+
+    filter_status = request.GET.get('status', '').strip()
+    filter_type   = request.GET.get('track_type', '').strip()
+
+    if filter_status:
+        tracks = tracks.filter(status=filter_status)
+    if filter_type:
+        tracks = tracks.filter(track_type=filter_type)
+
+    paginator = Paginator(tracks, 20)
+    page      = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'track_list.html', {
+        'page':           page,
+        'status_choices': Track.STATUS_CHOICES,
+        'type_choices':   Track.TRACK_TYPE_CHOICES,
+        'filter_status':  filter_status,
+        'filter_type':    filter_type,
+        'total_tracks':   Track.objects.count(),
+        'active_count':   Track.objects.filter(status='active').count(),
+    })
+
+
+# 26. Track Create  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def track_create_view(request):
+    """
+    GET  → blank TrackForm
+    POST → validate, save, redirect to track list with success message
+    """
+    if request.method == 'POST':
+        form = TrackForm(request.POST)
+        if form.is_valid():
+            track = form.save()
+            messages.success(
+                request,
+                f'Track "{track.name}" created successfully.'
+            )
+            return redirect('scheduling:track_list')
+    else:
+        form = TrackForm()
+
+    return render(request, 'track_form.html', {
+        'form':         form,
+        'form_title':   'Add New Track',
+        'submit_label': 'Create Track',
+    })
+
+
+# 27. Track Edit  (supervisor / admin)
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def track_edit_view(request, pk):
+    """
+    GET  → TrackForm pre-populated with existing track data
+    POST → validate, save, redirect to track list
+
+    track_type changes are blocked by TrackForm.clean_track_type() when
+    sessions already exist on the track.
+    """
+    track = get_object_or_404(Track, pk=pk)
+
+    if request.method == 'POST':
+        form = TrackForm(request.POST, instance=track)
+        if form.is_valid():
+            track = form.save()
+            messages.success(
+                request,
+                f'Track "{track.name}" updated successfully.'
+            )
+            return redirect('scheduling:track_list')
+    else:
+        form = TrackForm(instance=track)
+
+    return render(request, 'track_form.html', {
+        'form':         form,
+        'track':        track,
+        'form_title':   f'Edit Track — {track.name}',
+        'submit_label': 'Save Changes',
+    })
+
+
+# 28. Track Toggle Status  (supervisor / admin) — POST only
+
+@login_required
+@role_required(['admin', 'supervisor'])
+def track_toggle_status_view(request, pk):
+    """
+    POST only.  Flips a track's status to an explicit value supplied by the
+    template via 'new_status' — so the list page can offer one-click
+    Active / Inactive / Maintenance buttons without opening the edit form.
+
+    Valid values mirror Track.STATUS_CHOICES: 'active', 'inactive',
+    'maintenance'.  An unrecognised value is rejected with an error message.
+    """
+    if request.method != 'POST':
+        return redirect('scheduling:track_list')
+
+    track      = get_object_or_404(Track, pk=pk)
+    new_status = request.POST.get('new_status', '').strip()
+
+    valid_statuses = {s[0] for s in Track.STATUS_CHOICES}
+    if new_status not in valid_statuses:
+        messages.error(request, f'Invalid status "{new_status}".')
+        return redirect('scheduling:track_list')
+
+    track.status = new_status
+    track.save(update_fields=['status'])
+
+    label = dict(Track.STATUS_CHOICES).get(new_status, new_status)
+    messages.success(request, f'"{track.name}" is now {label}.')
+
+    return redirect(request.POST.get('next', 'scheduling:track_list'))

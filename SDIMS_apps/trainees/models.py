@@ -17,6 +17,18 @@ class Trainee(models.Model):
         ('TRAINING', 'In Training'),
         ('COMPLETED', 'Completed'),
         ('FAILED', 'Failed'),
+        ('PAY_PER_SESSION', 'Pay-Per-Session'),
+    )
+
+    GUIDANCE_CHOICES = (
+        ('guided', 'Instructor-Guided'),
+        ('free', 'Instructor-Free'),
+    )
+
+    VEHICLE_TYPE_CHOICES = (
+        ('car', 'Car'),
+        ('bike', 'Bike'),
+        ('scooter', 'Scooter'),
     )
 
     # LINK TO USER
@@ -36,6 +48,31 @@ class Trainee(models.Model):
 
     enrollment_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ENROLLED')
+
+    # --- Instructor guidance override ---
+    # Supervisors/admins can manually classify trainees as guided or free.
+    # 'auto' = system determines based on course level or policy.
+    instructor_guidance = models.CharField(
+        max_length=10,
+        choices=GUIDANCE_CHOICES,
+        default='auto',
+        help_text=(
+            "Manual override for instructor requirement. "
+            "'auto' = system determines based on course level or policy. "
+            "Set by supervisor/admin."
+        ),
+    )
+
+    # --- Vehicle type preference (for pay-per-session trainees) ---
+    # Required when no course is assigned, since there's no course.vehicle_type
+    # to fall back on.
+    vehicle_type_preference = models.CharField(
+        max_length=20,
+        choices=VEHICLE_TYPE_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Vehicle type for pay-per-session trainees who have no course.",
+    )
 
     # Optional
     guardian_name = models.CharField(max_length=150, blank=True, null=True)
@@ -60,7 +97,36 @@ class Trainee(models.Model):
         return f"{self.user.first_name} {self.user.last_name}"
 
     def is_active_trainee(self):
-        return self.status in ['ENROLLED', 'TRAINING']
+        return self.status in ['ENROLLED', 'TRAINING', 'PAY_PER_SESSION']
+
+    @property
+    def is_pay_per_session(self):
+        """True if this trainee has no course enrollment."""
+        return self.course_id is None
+
+    @property
+    def effective_guidance(self):
+        """
+        Resolve the actual guidance mode after applying policy.
+        Priority: manual override > course-level auto-policy > default free.
+        """
+        if self.instructor_guidance != 'auto':
+            return self.instructor_guidance
+        # Auto policy: course beginners/intermediates = guided, else free
+        if self.course and self.course.level in ('beginner', 'intermediate'):
+            return 'guided'
+        return 'free'
+
+    @property
+    def effective_vehicle_type(self):
+        """
+        Returns the vehicle type to use for scheduling.
+        Course trainees use their course's vehicle_type.
+        Pay-per-session trainees use vehicle_type_preference.
+        """
+        if self.course:
+            return self.course.vehicle_type
+        return self.vehicle_type_preference
 
     @property
     def final_fee(self):

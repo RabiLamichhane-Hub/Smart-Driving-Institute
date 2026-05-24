@@ -19,7 +19,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 160px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
@@ -31,7 +31,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .page-title {
@@ -56,8 +56,8 @@
     align-items: center;
     gap: 7px;
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
     border-radius: 8px;
     padding: 9px 18px;
     font-size: 13px;
@@ -68,8 +68,8 @@
     transition: border-color 0.18s, color 0.18s, transform 0.18s;
   }
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
     transform: translateY(-1px);
   }
 
@@ -99,7 +99,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 4px;
   }
   .section-heading {
@@ -144,7 +144,7 @@
   .slot-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 24px;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -162,15 +162,15 @@
     user-select: none;
   }
   .slot-item:hover {
-    border-color: rgba(250, 204, 21, 0.25);
-    background: rgba(250, 204, 21, 0.03);
+    border-color: rgba(45, 122, 95, 0.25);
+    background: rgba(45, 122, 95, 0.03);
   }
   .slot-item.sortable-ghost {
     opacity: 0.35;
   }
   .slot-item.sortable-chosen {
-    border-color: rgba(250, 204, 21, 0.4);
-    background: rgba(250, 204, 21, 0.05);
+    border-color: rgba(45, 122, 95, 0.4);
+    background: rgba(45, 122, 95, 0.05);
   }
   .drag-handle {
     color: var(--text-muted);
@@ -188,11 +188,11 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     font-family: 'Bebas Neue', sans-serif;
     font-size: 13px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
   }
   .slot-label-text {
@@ -203,15 +203,20 @@
     flex: 1;
   }
 
-  /* ── Submit button ── */
+  /* ── Form footer ── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
+  }
   .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    width: 100%;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 11px 18px;
@@ -223,7 +228,7 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
@@ -264,7 +269,7 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--yellow);
+    background: var(--green);
     flex-shrink: 0;
     margin-top: 7px;
   }
@@ -298,15 +303,15 @@
   }
   .slot-badge {
     display: inline-block;
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 2px 8px;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     font-family: 'DM Sans', sans-serif;
     flex-shrink: 0;
   }
@@ -380,14 +385,18 @@
             {% endif %}
           </ul>
 
-          <button type="submit" class="btn-primary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Save Preferences
-          </button>
+          <hr class="section-divider">
+          <div class="form-footer">
+            <button type="submit" class="btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save Preferences
+            </button>
+            <a href="{% url 'scheduling:my_schedule' %}" class="btn-ghost">Cancel</a>
+          </div>
         </form>
       </div>
     </div>

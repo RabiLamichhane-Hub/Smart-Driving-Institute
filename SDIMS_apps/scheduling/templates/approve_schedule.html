@@ -19,10 +19,13 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
+  }
+  :root.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
   }
 
   /* ── Page Header ── */
@@ -31,7 +34,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .page-title {
@@ -57,13 +60,13 @@
     align-items: center;
     gap: 8px;
     padding: 6px 14px;
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.25);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 20px;
     font-family: 'DM Sans', sans-serif;
     font-size: 12px;
     font-weight: 600;
-    color: var(--yellow);
+    color: var(--green);
     letter-spacing: 0.04em;
     margin-bottom: 24px;
   }
@@ -71,7 +74,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--yellow);
+    background: var(--green);
     animation: pulse 1.8s ease-in-out infinite;
   }
   @keyframes pulse {
@@ -113,7 +116,7 @@
   .check-label input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    accent-color: var(--yellow);
+    accent-color: var(--green);
     cursor: pointer;
     border-radius: 4px;
   }
@@ -138,7 +141,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--yellow);
+    background: var(--green);
     flex-shrink: 0;
   }
   .date-divider-label span {
@@ -177,7 +180,7 @@
     transition: border-color 0.18s;
   }
   .slot-card:hover {
-    border-color: rgba(250, 204, 21, 0.18);
+    border-color: rgba(45, 122, 95, 0.20);
   }
   .slot-header {
     display: flex;
@@ -190,8 +193,8 @@
   }
   .slot-num-badge {
     display: inline-block;
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 4px 10px;
     font-family: 'DM Sans', sans-serif;
@@ -199,7 +202,7 @@
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
   }
   .slot-label-text {
     font-family: 'DM Sans', sans-serif;
@@ -241,11 +244,11 @@
   }
   th.col-check { width: 44px; }
   tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  tbody tr:hover { background: rgba(45, 122, 95, 0.03); }
   td {
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
@@ -260,7 +263,7 @@
   td.col-check input[type="checkbox"] {
     width: 15px;
     height: 15px;
-    accent-color: var(--yellow);
+    accent-color: var(--green);
     cursor: pointer;
   }
 
@@ -287,14 +290,14 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 12px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
   }
 
@@ -310,19 +313,20 @@
     font-family: 'DM Sans', sans-serif;
   }
   .type-guided {
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
-    color: var(--yellow);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
   }
   .type-unguided {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.45);
+    background: rgba(61, 82, 71, 0.08);
+    border: 1px solid rgba(61, 82, 71, 0.18);
+    color: var(--slate);
   }
   .type-course {
-    background: rgba(250, 204, 21, 0.06);
-    border: 1px solid rgba(250, 204, 21, 0.14);
-    color: rgba(250, 204, 21, 0.75);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+    opacity: 0.8;
   }
 
   /* ── Bottom Submit Bar ── */
@@ -341,7 +345,7 @@
     color: var(--text-muted);
   }
   .submit-bar-info strong {
-    color: var(--yellow);
+    color: var(--green);
     font-weight: 600;
   }
 
@@ -350,8 +354,8 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 9px 18px;
@@ -363,7 +367,7 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
   .btn-ghost {
@@ -371,8 +375,8 @@
     align-items: center;
     gap: 7px;
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
     border-radius: 8px;
     padding: 9px 18px;
     font-size: 13px;
@@ -383,8 +387,8 @@
     transition: border-color 0.18s, color 0.18s, transform 0.18s;
   }
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
     transform: translateY(-1px);
   }
 
@@ -400,7 +404,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 26px;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
   .empty-state-sub {

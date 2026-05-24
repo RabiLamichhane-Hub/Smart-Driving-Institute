@@ -7,12 +7,7 @@
   :root {
     --radius:    14px;
     --radius-sm: 8px;
-    /* Local aliases mapping design-preference tokens */
-    --surface-2: rgba(255,255,255,0.03);
-    --muted:     var(--text-muted);
-    --accent:    var(--yellow);
-    --accent-2:  #38d9a9;
-    --accent-3:  var(--yellow);
+    --surface-2: rgba(45,122,95,0.04);
     --danger:    #ef4444;
   }
 
@@ -22,8 +17,6 @@
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
   }
-
-  /* .dash-wrapper replaced by .page-wrapper from design system */
 
   /* ── Top bar ── */
   .topbar {
@@ -41,20 +34,12 @@
     letter-spacing: 0.05em;
     line-height: 0.95;
   }
-  .topbar-greeting span {
-    color: var(--yellow);
-  }
-  .topbar-greeting p {
-    color: var(--muted);
-    font-size: .9rem;
-    margin-top: 4px;
-  }
   .logout-btn {
     display: inline-flex;
     align-items: center;
     gap: 7px;
     padding: 9px 18px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-sec);
@@ -71,7 +56,7 @@
     font-weight: 500;
     letter-spacing: .10em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 14px;
   }
 
@@ -89,7 +74,7 @@
     padding: 24px;
     transition: border-color .2s, transform .2s;
   }
-  .card:hover { border-color: rgba(250,204,21,0.18); transform: translateY(-3px); }
+  .card:hover { border-color: rgba(45,122,95,0.20); transform: translateY(-3px); }
   .card-title {
     font-size: .78rem;
     font-weight: 500;
@@ -104,16 +89,16 @@
   }
   .card-title svg { flex-shrink: 0; }
 
-  /* History button — ghost pill style with yellow accent */
+  /* History button — ghost pill style with green accent */
   .btn-history {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 5px 13px;
     border-radius: 6px;
-    border: 1px solid var(--yellow-border);
-    background: var(--yellow-dim);
-    color: var(--yellow);
+    border: 1px solid var(--green-border);
+    background: var(--green-dim);
+    color: var(--green);
     text-decoration: none;
     font-family: 'DM Sans', sans-serif;
     font-size: .75rem;
@@ -125,8 +110,8 @@
     flex-shrink: 0;
   }
   .btn-history:hover {
-    border-color: var(--yellow-focus);
-    background: rgba(250,204,21,0.18);
+    border-color: var(--green-focus);
+    background: rgba(45,122,95,0.18);
     transform: translateY(-1px);
   }
 
@@ -141,7 +126,7 @@
     gap: 12px;
   }
   .info-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .info-label { color: var(--muted); white-space: nowrap; }
+  .info-label { color: var(--text-muted); white-space: nowrap; }
   .info-value { font-weight: 500; text-align: right; }
 
   /* ── Status badge ── */
@@ -154,11 +139,10 @@
     letter-spacing: .04em;
     text-transform: uppercase;
   }
-  .badge-green  { background: rgba(56,217,169,.12); color: #38d9a9; border: 1px solid rgba(56,217,169,.2); }
-  .badge-blue   { background: var(--yellow-dim);    color: var(--yellow); border: 1px solid var(--yellow-border); }
-  .badge-orange { background: var(--yellow-dim);    color: var(--yellow); border: 1px solid var(--yellow-border); }
-  .badge-gray   { background: rgba(255,255,255,.06); color: var(--text-muted); border: 1px solid var(--border); }
-  .badge-red    { background: rgba(239,68,68,.12);  color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
+  .badge-green  { background: var(--green-dim);   color: var(--green); border: 1px solid var(--green-border); }
+  .badge-status { background: var(--green-dim);   color: var(--green); border: 1px solid var(--green-border); }
+  .badge-gray   { background: rgba(26,46,37,0.06); color: var(--text-muted); border: 1px solid var(--border); }
+  .badge-red    { background: rgba(239,68,68,.12); color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
 
   /* ── Payment stat boxes ── */
   .stat-box {
@@ -169,23 +153,23 @@
   }
   .stat-box .stat-label {
     font-size: .78rem;
-    color: var(--muted);
+    color: var(--text-muted);
     margin-bottom: 6px;
   }
   .stat-box .stat-value {
-    font-family: 'DM Mono', monospace;
     font-size: 1.3rem;
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
-  .stat-box .stat-value.accent   { color: var(--yellow); }
-  .stat-box .stat-value.success  { color: #38d9a9; }
-  .stat-box .stat-value.warning  { color: var(--yellow); }
+  .stat-box .stat-value.accent   { color: var(--green); }
+  .stat-box .stat-value.success  { color: var(--green); }
+  .stat-box .stat-value.warning  { color: var(--slate); }
   .stat-box .stat-value.danger   { color: #ef4444; }
 
   /* ── Progress bar ── */
   .progress-track {
     height: 6px;
-    background: var(--surface-2);
+    background: var(--green-dim);
     border-radius: 99px;
     margin-top: 14px;
     overflow: hidden;
@@ -193,14 +177,14 @@
   .progress-fill {
     height: 100%;
     border-radius: 99px;
-    background: var(--yellow);
+    background: var(--green);
     transition: width .5s ease;
   }
   .progress-meta {
     display: flex;
     justify-content: space-between;
     font-size: .78rem;
-    color: var(--muted);
+    color: var(--text-muted);
     margin-top: 7px;
   }
 
@@ -214,10 +198,10 @@
     text-align: left;
     padding: 10px 14px;
     font-size: .72rem;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--text-muted);
     border-bottom: 1px solid var(--border);
   }
   .data-table tbody tr {
@@ -225,12 +209,12 @@
     transition: background .15s;
   }
   .data-table tbody tr:last-child { border-bottom: none; }
-  .data-table tbody tr:hover { background: var(--surface-2); }
+  .data-table tbody tr:hover { background: rgba(45,122,95,0.03); }
   .data-table td {
     padding: 12px 14px;
     vertical-align: middle;
   }
-  .mono { font-family: 'DM Mono', monospace; font-size: .85rem; }
+  .mono { font-variant-numeric: tabular-nums; font-size: .85rem; }
 
   /* ── Session status chips ── */
   .chip {
@@ -242,10 +226,10 @@
     font-size: .78rem;
     font-weight: 500;
   }
-  .chip-scheduled { background: rgba(56,217,169,.10); color: #38d9a9; border: 1px solid rgba(56,217,169,.2); }
-  .chip-pending   { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow-border); }
-  .chip-ongoing   { background: rgba(255,255,255,.06); color: var(--text-sec); border: 1px solid var(--border); }
-  .chip-completed { background: rgba(255,255,255,.04); color: var(--text-muted); border: 1px solid var(--border); }
+  .chip-scheduled { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+  .chip-pending   { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+  .chip-ongoing   { background: rgba(26,46,37,0.06); color: var(--text-sec); border: 1px solid var(--border); }
+  .chip-completed { background: rgba(26,46,37,0.04); color: var(--text-muted); border: 1px solid var(--border); }
 
   /* ── Buttons ── */
   .btn {
@@ -257,22 +241,23 @@
     text-decoration: none;
     font-family: inherit;
     font-size: .875rem;
-    font-weight: 500;
+    font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: opacity .15s, transform .1s;
+    transition: background .2s, border-color .2s, color .2s, transform .1s;
   }
-  .btn:hover { opacity: .88; transform: translateY(-1px); }
   .btn:active { transform: translateY(0); }
-  .btn-primary { background: var(--yellow); color: #0a0a0a; font-weight: 600; }
-  .btn-primary:hover { background: var(--yellow-dark); }
-  .btn-success { background: #38d9a9; color: #0a0a0a; font-weight: 600; }
+  .btn-primary {
+    background: var(--green);
+    color: #ffffff;
+  }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
   .btn-ghost {
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45,122,95,0.3);
   }
-  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); opacity: 1; }
+  .btn-ghost:hover { border-color: rgba(45,122,95,0.5); color: var(--green); }
   .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
 
   /* ── Preferences list ── */
@@ -282,8 +267,8 @@
     align-items: center;
     gap: 12px;
     padding: 10px 14px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: var(--radius-sm);
     font-size: .9rem;
   }
@@ -291,21 +276,24 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: var(--yellow);
-    color: #0a0a0a;
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
+    color: var(--green);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: .72rem;
     font-weight: 700;
     flex-shrink: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.03em;
   }
 
   /* ── Empty state ── */
   .empty {
     text-align: center;
     padding: 36px;
-    color: var(--muted);
+    color: var(--text-muted);
     font-size: .9rem;
   }
   .empty span { display: block; font-size: 2rem; margin-bottom: 10px; }
@@ -313,7 +301,7 @@
   /* ── Quick-action card (mock test) ── */
   .action-card {
     background: var(--card);
-    border: 1px solid var(--yellow-border);
+    border: 1px solid var(--green-border);
     border-radius: 12px;
     padding: 28px;
     display: flex;
@@ -329,7 +317,7 @@
   }
   .action-card-text p {
     font-size: .875rem;
-    color: var(--muted);
+    color: var(--text-muted);
   }
 
   /* ── Trainee photo ── */
@@ -343,21 +331,21 @@
     height: 88px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--yellow);
-    box-shadow: 0 0 0 4px rgba(250,204,21,0.12);
+    border: 2px solid var(--green-border);
+    box-shadow: 0 0 0 4px var(--green-dim);
     background: var(--surface);
   }
   .profile-photo-fallback {
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    border: 2px solid var(--yellow);
-    box-shadow: 0 0 0 4px rgba(250,204,21,0.12);
-    background: var(--surface);
+    border: 1.5px solid var(--green-border);
+    box-shadow: 0 0 0 4px var(--green-dim);
+    background: var(--green-dim);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--yellow);
+    color: var(--green);
   }
 
   /* ── Section spacing ── */
@@ -378,11 +366,14 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 180px;
     font-weight: 400;
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     letter-spacing: 0.05em;
     pointer-events: none;
     user-select: none;
     white-space: nowrap;
+  }
+  html.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
   @media (max-width: 700px) {
     .page-wrapper { padding: 28px 20px 60px; }
@@ -396,11 +387,11 @@
 <div class="page-wrapper">
 
   {# ── Page header ── #}
-  <p class="page-label" style="font-size:11px;font-weight:500;letter-spacing:.10em;text-transform:uppercase;color:var(--yellow);margin-bottom:6px;">Trainee Portal</p>
-  <h1 style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.05em;line-height:0.95;margin-bottom:32px;">
+  <p class="page-label">Trainee Portal</p>
+  <h1 class="page-title">
     Hello, {{ trainee.user.first_name }}
   </h1>
-  <hr style="border:none;border-top:1px solid var(--border);margin:0 0 32px;">
+  <hr class="section-divider" style="margin: 16px 0 32px;">
 
   {# ── Top bar ── #}
   <div class="topbar">
@@ -475,7 +466,7 @@
         <p class="card-title">
           <span style="display:flex;align-items:center;gap:8px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Fee Summary &nbsp;<span class="badge badge-blue">{{ fee_record.get_status_display }}</span>
+            Fee Summary &nbsp;<span class="badge badge-green">{{ fee_record.get_status_display }}</span>
           </span>
           <a href="{% url 'accounting:payment_history' trainee.pk %}" class="btn-history">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -515,7 +506,6 @@
           <span>{% if final_fee %}{% widthratio paid final_fee 100 %}{% else %}0{% endif %}% of Rs. {{ final_fee }}</span>
         </div>
 
-
       </div>
       {% endwith %}
     {% else %}
@@ -537,7 +527,7 @@
         Upcoming Sessions
       </p>
 
-      <p style="font-size:.875rem;color:var(--muted);margin-bottom:16px;">
+      <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:16px;">
         Sessions are auto-assigned nightly based on your slot preferences. Set your preferences to get the best slots.
       </p>
 
@@ -546,7 +536,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
           Set Slot Preferences
         </a>
-        <a href="{% url 'scheduling:my_schedule' %}" class="btn btn-success">
+        <a href="{% url 'scheduling:my_schedule' %}" class="btn btn-ghost">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
           Full Schedule
         </a>
@@ -578,7 +568,7 @@
                 {% if session.instructor %}
                   {{ session.instructor.user.get_full_name }}
                 {% else %}
-                  <span style="color:var(--muted);">—</span>
+                  <span style="color:var(--text-muted);">—</span>
                 {% endif %}
               </td>
               <td>{{ session.get_session_type_display }}</td>

@@ -18,10 +18,13 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 180px;
     letter-spacing: 0.04em;
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     pointer-events: none;
     line-height: 1;
     z-index: 0;
+  }
+  :root.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
 
   /* ── Header ── */
@@ -31,7 +34,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 8px;
   }
   .page-title {
@@ -43,7 +46,7 @@
     color: var(--text);
     margin-bottom: 0;
   }
-  .page-title .hl { color: var(--yellow); }
+  .page-title .hl { color: var(--green); }
 
   .section-divider {
     border: none;
@@ -58,7 +61,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 6px;
   }
   .section-heading {
@@ -82,8 +85,8 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 600;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     vertical-align: middle;
     margin-left: 10px;
   }
@@ -97,7 +100,7 @@
     margin-bottom: 10px;
     transition: border-color .2s;
   }
-  .request-card:hover { border-color: rgba(250,204,21,0.18); }
+  .request-card:hover { border-color: rgba(45,122,95,0.20); }
 
   .request-card-top {
     display: flex;
@@ -117,14 +120,14 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 13px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
     letter-spacing: 0.04em;
   }
@@ -210,13 +213,13 @@
     padding: 8px 16px;
     border-radius: 8px;
     border: none;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     cursor: pointer;
     transition: background .15s, transform .15s;
   }
   .btn-approve:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
   .btn-reject {
@@ -303,13 +306,16 @@
     font-weight: 400;
     padding: 7px 14px;
     border-radius: 7px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(45,122,95,0.3);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--slate);
     cursor: pointer;
     transition: border-color .15s, color .15s;
   }
-  .btn-cancel-reject:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+  .btn-cancel-reject:hover {
+    border-color: rgba(45,122,95,0.5);
+    color: var(--green);
+  }
 
   /* ── Empty state ── */
   .empty-card {
@@ -324,7 +330,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.05em;
-    color: rgba(255,255,255,0.30);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
   .empty-card p {
@@ -361,11 +367,11 @@
     white-space: nowrap;
   }
   tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     transition: background .12s;
   }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  tbody tr:hover { background: rgba(45,122,95,0.03); }
   td {
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
@@ -392,9 +398,9 @@
     border: 1px solid transparent;
   }
   .badge-approved {
-    background: var(--yellow-dim);
-    color: var(--yellow);
-    border-color: var(--yellow-border);
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: var(--green-border);
   }
   .badge-rejected {
     background: rgba(239,68,68,0.08);
@@ -414,7 +420,7 @@
   }
   .td-note {
     font-size: 13px;
-    color: rgba(255,255,255,0.35);
+    color: var(--text-muted);
     font-style: italic;
   }
 
@@ -423,14 +429,14 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 12px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
     letter-spacing: 0.03em;
     vertical-align: middle;

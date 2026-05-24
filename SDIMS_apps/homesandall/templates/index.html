@@ -6,53 +6,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soch Driving Institute</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --yellow: #facc15;
-            --yellow-dark: #eab308;
-            --black: #0a0a0a;
-            --off-black: #141414;
-            --card-bg: #1a1a1a;
-            --border: rgba(255,255,255,0.08);
-            --text-muted: rgba(255,255,255,0.45);
-            --text-secondary: rgba(255,255,255,0.72);
+            --green:         #2d7a5f;
+            --green-dark:    #235f4a;
+            --green-dim:     rgba(45,122,95,0.10);
+            --green-border:  rgba(45,122,95,0.22);
+            --green-focus:   rgba(45,122,95,0.40);
+            --slate:         #3d5247;
+            --bg:            #f4f7f5;
+            --surface:       #ffffff;
+            --card:          #f9fbfa;
+            --border:        rgba(0,0,0,0.09);
+            --text:          #1a2e25;
+            --text-sec:      rgba(26,46,37,0.72);
+            --text-muted:    rgba(26,46,37,0.45);
+        }
+
+        html.dark {
+            --green:         #4db88a;
+            --green-dark:    #3da070;
+            --green-dim:     rgba(77,184,138,0.12);
+            --green-border:  rgba(77,184,138,0.25);
+            --green-focus:   rgba(77,184,138,0.45);
+            --slate:         #7aab93;
+            --bg:            #0d1410;
+            --surface:       #151c18;
+            --card:          #1c2620;
+            --border:        rgba(255,255,255,0.08);
+            --text:          #e8f2ed;
+            --text-sec:      rgba(232,242,237,0.72);
+            --text-muted:    rgba(232,242,237,0.40);
         }
 
         html { scroll-behavior: smooth; }
 
         body {
-            background: var(--black);
-            color: #fff;
+            background: var(--bg);
+            color: var(--text);
             font-family: 'DM Sans', sans-serif;
-            font-weight: 400;
-            line-height: 1.6;
+            font-weight: 300;
+            line-height: 1.7;
             overflow-x: hidden;
+            transition: background 0.22s, color 0.22s;
         }
 
         /* ── TOP BAR ── */
         .topbar {
-            background: var(--yellow);
-            color: var(--black);
+            background: var(--green);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             gap: 48px;
-            padding: 9px 40px;
-            font-size: 12.5px;
+            padding: 8px 40px;
+            font-size: 12px;
             font-weight: 500;
             letter-spacing: 0.02em;
         }
-        .topbar span { display: flex; align-items: center; gap: 7px; }
+        .topbar span { display: flex; align-items: center; gap: 6px; }
 
         /* ── NAV ── */
         nav {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10,10,10,0.95);
+            background: color-mix(in srgb, var(--bg) 96%, transparent);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -60,6 +82,7 @@
             justify-content: space-between;
             padding: 0 48px;
             height: 64px;
+            transition: background 0.22s, border-color 0.22s;
         }
         .nav-logo {
             display: flex;
@@ -68,41 +91,58 @@
             text-decoration: none;
         }
         .nav-logo img {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             object-fit: contain;
             border-radius: 6px;
+            background: var(--card);
+            border: 1px solid var(--green-border);
+            padding: 4px;
         }
-        .nav-logo-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.15;
-        }
+        .nav-logo-text { display: flex; flex-direction: column; line-height: 1.2; }
         .nav-logo-name {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 18px;
+            font-size: 17px;
             letter-spacing: 0.08em;
-            color: #fff;
+            color: var(--text);
         }
         .nav-logo-tagline {
             font-size: 10px;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: var(--yellow);
+            color: var(--green);
             font-weight: 500;
         }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
         nav a.login-btn {
             text-decoration: none;
-            background: var(--yellow);
-            color: var(--black);
-            font-size: 13.5px;
+            background: var(--green);
+            color: #ffffff;
+            font-size: 13px;
             font-weight: 600;
             padding: 9px 22px;
-            border-radius: 6px;
-            transition: background 0.15s;
+            border-radius: 8px;
+            transition: background 0.15s, transform 0.1s;
             letter-spacing: 0.01em;
         }
-        nav a.login-btn:hover { background: var(--yellow-dark); }
+        nav a.login-btn:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+        /* Theme toggle */
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .theme-btn:hover { border-color: var(--green-border); color: var(--green); }
 
         /* ── HERO ── */
         .hero {
@@ -115,12 +155,12 @@
         }
         .hero-bg-text {
             position: absolute;
-            right: -40px;
+            right: -30px;
             top: 50%;
             transform: translateY(-50%);
             font-family: 'Bebas Neue', sans-serif;
             font-size: clamp(120px, 18vw, 260px);
-            color: rgba(255,255,255,0.035);
+            color: rgba(45,122,95,0.05);
             line-height: 1;
             pointer-events: none;
             user-select: none;
@@ -138,68 +178,61 @@
             height: 72px;
             object-fit: contain;
             border-radius: 14px;
-            background: rgba(255,255,255,0.05);
+            background: var(--card);
             padding: 6px;
-            border: 1px solid rgba(250,204,21,0.2);
+            border: 1px solid var(--green-border);
             flex-shrink: 0;
         }
-        .hero-brand-text {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+        .hero-brand-text { display: flex; flex-direction: column; gap: 4px; }
         .hero-brand-name {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 28px;
             letter-spacing: 0.08em;
-            color: #fff;
+            color: var(--text);
             line-height: 1;
         }
-        .hero-brand-location {
-            font-size: 12.5px;
-            color: var(--text-muted);
-            letter-spacing: 0.03em;
-        }
+        .hero-brand-location { font-size: 12px; color: var(--text-muted); letter-spacing: 0.03em; }
         .hero h1 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: clamp(56px, 7vw, 90px);
             line-height: 0.95;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
             margin-bottom: 24px;
         }
-        .hero h1 .accent { color: var(--yellow); }
+        .hero h1 .accent { color: var(--green); }
         .hero p {
-            font-size: 17px;
-            color: var(--text-secondary);
+            font-size: 16px;
+            color: var(--text-sec);
             max-width: 480px;
             line-height: 1.75;
             margin-bottom: 40px;
+            font-weight: 300;
         }
         .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
         .btn-primary {
             display: inline-block;
             text-decoration: none;
-            background: var(--yellow);
-            color: var(--black);
-            font-size: 14.5px;
+            background: var(--green);
+            color: #ffffff;
+            font-size: 14px;
             font-weight: 600;
             padding: 13px 28px;
-            border-radius: 7px;
+            border-radius: 8px;
             transition: background 0.15s, transform 0.1s;
         }
-        .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+        .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
         .btn-ghost {
             display: inline-block;
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.8);
-            font-size: 14.5px;
+            border: 1px solid rgba(45,122,95,0.3);
+            color: var(--slate);
+            font-size: 14px;
             font-weight: 400;
             padding: 13px 28px;
-            border-radius: 7px;
+            border-radius: 8px;
             transition: border-color 0.15s, color 0.15s;
         }
-        .btn-ghost:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+        .btn-ghost:hover { border-color: var(--green-border); color: var(--green); }
 
         /* ── STATS STRIP ── */
         .stats {
@@ -217,159 +250,369 @@
         .stat-num {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 42px;
-            color: var(--yellow);
+            color: var(--green);
             letter-spacing: 0.03em;
             line-height: 1;
             display: block;
             margin-bottom: 6px;
         }
-        .stat-label { font-size: 12.5px; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+        .stat-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
 
         /* ── SECTION SHARED ── */
         section { padding: 80px 48px; }
         .section-tag {
-            font-size: 11.5px;
+            display: block;
+            font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: var(--yellow);
+            color: var(--green);
             margin-bottom: 12px;
-            display: block;
         }
         .section-heading {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(34px, 4vw, 50px);
-            letter-spacing: 0.03em;
-            color: #fff;
+            font-size: clamp(34px, 4vw, 52px);
+            letter-spacing: 0.05em;
+            color: var(--text);
             margin-bottom: 48px;
-            line-height: 1;
+            line-height: 0.95;
         }
 
         /* ── COURSES ── */
         .courses-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 18px;
         }
         .course-card {
-            background: var(--card-bg);
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 28px;
+            overflow: hidden;
             transition: border-color 0.2s, transform 0.2s;
             position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .course-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 3px;
-            background: var(--yellow);
+            background: var(--green);
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.25s ease;
+            z-index: 1;
         }
-        .course-card:hover { border-color: rgba(250,204,21,0.25); transform: translateY(-3px); }
+        .course-card:hover { border-color: var(--green-border); transform: translateY(-3px); }
         .course-card:hover::before { transform: scaleX(1); }
+
+        .course-card-header {
+            padding: 24px 24px 18px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
         .course-icon {
             width: 44px;
             height: 44px;
-            background: rgba(250,204,21,0.1);
+            background: var(--green-dim);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            margin-bottom: 18px;
+            flex-shrink: 0;
         }
-        .course-card h3 { font-size: 17px; font-weight: 500; margin-bottom: 10px; }
-        .course-card p { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; }
+        .course-level-badge {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        .course-level-badge.beginner    { border-color: rgba(34,197,94,0.3);  color: #22c55e; }
+        .course-level-badge.intermediate{ border-color: var(--green-border); color: var(--green); }
+        .course-level-badge.advanced    { border-color: rgba(239,68,68,0.3);  color: #ef4444; }
+
+        .course-card-body { padding: 0 24px 20px; flex: 1; }
+        .course-card-body h3 { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+        .course-card-body p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
+
+        .course-card-meta {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .course-meta-item { display: flex; flex-direction: column; gap: 2px; }
+        .course-meta-label {
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .course-meta-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .course-meta-value.fee {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            color: var(--green);
+            letter-spacing: 0.03em;
+        }
 
         /* ── INSTRUCTORS ── */
-        .instructors-section { background: var(--off-black); }
+        .instructors-section { background: var(--surface); }
         .instructors-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 18px;
         }
         .instructor-card {
-            background: var(--card-bg);
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 28px 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 14px;
-            transition: border-color 0.2s;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
         }
-        .instructor-card:hover { border-color: rgba(250,204,21,0.25); }
-        .avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: rgba(250,204,21,0.12);
-            border: 1.5px solid rgba(250,204,21,0.3);
+        .instructor-card:hover { border-color: var(--green-border); transform: translateY(-3px); }
+
+        .instructor-photo {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: var(--surface);
+        }
+        .instructor-photo-placeholder {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: var(--green-dim);
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 18px;
-            color: var(--yellow);
+            font-size: 42px;
+            color: var(--green);
             letter-spacing: 0.05em;
-            flex-shrink: 0;
         }
-        .instructor-name { font-size: 15.5px; font-weight: 500; margin-bottom: 4px; }
+        .instructor-info { padding: 16px 18px; }
+        .instructor-name { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
         .instructor-status {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             font-size: 12px;
             color: var(--text-muted);
+            font-weight: 400;
         }
-        .status-dot {
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: #22c55e;
-            flex-shrink: 0;
-        }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
         /* ── VEHICLES ── */
         .vehicles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
         }
-        .vehicle-pill {
-            background: var(--card-bg);
+        .vehicle-card {
+            background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px 20px;
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--text-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .vehicle-card:hover { border-color: var(--green-border); transform: translateY(-3px); }
+
+        .vehicle-photo {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            display: block;
+            background: var(--surface);
+        }
+        .vehicle-photo-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--green-dim);
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: border-color 0.2s, color 0.2s;
+            justify-content: center;
+            font-size: 36px;
         }
-        .vehicle-pill:hover { border-color: rgba(250,204,21,0.3); color: #fff; }
-        .vehicle-pill::before {
-            content: '▸';
-            color: var(--yellow);
+        .vehicle-info { padding: 16px 18px; }
+        .vehicle-name { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+        .vehicle-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .vehicle-tag {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        .vehicle-tag.dual { border-color: rgba(34,197,94,0.3); color: #22c55e; }
+
+        /* ── VACANT SLOTS ── */
+        .slots-section { background: var(--bg); }
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+        }
+        .slot-day-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .slot-day-card:hover { border-color: var(--green-border); transform: translateY(-3px); }
+        .slot-day-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .slot-day-date {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.05em;
+            color: var(--text);
+            line-height: 1;
+        }
+        .slot-today-badge {
             font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #ffffff;
+            background: var(--green);
+            border-radius: 4px;
+            padding: 3px 8px;
+        }
+        .slot-list { padding: 8px 0; }
+        .slot-row {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .slot-row:last-child { border-bottom: none; }
+        .slot-row:hover { background: var(--green-dim); }
+        .slot-time {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            margin-bottom: 7px;
+        }
+        .slot-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+        .slot-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--green-dim);
+            border: 1px solid var(--green-border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--green);
+            white-space: nowrap;
+        }
+        .slot-badge-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            opacity: 0.7;
             flex-shrink: 0;
+        }
+        .slot-badge.unavailable {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+        .slot-badge.unavailable .slot-badge-dot { background: var(--text-muted); }
+        .slot-badge.full {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text-muted);
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+        /* Booking CTA banner */
+        .booking-cta {
+            margin-top: 40px;
+            padding: 28px 32px;
+            background: var(--green-dim);
+            border: 1px solid var(--green-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .booking-cta-text p:first-child {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.05em;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .booking-cta-text p:last-child {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+        .booking-cta-fee {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 34px;
+            color: var(--green);
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+        .booking-disabled-note {
+            margin-top: 24px;
+            padding: 18px 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
         }
 
         /* ── EMPTY STATES ── */
         .empty {
-            padding: 48px;
+            padding: 48px 24px;
             text-align: center;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
             border: 1px dashed var(--border);
             border-radius: 12px;
+        }
+        .empty-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            display: block;
+            margin-bottom: 8px;
         }
 
         /* ── FOOTER ── */
@@ -384,14 +627,17 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-        footer strong { color: var(--yellow); font-weight: 500; }
+        footer strong { color: var(--green); font-weight: 500; }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 640px) {
-            nav, section, footer { padding-left: 20px; padding-right: 20px; }
+            nav, footer { padding-left: 20px; padding-right: 20px; }
+            section { padding: 60px 20px; }
             .hero { padding: 60px 20px 40px; }
             .stat { padding: 24px 16px; }
-            .topbar { gap: 24px; font-size: 11px; flex-wrap: wrap; justify-content: center; }
+            .topbar { gap: 20px; font-size: 11px; flex-wrap: wrap; justify-content: center; }
+            .booking-cta { flex-direction: column; gap: 16px; }
+            .course-card-meta { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -400,7 +646,7 @@
 <!-- TOP BAR -->
 <div class="topbar">
     <span>📍 Ranipauwa-11, Pokhara</span>
-    <span>⏰ 6AM –8 PM, Sun-Fri</span>
+    <span>⏰ 6AM – 8PM, Sun–Fri</span>
     <span>📞 Contact Us Today</span>
 </div>
 
@@ -413,7 +659,10 @@
             <span class="nav-logo-tagline">Drive Smart. Drive Safe.</span>
         </div>
     </a>
-    <a href="{% url 'accounts:login' %}" class="login-btn">Login →</a>
+    <div class="nav-right">
+        <button class="theme-btn" id="themeToggleBtn" aria-label="Toggle theme">🌙</button>
+        <a href="{% url 'accounts:login' %}" class="login-btn">Login →</a>
+    </div>
 </nav>
 
 <!-- HERO -->
@@ -436,14 +685,6 @@
     </div>
 </section>
 
-<!-- STATS -->
-<div class="stats">
-    <div class="stat"><span class="stat-num">3+</span><span class="stat-label">Vehicle Types</span></div>
-    <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Dual Control</span></div>
-    <div class="stat"><span class="stat-num">7</span><span class="stat-label">Days a Week</span></div>
-    <div class="stat"><span class="stat-num">1×1</span><span class="stat-label">Instructor Ratio</span></div>
-</div>
-
 <!-- COURSES -->
 <section id="courses">
     <span class="section-tag">What We Offer</span>
@@ -452,12 +693,39 @@
     <div class="courses-grid">
         {% for course in courses %}
         <div class="course-card">
-            <div class="course-icon">🚗</div>
-            <h3>{{ course.course_name }}</h3>
-            <p>{{ course.description }}</p>
+            <div class="course-card-header">
+                <div class="course-icon">
+                    {% if course.vehicle_type == 'bike' %}🏍️
+                    {% elif course.vehicle_type == 'scooter' %}🛵
+                    {% else %}🚗
+                    {% endif %}
+                </div>
+                <span class="course-level-badge {{ course.level }}">{{ course.get_level_display }}</span>
+            </div>
+            <div class="course-card-body">
+                <h3>{{ course.course_name }}</h3>
+                {% if course.description %}<p>{{ course.description }}</p>{% endif %}
+            </div>
+            <div class="course-card-meta">
+                <div class="course-meta-item">
+                    <span class="course-meta-label">Fee</span>
+                    <span class="course-meta-value fee">Rs. {{ course.fee }}</span>
+                </div>
+                <div class="course-meta-item">
+                    <span class="course-meta-label">Duration</span>
+                    <span class="course-meta-value">{{ course.duration_days }} days</span>
+                </div>
+                <div class="course-meta-item">
+                    <span class="course-meta-label">Sessions</span>
+                    <span class="course-meta-value">{{ course.total_lessons }}</span>
+                </div>
+            </div>
         </div>
         {% empty %}
-        <div class="empty" style="grid-column: 1/-1;">No courses available at this time.</div>
+        <div class="empty" style="grid-column: 1/-1;">
+            <span class="empty-label">No Courses</span>
+            No courses available at this time.
+        </div>
         {% endfor %}
     </div>
 </section>
@@ -470,19 +738,29 @@
     <div class="instructors-grid">
         {% for instructor in instructors %}
         <div class="instructor-card">
-            <div class="avatar">
-                {{ instructor.user.first_name|slice:":1"|upper }}{{ instructor.user.last_name|slice:":1"|upper }}
-            </div>
-            <div>
+            {% if instructor.images %}
+                <img src="{{ instructor.images.url }}" alt="{{ instructor.user.first_name }} {{ instructor.user.last_name }}" class="instructor-photo">
+            {% else %}
+                <div class="instructor-photo-placeholder">
+                    {{ instructor.user.first_name|slice:":1"|upper }}{{ instructor.user.last_name|slice:":1"|upper }}
+                </div>
+            {% endif %}
+            <div class="instructor-info">
                 <div class="instructor-name">{{ instructor.user.first_name }} {{ instructor.user.last_name }}</div>
                 <div class="instructor-status">
-                    <span class="status-dot"></span>
-                    {{ instructor.status }}
+                    {% if instructor.status == 'active' %}
+                        <span class="status-dot" style="background:#22c55e;"></span> Active
+                    {% else %}
+                        <span class="status-dot" style="background:#6b7280;"></span> Inactive
+                    {% endif %}
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="empty" style="grid-column: 1/-1;">No instructors listed yet.</div>
+        <div class="empty" style="grid-column: 1/-1;">
+            <span class="empty-label">No Instructors</span>
+            No instructors listed yet.
+        </div>
         {% endfor %}
     </div>
 </section>
@@ -494,11 +772,103 @@
 
     <div class="vehicles-grid">
         {% for vehicle in vehicles %}
-        <div class="vehicle-pill">{{ vehicle.brand }} {{ vehicle.model }}</div>
+        <div class="vehicle-card">
+            {% if vehicle.image %}
+                <img src="{{ vehicle.image.url }}" alt="{{ vehicle.brand }} {{ vehicle.model }}" class="vehicle-photo">
+            {% else %}
+                <div class="vehicle-photo-placeholder">
+                    {% if vehicle.vehicle_type == 'bike' %}🏍️
+                    {% elif vehicle.vehicle_type == 'scooter' %}🛵
+                    {% else %}🚗
+                    {% endif %}
+                </div>
+            {% endif %}
+            <div class="vehicle-info">
+                <div class="vehicle-name">{{ vehicle.brand }} {{ vehicle.model }}</div>
+                <div class="vehicle-tags">
+                    <span class="vehicle-tag">{{ vehicle.get_vehicle_type_display }}</span>
+                    <span class="vehicle-tag">{{ vehicle.get_transmission_display }}</span>
+                    <span class="vehicle-tag">{{ vehicle.get_fuel_type_display }}</span>
+                    {% if vehicle.dual_control %}<span class="vehicle-tag dual">Dual Control</span>{% endif %}
+                </div>
+            </div>
+        </div>
         {% empty %}
-        <div class="empty" style="grid-column: 1/-1;">No vehicles listed yet.</div>
+        <div class="empty" style="grid-column: 1/-1;">
+            <span class="empty-label">No Vehicles</span>
+            No vehicles listed yet.
+        </div>
         {% endfor %}
     </div>
+</section>
+
+<!-- VACANT SLOTS / WALK-IN BOOKING -->
+<section class="slots-section" id="book">
+    <span class="section-tag">Walk-In Sessions</span>
+    <div class="section-heading">Open Slots Today & Tomorrow</div>
+
+    {% if booking_enabled %}
+        {% if vacant_slot_days %}
+        <div class="slots-grid">
+            {% for day in vacant_slot_days %}
+            {% if forloop.counter <= 2 %}
+            <div class="slot-day-card">
+                <div class="slot-day-header">
+                    <span class="slot-day-date">{{ day.date_display }}</span>
+                    {% if day.is_today %}<span class="slot-today-badge">Today</span>{% endif %}
+                </div>
+                <div class="slot-list">
+                    {% for slot in day.slots %}
+                    <div class="slot-row">
+                        <span class="slot-time">{{ slot.label }}</span>
+                        <div class="slot-badges">
+                            {% if slot.four_wheel > 0 %}
+                            <span class="slot-badge">
+                                <span class="slot-badge-dot"></span>
+                                🚗 4-Wheeler
+                            </span>
+                            {% endif %}
+                            {% if slot.two_wheel > 0 %}
+                            <span class="slot-badge">
+                                <span class="slot-badge-dot"></span>
+                                🛵 2-Wheeler
+                            </span>
+                            {% endif %}
+                            {% if slot.four_wheel == 0 and slot.two_wheel == 0 %}
+                            <span class="slot-badge full">Fully Booked</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="booking-cta">
+            <div class="booking-cta-text">
+                <p>Pay Per Session — No Enrolment Needed</p>
+                <p>Walk in or call ahead to reserve a slot with a qualified instructor.</p>
+            </div>
+            {% if session_fee %}
+            <div class="booking-cta-fee">Rs. {{ session_fee }}</div>
+            {% endif %}
+            <a href="tel:+977XXXXXXXXXX" class="btn-primary">Call to Book →</a>
+        </div>
+
+        {% else %}
+        <div class="empty">
+            <span class="empty-label">No Openings</span>
+            No walk-in slots are available today or tomorrow. Check back soon.
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="booking-disabled-note">
+        Walk-in / pay-per-session booking is not available right now. Please contact us or log in to your account for scheduling options.
+    </div>
+    {% endif %}
 </section>
 
 <!-- FOOTER -->
@@ -506,6 +876,25 @@
     <span>© 2025 <strong>Soch Driving Institute</strong> — Ranipauwa-11, Pokhara</span>
     <span>Drive Smart. Drive Safe.</span>
 </footer>
+
+<script>
+    (function() {
+        var saved = localStorage.getItem('sdims-theme');
+        if (saved === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        var btn = document.getElementById('themeToggleBtn');
+        function updateIcon() {
+            btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        }
+        updateIcon();
+        btn.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('sdims-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcon();
+        });
+    })();
+</script>
 
 </body>
 </html>

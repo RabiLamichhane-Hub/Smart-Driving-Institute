@@ -18,7 +18,7 @@
     right: -20px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     letter-spacing: 0.04em;
     line-height: 1;
     pointer-events: none;
@@ -30,7 +30,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 8px;
   }
   .page-title {
@@ -65,9 +65,12 @@
     border-radius: 12px;
     padding: 32px;
     margin-bottom: 24px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, transform 0.2s;
   }
-  .card:hover { border-color: rgba(250,204,21,0.18); }
+  .card:hover {
+    border-color: rgba(45,122,95,0.20);
+    transform: translateY(-3px);
+  }
 
   .card-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -108,7 +111,7 @@
   }
   .form-group input:focus,
   .form-group select:focus,
-  .form-group textarea:focus { border-color: var(--yellow-focus); }
+  .form-group textarea:focus { border-color: var(--green-focus); }
   .form-group select option { background: var(--card); }
   .form-group .errorlist { list-style: none; font-size: 12px; color: #f87171; }
 
@@ -126,12 +129,12 @@
   }
   .photo-upload-area:hover,
   .photo-upload-area.drag-over {
-    border-color: var(--yellow);
-    background: rgba(250,204,21,0.04);
+    border-color: var(--green);
+    background: var(--green-dim);
   }
   .photo-upload-area.drag-over {
     border-style: solid;
-    background: rgba(250,204,21,0.07);
+    background: rgba(45,122,95,0.07);
   }
 
   /* hidden native input covers the whole drop zone */
@@ -161,8 +164,8 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(250,204,21,0.1);
-    border: 1px solid rgba(250,204,21,0.22);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,16 +173,16 @@
   }
   .photo-upload-area:hover .upload-icon,
   .photo-upload-area.drag-over .upload-icon {
-    background: rgba(250,204,21,0.18);
+    background: rgba(45,122,95,0.18);
   }
-  .upload-icon svg { width: 20px; height: 20px; stroke: var(--yellow); fill: none; stroke-width: 1.8; }
+  .upload-icon svg { width: 20px; height: 20px; stroke: var(--green); fill: none; stroke-width: 1.8; }
 
   .upload-label {
     font-size: 13px;
     font-weight: 500;
     color: var(--text);
   }
-  .upload-label span { color: var(--yellow); text-decoration: underline; }
+  .upload-label span { color: var(--green); text-decoration: underline; }
   .upload-hint { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
 
   /* ── Preview ─────────────────────────────────────────────── */
@@ -200,7 +203,7 @@
     height: 80px;
     border-radius: 10px;
     object-fit: cover;
-    border: 2px solid rgba(250,204,21,0.3);
+    border: 2px solid var(--green-border);
   }
   .preview-badge {
     position: absolute;
@@ -208,13 +211,13 @@
     right: -5px;
     width: 20px;
     height: 20px;
-    background: var(--yellow);
+    background: var(--green);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .preview-badge svg { width: 11px; height: 11px; stroke: #000; fill: none; stroke-width: 2.5; }
+  .preview-badge svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 2.5; }
 
   .preview-meta { text-align: left; }
   .preview-name {
@@ -249,9 +252,9 @@
 
   /* drag-over ripple pulse */
   @keyframes dropPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(250,204,21,0.35); }
-    70%  { box-shadow: 0 0 0 10px rgba(250,204,21,0); }
-    100% { box-shadow: 0 0 0 0 rgba(250,204,21,0); }
+    0%   { box-shadow: 0 0 0 0 rgba(45,122,95,0.35); }
+    70%  { box-shadow: 0 0 0 10px rgba(45,122,95,0); }
+    100% { box-shadow: 0 0 0 0 rgba(45,122,95,0); }
   }
   .photo-upload-area.drag-over { animation: dropPulse 0.7s ease-out; }
 
@@ -261,8 +264,8 @@
     align-items: center;
     gap: 16px;
     padding: 14px 18px;
-    background: rgba(250,204,21,0.05);
-    border: 1px solid rgba(250,204,21,0.14);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 10px;
     margin-bottom: 16px;
   }
@@ -271,7 +274,7 @@
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(250,204,21,0.30);
+    border: 2px solid var(--green-border);
     flex-shrink: 0;
   }
   .current-photo-text { flex: 1; }
@@ -298,23 +301,23 @@
     text-transform: uppercase;
     color: var(--text-muted);
   }
-  .billing-amount { color: var(--yellow); font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .billing-amount { color: var(--green); font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
   .billing-final {
-    color: var(--yellow);
+    color: var(--green);
     font-size: 22px;
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 0.05em;
   }
 
   .course-badge {
-    background: rgba(250,204,21,0.08);
-    border: 1px solid rgba(250,204,21,0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 3px 9px;
     font-size: 11px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     font-weight: 500;
   }
 
@@ -324,7 +327,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 20px;
     letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.25);
+    color: var(--text-muted);
     margin-bottom: 6px;
   }
 
@@ -344,12 +347,12 @@
     font-variant-numeric: tabular-nums;
     text-align: right;
   }
-  .discount-wrapper input:focus { border-color: var(--yellow-focus); }
+  .discount-wrapper input:focus { border-color: var(--green-focus); }
   .currency-prefix { font-size: 13px; color: var(--text-muted); font-weight: 500; }
 
   .btn-primary {
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 11px 28px;
@@ -363,26 +366,12 @@
     align-items: center;
     gap: 8px;
   }
-
-  /* ── Bottom form actions ─────────────────────────────────── */
-  .form-actions-bottom {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 0 16px;
-  }
-
-  @media (max-width: 768px) {
-    .form-actions-bottom { flex-direction: column; align-items: stretch; }
-    .form-actions-bottom .btn-primary,
-    .form-actions-bottom .btn-ghost { justify-content: center; text-align: center; }
-  }
-  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
 
   .btn-ghost {
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45,122,95,0.3);
     border-radius: 8px;
     padding: 11px 24px;
     font-family: 'DM Sans', sans-serif;
@@ -393,7 +382,15 @@
     display: inline-block;
     transition: border-color 0.2s, color 0.2s;
   }
-  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+  .btn-ghost:hover { border-color: rgba(45,122,95,0.5); color: var(--green); }
+
+  /* ── Form footer (Save button placement) ────────────────── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
+  }
 
   @media (max-width: 768px) {
     .page-wrapper { padding: 28px 20px 60px; }
@@ -402,6 +399,9 @@
     .page-wrapper::before { font-size: 120px; }
     .card { padding: 20px; }
     .photo-preview { flex-wrap: wrap; }
+    .form-footer { flex-direction: column; align-items: stretch; }
+    .form-footer .btn-primary,
+    .form-footer .btn-ghost { justify-content: center; text-align: center; }
   }
 </style>
 {% endblock %}
@@ -525,8 +525,9 @@
       {% endif %}
     </div>
 
-    <!-- ── Form actions (bottom) ─────────────────────────── -->
-    <div class="form-actions-bottom">
+    <!-- ── Form footer (Save button) ─────────────────────── -->
+    <hr class="section-divider">
+    <div class="form-footer">
       <button type="submit" class="btn-primary">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Save Changes

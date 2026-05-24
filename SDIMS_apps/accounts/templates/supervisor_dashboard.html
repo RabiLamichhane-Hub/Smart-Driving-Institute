@@ -16,7 +16,7 @@
     content: 'OVERVIEW';
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     letter-spacing: 0.05em;
     line-height: 1;
     position: absolute;
@@ -33,7 +33,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 8px;
   }
 
@@ -64,13 +64,13 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 8px;
     padding: 7px 14px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--yellow);
+    color: var(--green);
     letter-spacing: 0.03em;
   }
 
@@ -95,17 +95,17 @@
   }
 
   .stat-card:hover {
-    border-color: rgba(250, 204, 21, 0.18);
+    border-color: rgba(45, 122, 95, 0.20);
     transform: translateY(-3px);
   }
 
-  /* yellow top-border reveal */
+  /* emerald top-border reveal */
   .stat-card::after {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: var(--yellow);
+    background: var(--green);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.3s ease;
@@ -122,12 +122,12 @@
     width: 36px;
     height: 36px;
     border-radius: 9px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 18px;
   }
 
@@ -146,8 +146,8 @@
     margin-bottom: 4px;
   }
 
-  .stat-value--yellow { color: var(--yellow); }
-  .stat-value--alert  { color: #f87171; }
+  .stat-value--green { color: var(--green); }
+  .stat-value--alert { color: #f87171; }
 
   .stat-label {
     font-size: 11px;
@@ -183,7 +183,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 6px;
   }
 
@@ -226,13 +226,13 @@
   }
 
   .table-card tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
 
   .table-card tbody tr:last-child { border-bottom: none; }
 
-  .table-card tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  .table-card tbody tr:hover { background: rgba(45, 122, 95, 0.03); }
 
   .table-card td {
     font-size: 14px;
@@ -260,9 +260,9 @@
   }
 
   .status-badge--completed {
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
-    color: var(--yellow);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
   }
 
   .status-badge--ongoing {
@@ -292,9 +292,9 @@
     line-height: 26px;
     text-align: center;
     border-radius: 6px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
-    color: var(--yellow);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
     font-family: 'Bebas Neue', sans-serif;
     font-size: 14px;
     letter-spacing: 0.04em;
@@ -312,15 +312,15 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 12px;
     letter-spacing: 0.04em;
-    color: var(--yellow);
+    color: var(--green);
     line-height: 1;
   }
 
@@ -334,7 +334,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
 
@@ -362,7 +362,7 @@
   }
 
   .alert-card:hover {
-    border-color: rgba(250, 204, 21, 0.18);
+    border-color: rgba(45, 122, 95, 0.20);
     transform: translateY(-2px);
   }
 
@@ -380,10 +380,10 @@
     justify-content: center;
   }
 
-  .alert-card-icon--yellow {
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
-    color: var(--yellow);
+  .alert-card-icon--green {
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
   }
 
   .alert-card-icon--danger {
@@ -403,8 +403,8 @@
     margin-bottom: 2px;
   }
 
-  .alert-card-count--yellow { color: var(--yellow); }
-  .alert-card-count--danger  { color: #f87171; }
+  .alert-card-count--green  { color: var(--green); }
+  .alert-card-count--danger { color: #f87171; }
 
   .alert-card-label {
     font-size: 11px;
@@ -421,7 +421,7 @@
   }
 
   .alert-card:hover .alert-card-arrow {
-    color: var(--yellow);
+    color: var(--green);
     transform: translateX(3px);
   }
 
@@ -464,7 +464,7 @@
     font-size: 26px;
     letter-spacing: 0.04em;
     line-height: 1;
-    color: var(--yellow);
+    color: var(--green);
   }
 
   .fleet-ring-sub {
@@ -502,8 +502,8 @@
     flex-shrink: 0;
   }
 
-  .fleet-dot--yellow { background: var(--yellow); }
-  .fleet-dot--muted  { background: rgba(255,255,255,0.15); }
+  .fleet-dot--green { background: var(--green); }
+  .fleet-dot--muted { background: var(--border); }
 
   .fleet-legend-val {
     font-family: 'Bebas Neue', sans-serif;
@@ -539,7 +539,7 @@
     text-align: center;
   }
 
-  .instructor-rank--top { color: var(--yellow); }
+  .instructor-rank--top { color: var(--green); }
 
   .instructor-info { flex: 1; min-width: 0; }
 
@@ -555,14 +555,14 @@
 
   .instructor-bar-wrap {
     height: 4px;
-    background: rgba(255,255,255,0.07);
+    background: var(--border);
     border-radius: 4px;
     overflow: hidden;
   }
 
   .instructor-bar {
     height: 100%;
-    background: var(--yellow);
+    background: var(--green);
     border-radius: 4px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -604,24 +604,248 @@
     color: var(--text);
   }
 
-  .session-progress-frac span { color: var(--yellow); }
+  .session-progress-frac span { color: var(--green); }
 
   .session-bar-wrap {
     height: 6px;
-    background: rgba(255,255,255,0.07);
+    background: var(--border);
     border-radius: 6px;
     overflow: hidden;
   }
 
   .session-bar {
     height: 100%;
-    background: var(--yellow);
+    background: var(--green);
     border-radius: 6px;
     transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* ── Alerts & Notifications Panel ──────────── */
+  .alerts-panel {
+    margin-bottom: 32px;
+  }
+
+  .alerts-panel-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .alerts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* Individual alert card */
+  .notif-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.22s, transform 0.22s;
+  }
+
+  .notif-card:hover { transform: translateY(-2px); }
+
+  .notif-card--red   { border-top: 3px solid #ef4444; }
+  .notif-card--amber { border-top: 3px solid #f59e0b; }
+  .notif-card--yellow { border-top: 3px solid #eab308; }
+
+  .notif-card--red:hover   { border-color: rgba(239, 68, 68, 0.45);  border-top-color: #ef4444; }
+  .notif-card--amber:hover { border-color: rgba(245,158, 11, 0.45);  border-top-color: #f59e0b; }
+  .notif-card--yellow:hover{ border-color: rgba(234,179,  8, 0.45);  border-top-color: #eab308; }
+
+  .notif-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px 14px;
+  }
+
+  .notif-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .notif-icon--red    { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); }
+  .notif-icon--amber  { background: rgba(245,158, 11, 0.12); border: 1px solid rgba(245,158, 11, 0.25); }
+  .notif-icon--yellow { background: rgba(234,179,  8, 0.12); border: 1px solid rgba(234,179,  8, 0.25); }
+
+  .notif-title-group { flex: 1; min-width: 0; }
+
+  .notif-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    margin-bottom: 2px;
+  }
+
+  .notif-subtitle {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .notif-count {
+    flex-shrink: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .notif-count--red    { color: #f87171; }
+  .notif-count--amber  { color: #fbbf24; }
+  .notif-count--yellow { color: #facc15; }
+  .notif-count--ok     { color: var(--green); }
+
+  /* Toggle trigger */
+  .notif-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .notif-toggle:hover { background: rgba(45,122,95,0.04); color: var(--green); }
+
+  .notif-toggle-arrow {
+    transition: transform 0.25s ease;
+  }
+
+  .notif-toggle[aria-expanded="true"] .notif-toggle-arrow {
+    transform: rotate(180deg);
+  }
+
+  /* Expandable detail body */
+  .notif-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .notif-body.is-open { display: block; }
+
+  .notif-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .notif-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    transition: background 0.12s;
+  }
+
+  .notif-list-item:last-child { border-bottom: none; }
+  .notif-list-item:hover { background: rgba(45,122,95,0.025); }
+
+  .notif-item-name {
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .notif-item-meta {
+    flex-shrink: 0;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .notif-item-meta strong { color: var(--text-sec); font-weight: 500; }
+
+  .notif-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .notif-tag--red    { background: rgba(239,68,68,0.1);  color: #f87171; }
+  .notif-tag--amber  { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .notif-tag--yellow { background: rgba(234,179,8,0.1);  color: #facc15; }
+
+  /* Footer link inside card */
+  .notif-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .notif-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--green);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.15s;
+  }
+
+  .notif-link:hover { opacity: 0.75; }
+
+  /* Sub-section label (for underutilized resources) */
+  .notif-subsection-label {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Zero-alert happy state */
+  .notif-all-clear {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 500;
+  }
+
   /* ── Mobile ─────────────────────────────────── */
   @media (max-width: 1100px) {
+    .alerts-grid { grid-template-columns: 1fr; }
+  }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
@@ -704,7 +928,7 @@
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
       </div>
-      <div class="stat-value stat-value--yellow">{{ sessions_today }}</div>
+      <div class="stat-value stat-value--green">{{ sessions_today }}</div>
       <div class="stat-label">Sessions Today</div>
       <p class="stat-sub"><strong>{{ sessions_remaining_today }}</strong> remaining</p>
     </div>
@@ -749,6 +973,225 @@
     </div>
 
   </div>
+
+  <hr class="section-divider">
+
+  <!-- ── Alerts & Notifications ───────────────── -->
+  {% with overdue_trainee_count=overdue_trainees|length overdue_walkin_count=overdue_walkins|length low_practice_count=low_practice_trainees|length idle_vehicle_count=idle_vehicles|length idle_instructor_count=idle_instructors|length idle_track_count=idle_tracks|length %}
+  <div class="alerts-panel">
+
+    <div class="alerts-panel-header">
+      <div>
+        <p class="section-tag">Monitoring</p>
+        <h2 class="section-heading">Alerts &amp; Notifications</h2>
+      </div>
+    </div>
+
+    <div class="alerts-grid">
+
+      <!-- ① Overdue Payments (red) -->
+      <div class="notif-card notif-card--red">
+        <div class="notif-header">
+          <div class="notif-icon notif-icon--red">💳</div>
+          <div class="notif-title-group">
+            <div class="notif-title">Overdue Payments</div>
+            <div class="notif-subtitle">Unpaid debts older than 30 days</div>
+          </div>
+          <div class="notif-count {% if overdue_trainee_count > 0 or overdue_walkin_count > 0 %}notif-count--red{% else %}notif-count--ok{% endif %}">
+            {{ overdue_trainee_count|add:overdue_walkin_count }}
+          </div>
+        </div>
+
+        {% if overdue_trainee_count > 0 or overdue_walkin_count > 0 %}
+        <button class="notif-toggle" aria-expanded="false" onclick="toggleNotif(this)">
+          <span>View details</span>
+          <svg class="notif-toggle-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="notif-body">
+
+          {% if overdue_trainee_count > 0 %}
+          <div class="notif-subsection-label">Trainees ({{ overdue_trainee_count }})</div>
+          <ul class="notif-list">
+            {% for trainee in overdue_trainees %}
+            <li class="notif-list-item">
+              <div class="notif-item-name">
+                {{ trainee.user.first_name }} {{ trainee.user.last_name }}
+              </div>
+              <div class="notif-item-meta">
+                <span class="notif-tag notif-tag--red">Unpaid</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if overdue_walkin_count > 0 %}
+          <div class="notif-subsection-label">Walk-ins ({{ overdue_walkin_count }})</div>
+          <ul class="notif-list">
+            {% for booking in overdue_walkins %}
+            <li class="notif-list-item">
+              <div class="notif-item-name">
+                {{ booking.full_name|default:booking.name|default:"Walk-in #"|add:booking.id|stringformat:"s" }}
+              </div>
+              <div class="notif-item-meta">
+                <span class="notif-tag notif-tag--red">Fee Unpaid</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          <div class="notif-footer">
+            <a href="{% url 'fees:overview' %}" class="notif-link">
+              Fee Overview
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+
+        {% else %}
+        <div class="notif-all-clear">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          No overdue payments
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ② Insufficient Practice (amber) -->
+      <div class="notif-card notif-card--amber">
+        <div class="notif-header">
+          <div class="notif-icon notif-icon--amber">📉</div>
+          <div class="notif-title-group">
+            <div class="notif-title">Insufficient Practice</div>
+            <div class="notif-subtitle">Trainees falling behind schedule</div>
+          </div>
+          <div class="notif-count {% if low_practice_count > 0 %}notif-count--amber{% else %}notif-count--ok{% endif %}">
+            {{ low_practice_count }}
+          </div>
+        </div>
+
+        {% if low_practice_count > 0 %}
+        <button class="notif-toggle" aria-expanded="false" onclick="toggleNotif(this)">
+          <span>View details</span>
+          <svg class="notif-toggle-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="notif-body">
+          <ul class="notif-list">
+            {% for trainee in low_practice_trainees %}
+            <li class="notif-list-item">
+              <div class="notif-item-name">
+                {{ trainee.user.first_name }} {{ trainee.user.last_name }}
+              </div>
+              <div class="notif-item-meta">
+                <strong>{{ trainee.completed_sessions }}</strong> done
+                <span style="margin:0 3px;opacity:0.4;">·</span>
+                <span class="notif-tag notif-tag--amber">Behind</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          <div class="notif-footer">
+            <a href="{% url 'trainees:trainee_list' %}" class="notif-link">
+              Trainee Details
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+
+        {% else %}
+        <div class="notif-all-clear">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          All trainees on track
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ③ Underutilized Resources (yellow) -->
+      {% with total_idle=idle_vehicle_count|add:idle_instructor_count|add:idle_track_count %}
+      <div class="notif-card notif-card--yellow">
+        <div class="notif-header">
+          <div class="notif-icon notif-icon--yellow">🕐</div>
+          <div class="notif-title-group">
+            <div class="notif-title">Underutilized Resources</div>
+            <div class="notif-subtitle">Idle for 7+ days</div>
+          </div>
+          <div class="notif-count {% if total_idle > 0 %}notif-count--yellow{% else %}notif-count--ok{% endif %}">
+            {{ total_idle }}
+          </div>
+        </div>
+
+        {% if total_idle > 0 %}
+        <button class="notif-toggle" aria-expanded="false" onclick="toggleNotif(this)">
+          <span>View details</span>
+          <svg class="notif-toggle-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="notif-body">
+
+          {% if idle_vehicle_count > 0 %}
+          <div class="notif-subsection-label">
+            Vehicles ({{ idle_vehicle_count }})
+            <a href="{% url 'vehicles:vehicles_list' %}" class="notif-link" style="float:right; margin-top:-1px;">Manage →</a>
+          </div>
+          <ul class="notif-list">
+            {% for vehicle in idle_vehicles %}
+            <li class="notif-list-item">
+              <div class="notif-item-name">{{ vehicle.brand }} {{ vehicle.model }}</div>
+              <div class="notif-item-meta">
+                <span class="notif-tag notif-tag--yellow">{{ vehicle.plate_number }}</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if idle_instructor_count > 0 %}
+          <div class="notif-subsection-label">
+            Instructors ({{ idle_instructor_count }})
+            <a href="{% url 'instructors:list' %}" class="notif-link" style="float:right; margin-top:-1px;">Manage →</a>
+          </div>
+          <ul class="notif-list">
+            {% for instructor in idle_instructors %}
+            <li class="notif-list-item">
+              <div class="notif-item-name">{{ instructor.user.first_name }} {{ instructor.user.last_name }}</div>
+              <div class="notif-item-meta">
+                <span class="notif-tag notif-tag--yellow">No Sessions</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if idle_track_count > 0 %}
+          <div class="notif-subsection-label">
+            Tracks ({{ idle_track_count }})
+            <a href="{% url 'scheduling:track_list' %}" class="notif-link" style="float:right; margin-top:-1px;">Manage →</a>
+          </div>
+          <ul class="notif-list">
+            {% for track in idle_tracks %}
+            <li class="notif-list-item">
+              <div class="notif-item-name">{{ track.name }}</div>
+              <div class="notif-item-meta">
+                <span class="notif-tag notif-tag--yellow">Inactive</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+        </div>
+
+        {% else %}
+        <div class="notif-all-clear">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          All resources active
+        </div>
+        {% endif %}
+      </div>
+      {% endwith %}
+
+    </div><!-- /.alerts-grid -->
+  </div><!-- /.alerts-panel -->
+  {% endwith %}
 
   <hr class="section-divider">
 
@@ -833,13 +1276,13 @@
       <!-- Quick alerts -->
       <div class="alert-cards">
         <a href="{% url 'scheduling:approve' %}" class="alert-card {% if pending_count > 0 %}alert-card--danger{% endif %}">
-          <div class="alert-card-icon {% if pending_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--yellow{% endif %}">
+          <div class="alert-card-icon {% if pending_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--green{% endif %}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
           </div>
           <div class="alert-card-body">
-            <div class="alert-card-count {% if pending_count > 0 %}alert-card-count--danger{% else %}alert-card-count--yellow{% endif %}">
+            <div class="alert-card-count {% if pending_count > 0 %}alert-card-count--danger{% else %}alert-card-count--green{% endif %}">
               {{ pending_count }}
             </div>
             <div class="alert-card-label">Pending Approvals</div>
@@ -848,13 +1291,13 @@
         </a>
 
         <a href="{% url 'scheduling:reschedule_queue' %}" class="alert-card {% if reschedule_queue_count > 0 %}alert-card--danger{% endif %}">
-          <div class="alert-card-icon {% if reschedule_queue_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--yellow{% endif %}">
+          <div class="alert-card-icon {% if reschedule_queue_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--green{% endif %}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.28"/>
             </svg>
           </div>
           <div class="alert-card-body">
-            <div class="alert-card-count {% if reschedule_queue_count > 0 %}alert-card-count--danger{% else %}alert-card-count--yellow{% endif %}">
+            <div class="alert-card-count {% if reschedule_queue_count > 0 %}alert-card-count--danger{% else %}alert-card-count--green{% endif %}">
               {{ reschedule_queue_count }}
             </div>
             <div class="alert-card-label">Reschedule Queue</div>
@@ -863,7 +1306,7 @@
         </a>
 
         <a href="{% url 'scheduling:reschedule_requests' %}" class="alert-card {% if reschedule_requests_count > 0 %}alert-card--danger{% endif %}">
-          <div class="alert-card-icon {% if reschedule_requests_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--yellow{% endif %}">
+          <div class="alert-card-icon {% if reschedule_requests_count > 0 %}alert-card-icon--danger{% else %}alert-card-icon--green{% endif %}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
@@ -872,7 +1315,7 @@
             </svg>
           </div>
           <div class="alert-card-body">
-            <div class="alert-card-count {% if reschedule_requests_count > 0 %}alert-card-count--danger{% else %}alert-card-count--yellow{% endif %}">
+            <div class="alert-card-count {% if reschedule_requests_count > 0 %}alert-card-count--danger{% else %}alert-card-count--green{% endif %}">
               {{ reschedule_requests_count }}
             </div>
             <div class="alert-card-label">Reschedule Requests</div>
@@ -881,7 +1324,7 @@
         </a>
 
         <a href="{% url 'scheduling:day_off_list' %}" class="alert-card">
-          <div class="alert-card-icon alert-card-icon--yellow">
+          <div class="alert-card-icon alert-card-icon--green">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
               <line x1="16" y1="2" x2="16" y2="6"/>
@@ -892,7 +1335,7 @@
             </svg>
           </div>
           <div class="alert-card-body">
-            <div class="alert-card-count alert-card-count--yellow">—</div>
+            <div class="alert-card-count alert-card-count--green">—</div>
             <div class="alert-card-label">Days Off</div>
           </div>
           <svg class="alert-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -907,10 +1350,10 @@
         <div class="fleet-ring-wrap">
           <div class="fleet-ring">
             <svg width="88" height="88" viewBox="0 0 88 88">
-              <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--border)" stroke-width="8"/>
               <circle
                 cx="44" cy="44" r="36" fill="none"
-                stroke="#facc15" stroke-width="8"
+                stroke="var(--green)" stroke-width="8"
                 stroke-linecap="round"
                 stroke-dasharray="226.19"
                 stroke-dashoffset="{% if total_vehicles > 0 %}{% widthratio vehicles_on_duty total_vehicles 226 %}{% else %}226{% endif %}"
@@ -926,7 +1369,7 @@
           <div class="fleet-legend">
             <div class="fleet-legend-item">
               <span class="fleet-legend-left">
-                <span class="fleet-dot fleet-dot--yellow"></span> On Duty
+                <span class="fleet-dot fleet-dot--green"></span> On Duty
               </span>
               <span class="fleet-legend-val">{{ vehicles_on_duty }}</span>
             </div>
@@ -979,4 +1422,13 @@
   </div><!-- /.content-grid -->
 
 </div><!-- /.page-wrapper -->
+
+<script>
+  function toggleNotif(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const body = btn.nextElementSibling;
+    body.classList.toggle('is-open', !expanded);
+  }
+</script>
 {% endblock %}

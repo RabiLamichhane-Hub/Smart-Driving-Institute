@@ -21,11 +21,15 @@
     right: -20px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(90px, 18vw, 200px);
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     letter-spacing: 0.05em;
     line-height: 1;
     pointer-events: none;
     user-select: none;
+  }
+
+  :root.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
   }
 
   /* ── Page header ── */
@@ -35,7 +39,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
     position: relative;
     z-index: 1;
@@ -75,7 +79,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #4ade80;
+    color: #22c55e;
     flex-shrink: 0;
   }
 
@@ -83,12 +87,12 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--text-sec);
     line-height: 1.5;
   }
 
   .success-banner-text strong {
-    color: #4ade80;
+    color: #22c55e;
     font-weight: 500;
   }
 
@@ -127,25 +131,25 @@
   }
 
   .btn-primary {
-    background: var(--yellow);
-    color: #0a0a0a;
+    background: var(--green);
+    color: #ffffff;
   }
 
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
   .btn-ghost {
     background: transparent;
-    color: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
     font-weight: 400;
   }
 
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
   }
 
   /* ── Info sections ── */
@@ -163,6 +167,12 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
+    transition: border-color 0.18s, transform 0.18s;
+  }
+
+  .info-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-3px);
   }
 
   .info-card-header {
@@ -170,19 +180,19 @@
     align-items: center;
     gap: 14px;
     padding: 18px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--border);
   }
 
   .info-card-icon {
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
   }
 
@@ -190,7 +200,7 @@
   .info-card.credentials .info-card-icon {
     background: rgba(34, 197, 94, 0.08);
     border-color: rgba(34, 197, 94, 0.2);
-    color: #4ade80;
+    color: #22c55e;
   }
 
   .info-card-tag {
@@ -200,12 +210,14 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(250, 204, 21, 0.7);
+    color: var(--green);
+    opacity: 0.7;
     margin-bottom: 2px;
   }
 
   .info-card.credentials .info-card-tag {
-    color: rgba(74, 222, 128, 0.7);
+    color: #22c55e;
+    opacity: 1;
   }
 
   .info-card-title {
@@ -234,8 +246,8 @@
     flex-direction: column;
     gap: 4px;
     padding: 14px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
   }
 
   .info-grid.single-col .info-row {
@@ -267,14 +279,14 @@
     color: var(--text-sec);
   }
 
-  /* ── Credential values — monospace-style, highlighted ── */
+  /* ── Credential values ── */
   .cred-value {
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: var(--text);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 6px;
     padding: 6px 12px;
     letter-spacing: 0.06em;
@@ -283,11 +295,11 @@
     word-break: break-all;
   }
 
-  /* password gets yellow tint */
+  /* password gets green tint */
   .cred-value.password {
-    color: var(--yellow);
-    background: var(--yellow-dim);
-    border-color: var(--yellow-border);
+    color: var(--green);
+    background: var(--green-dim);
+    border-color: var(--green-border);
     letter-spacing: 0.12em;
   }
 
@@ -297,7 +309,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
   }
 
   .fee-row:last-child {
@@ -305,8 +317,8 @@
   }
 
   .fee-row.final {
-    background: rgba(250, 204, 21, 0.04);
-    border-top: 1px solid rgba(250, 204, 21, 0.12);
+    background: var(--green-dim);
+    border-top: 1px solid var(--green-border);
     border-bottom: none;
   }
 
@@ -333,11 +345,11 @@
 
   .fee-row.final .fee-amount {
     font-size: 16px;
-    color: var(--yellow);
+    color: var(--green);
   }
 
   .fee-discount {
-    color: #4ade80;
+    color: #22c55e;
   }
 
   /* ── No course state ── */
@@ -356,8 +368,8 @@
     align-items: center;
     gap: 16px;
     padding: 16px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border);
+    background: var(--green-dim);
   }
 
   .trainee-photo-img {
@@ -365,7 +377,7 @@
     height: 64px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(250, 204, 21, 0.3);
+    border: 2px solid var(--green-border);
     flex-shrink: 0;
   }
 
@@ -397,7 +409,7 @@
     .page-wrapper::before { display: none; }
     .info-grid { grid-template-columns: 1fr; }
     .info-row { border-right: none; }
-    .info-row:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .info-row:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid var(--border); }
     .info-row:last-child { border-bottom: none; }
     .action-bar { flex-direction: column; }
     .btn { justify-content: center; }
@@ -538,7 +550,7 @@
           </div>
         </div>
 
-        <div style="border-top: 1px solid rgba(255,255,255,0.07);">
+        <div style="border-top: 1px solid var(--border);">
           <div class="fee-row">
             <span class="fee-label">Course Fee</span>
             <span class="fee-amount">Rs. {{ trainee.course.fee }}</span>

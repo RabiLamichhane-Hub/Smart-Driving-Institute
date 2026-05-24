@@ -19,7 +19,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 160px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
@@ -31,7 +31,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .page-title {
@@ -43,7 +43,7 @@
     margin: 0 0 10px;
   }
   .page-title span {
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--text-muted);
   }
   .page-sub {
     font-family: 'DM Sans', sans-serif;
@@ -83,7 +83,7 @@
   .section-divider {
     border: none;
     border-top: 1px solid var(--border);
-    margin: 28px 0;
+    margin: 32px 0;
   }
 
   /* ── Summary Bar ── */
@@ -113,7 +113,7 @@
   #pill-present { border-color: rgba(34, 197, 94, 0.3);  color: #4ade80;  background: rgba(34, 197, 94, 0.07); }
   #pill-late    { border-color: rgba(245,158, 11, 0.3);  color: #fbbf24;  background: rgba(245,158,11, 0.07); }
   #pill-absent  { border-color: rgba(239,  68, 68, 0.3);  color: #f87171;  background: rgba(239, 68, 68, 0.07); }
-  #pill-pending { border-color: rgba(250, 204, 21, 0.3);  color: var(--yellow); background: rgba(250,204,21,0.07); }
+  #pill-pending { border-color: var(--green-border); color: var(--green); background: var(--green-dim); }
 
   /* ── Slot Divider ── */
   .slot-group { margin-bottom: 32px; }
@@ -134,7 +134,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--yellow);
+    background: var(--green);
     flex-shrink: 0;
   }
   .slot-divider-label span {
@@ -174,8 +174,8 @@
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .sess-card:hover {
-    border-color: rgba(250, 204, 21, 0.18);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(45, 122, 95, 0.20);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
   .sess-card.st-present { border-left-color: #4ade80; }
   .sess-card.st-late    { border-left-color: #fbbf24; }
@@ -202,14 +202,14 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 12px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
   }
   .trainee-name {
@@ -260,7 +260,7 @@
     letter-spacing: 0.04em;
     padding: 7px 14px;
     border-radius: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
     color: var(--text-muted);
     background: var(--card);
     transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
@@ -269,7 +269,7 @@
   }
   .status-btns label:hover {
     transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(45, 122, 95, 0.30);
     color: var(--text);
   }
   .status-btns label.on-present {
@@ -302,7 +302,7 @@
     text-transform: uppercase;
     transition: color 0.15s;
   }
-  .notes-toggle:hover { color: var(--yellow); }
+  .notes-toggle:hover { color: var(--green); }
   .notes-area { display: none; padding: 0 18px 14px; }
   .notes-area.open { display: block; }
   .notes-area textarea {
@@ -321,7 +321,7 @@
     transition: border-color 0.15s;
     line-height: 1.65;
   }
-  .notes-area textarea:focus { border-color: var(--yellow-focus); }
+  .notes-area textarea:focus { border-color: var(--green-focus); }
   .notes-area textarea::placeholder { color: var(--text-muted); }
 
   /* ── Sticky Footer ── */
@@ -351,7 +351,7 @@
     color: var(--text-muted);
   }
   .footer-stat strong {
-    color: var(--yellow);
+    color: var(--green);
     font-weight: 600;
   }
   .footer-progress {
@@ -363,7 +363,7 @@
   }
   .footer-progress-bar {
     height: 100%;
-    background: var(--yellow);
+    background: var(--green);
     border-radius: 99px;
     transition: width 0.3s ease;
     width: 0%;
@@ -373,8 +373,8 @@
     align-items: center;
     gap: 8px;
     padding: 9px 22px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
@@ -384,7 +384,7 @@
     transition: background 0.15s, transform 0.1s;
     white-space: nowrap;
   }
-  .btn-save:hover  { background: var(--yellow-dark); transform: translateY(-1px); }
+  .btn-save:hover  { background: var(--green-dark); transform: translateY(-1px); }
   .btn-save:active { transform: translateY(0); }
   .btn-save:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
@@ -400,7 +400,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 26px;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
   .empty-state-sub {

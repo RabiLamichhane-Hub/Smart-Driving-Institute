@@ -3,16 +3,457 @@
 
 {% block title %}Add Payment — {{ trainee }}{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page-wrapper::before {
+    content: 'PAYMENT';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(100px, 20vw, 220px);
+    color: rgba(26, 46, 37, 0.025);
+    position: absolute;
+    top: 10px;
+    right: -10px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  html.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+  }
+
+  .page-label {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 68px);
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 26px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, transform 0.15s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
+    transform: translateY(-1px);
+  }
+
+  /* ── Two-column layout ── */
+  .payment-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+    align-items: start;
+  }
+
+  /* ── Summary panel ── */
+  .summary-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    position: sticky;
+    top: 80px;
+  }
+
+  .trainee-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .avatar-lg {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--green);
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+
+  .trainee-fullname {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .trainee-meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  hr.inner-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 20px;
+  }
+
+  /* Fee rows */
+  .fee-rows {
+    margin-bottom: 24px;
+  }
+
+  .fee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  html.dark .fee-row {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .fee-row:last-child {
+    border-bottom: none;
+  }
+
+  .highlight-row {
+    background: var(--green-dim);
+    border: 1px solid var(--green-border) !important;
+    border-radius: 7px;
+    padding: 10px 12px;
+    margin-top: 4px;
+  }
+
+  .fee-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .fee-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-sec);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fee-value.paid {
+    color: #2d7a5f;
+  }
+
+  html.dark .fee-value.paid {
+    color: #4db88a;
+  }
+
+  .fee-value.remaining {
+    color: var(--green);
+    font-size: 16px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-top: 4px;
+  }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .progress-label-text {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .progress-pct {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-track {
+    height: 4px;
+    background: rgba(45, 122, 95, 0.12);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width 0.6s ease;
+    min-width: 2px;
+  }
+
+  /* ── Form panel ── */
+  .form-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 32px 28px;
+  }
+
+  .form-panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  /* ── Field groups ── */
+  .field-group {
+    margin-bottom: 22px;
+  }
+
+  .field-label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .required-star {
+    color: var(--green);
+    margin-left: 3px;
+  }
+
+  /* Style all Django-rendered inputs */
+  .payment-form input[type="text"],
+  .payment-form input[type="number"],
+  .payment-form input[type="email"],
+  .payment-form input[type="date"],
+  .payment-form input[type="datetime-local"],
+  .payment-form textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-sizing: border-box;
+  }
+
+  .payment-form input:focus,
+  .payment-form textarea:focus {
+    border-color: var(--green-focus);
+    box-shadow: 0 0 0 3px rgba(45, 122, 95, 0.06);
+  }
+
+  html.dark .payment-form input:focus,
+  html.dark .payment-form textarea:focus {
+    box-shadow: 0 0 0 3px rgba(77, 184, 138, 0.06);
+  }
+
+  .payment-form textarea {
+    resize: vertical;
+    min-height: 88px;
+    line-height: 1.6;
+  }
+
+  /* Select wrapper */
+  .select-wrap {
+    position: relative;
+  }
+
+  .select-wrap select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 40px 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-sizing: border-box;
+  }
+
+  .select-wrap select:focus {
+    border-color: var(--green-focus);
+    box-shadow: 0 0 0 3px rgba(45, 122, 95, 0.06);
+  }
+
+  html.dark .select-wrap select:focus {
+    box-shadow: 0 0 0 3px rgba(77, 184, 138, 0.06);
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  /* Error state */
+  .field-group.has-error input,
+  .field-group.has-error select,
+  .field-group.has-error textarea {
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+
+  .field-error {
+    display: block;
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 6px;
+  }
+
+  .field-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  /* Form footer */
+  .form-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper {
+      padding: 28px 20px 60px;
+    }
+    .payment-layout {
+      grid-template-columns: 1fr;
+    }
+    .summary-panel {
+      position: static;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<section class="payment-section">
-
-  <!-- Ghost text -->
-  <span class="ghost-text">PAYMENT</span>
+<div class="page-wrapper">
 
   <!-- Header -->
   <div class="page-header">
-    <span class="page-tag">Accounting</span>
+    <p class="page-label">Accounting</p>
     <h1 class="page-title">Add Payment</h1>
   </div>
 
@@ -21,7 +462,7 @@
     <a href="{% url 'trainees:details' trainee.pk %}" class="btn-ghost">← Back to Trainee</a>
   </div>
 
-  <hr class="divider">
+  <hr class="section-divider">
 
   <div class="payment-layout">
 
@@ -80,12 +521,6 @@
     <div class="form-panel">
       <div class="form-panel-title">Payment Details</div>
 
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-
       <form method="post" class="payment-form" novalidate>
         {% csrf_token %}
 
@@ -118,6 +553,7 @@
         </div>
         {% endfor %}
 
+        <hr class="section-divider">
         <div class="form-footer">
           <button type="submit" class="btn-primary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -131,417 +567,6 @@
 
   </div><!-- /payment-layout -->
 
-</section>
-
-
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-  :root {
-    --yellow: #facc15;
-    --yellow-dark: #eab308;
-    --yellow-dim: rgba(250,204,21,0.08);
-    --yellow-border: rgba(250,204,21,0.18);
-    --yellow-focus: rgba(250,204,21,0.5);
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --card: #1a1a1a;
-    --border: rgba(255,255,255,0.08);
-    --border-row: rgba(255,255,255,0.05);
-    --text: #ffffff;
-    --text-sec: rgba(255,255,255,0.72);
-    --text-muted: rgba(255,255,255,0.40);
-  }
-
-  /* ── Section ── */
-  .payment-section {
-    position: relative;
-    padding: 56px 48px 80px;
-    min-height: 80vh;
-    overflow: hidden;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .ghost-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(100px, 20vw, 220px);
-    color: rgba(255,255,255,0.028);
-    position: absolute;
-    top: 10px;
-    right: -10px;
-    letter-spacing: 0.06em;
-    line-height: 1;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  /* ── Header ── */
-  .page-header {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 20px;
-  }
-  .page-tag {
-    display: inline-block;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--yellow);
-    margin-bottom: 8px;
-  }
-  .page-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 6vw, 68px);
-    letter-spacing: 0.04em;
-    line-height: 0.97;
-    color: var(--text);
-    margin: 0;
-  }
-
-  /* ── Action bar ── */
-  .action-bar {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-    position: relative;
-    z-index: 1;
-  }
-
-  hr.divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0 0 36px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── Buttons ── */
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--yellow);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 26px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.15s;
-  }
-  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
-
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: transparent;
-    color: var(--text-sec);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px;
-    padding: 11px 22px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, transform 0.15s;
-  }
-  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); transform: translateY(-1px); }
-
-  /* ── Two-column layout ── */
-  .payment-layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 24px;
-    position: relative;
-    z-index: 1;
-    align-items: start;
-  }
-
-  /* ── Summary panel ── */
-  .summary-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 28px;
-    position: sticky;
-    top: 80px;
-  }
-
-  .trainee-block {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-
-  .avatar-lg {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid rgba(250,204,21,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: var(--yellow);
-    flex-shrink: 0;
-    letter-spacing: 0.04em;
-  }
-
-  .trainee-fullname {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-    line-height: 1.3;
-  }
-  .trainee-meta {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 300;
-    color: var(--text-muted);
-    margin-top: 3px;
-  }
-
-  hr.inner-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0 0 20px;
-  }
-
-  /* Fee rows */
-  .fee-rows { margin-bottom: 24px; }
-
-  .fee-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-row);
-  }
-  .fee-row:last-child { border-bottom: none; }
-
-  .highlight-row {
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border) !important;
-    border-radius: 7px;
-    padding: 10px 12px;
-    margin-top: 4px;
-  }
-
-  .fee-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-  }
-  .fee-value {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-sec);
-    font-variant-numeric: tabular-nums;
-  }
-  .fee-value.paid { color: #4ade80; }
-  .fee-value.remaining { color: var(--yellow); font-size: 16px; }
-
-  /* Progress bar */
-  .progress-wrap { margin-top: 4px; }
-
-  .progress-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .progress-label-text {
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-  }
-  .progress-pct {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--yellow);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .progress-track {
-    height: 4px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--yellow);
-    border-radius: 99px;
-    transition: width 0.6s ease;
-    min-width: 2px;
-  }
-
-  /* ── Form panel ── */
-  .form-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 32px 32px 28px;
-  }
-
-  .form-panel-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 0.06em;
-    color: var(--text);
-    margin-bottom: 28px;
-  }
-
-  /* ── Field groups ── */
-  .field-group {
-    margin-bottom: 22px;
-  }
-
-  .field-label {
-    display: block;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .required-star { color: var(--yellow); margin-left: 3px; }
-
-  /* Style all Django-rendered inputs */
-  .payment-form input[type="text"],
-  .payment-form input[type="number"],
-  .payment-form input[type="email"],
-  .payment-form input[type="date"],
-  .payment-form input[type="datetime-local"],
-  .payment-form textarea {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 11px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 300;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.18s, box-shadow 0.18s;
-    box-sizing: border-box;
-  }
-
-  .payment-form input:focus,
-  .payment-form textarea:focus {
-    border-color: var(--yellow-focus);
-    box-shadow: 0 0 0 3px rgba(250,204,21,0.06);
-  }
-
-  .payment-form textarea {
-    resize: vertical;
-    min-height: 88px;
-    line-height: 1.6;
-  }
-
-  /* Select wrapper */
-  .select-wrap {
-    position: relative;
-  }
-  .select-wrap select {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 11px 40px 11px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 300;
-    color: var(--text);
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    cursor: pointer;
-    transition: border-color 0.18s, box-shadow 0.18s;
-    box-sizing: border-box;
-  }
-  .select-wrap select:focus {
-    border-color: var(--yellow-focus);
-    box-shadow: 0 0 0 3px rgba(250,204,21,0.06);
-  }
-  .select-arrow {
-    position: absolute;
-    right: 13px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-  }
-
-  /* Error state */
-  .field-group.has-error input,
-  .field-group.has-error select,
-  .field-group.has-error textarea {
-    border-color: rgba(239,68,68,0.5);
-  }
-  .field-error {
-    display: block;
-    font-size: 12px;
-    color: #f87171;
-    margin-top: 6px;
-  }
-  .field-hint {
-    display: block;
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 5px;
-  }
-
-  /* Alert */
-  .alert-msg {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text-sec);
-  }
-
-  /* Form footer */
-  .form-footer {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .payment-section { padding: 36px 20px 60px; }
-    .payment-layout { grid-template-columns: 1fr; }
-    .summary-panel { position: static; }
-  }
-</style>
+</div><!-- /page-wrapper -->
 
 {% endblock %}

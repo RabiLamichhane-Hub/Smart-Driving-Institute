@@ -14,30 +14,51 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --yellow:       #facc15;
-            --yellow-dark:  #eab308;
-            --bg:           #0a0a0a;
-            --surface:      #141414;
-            --card:         #1a1a1a;
+            --green:        #2d7a5f;
+            --green-dark:   #235f4a;
+            --green-dim:    rgba(45,122,95,0.10);
+            --green-border: rgba(45,122,95,0.22);
+            --green-focus:  rgba(45,122,95,0.40);
+            --slate:        #3d5247;
+            --bg:           #f4f7f5;
+            --surface:      #ffffff;
+            --card:         #f9fbfa;
+            --border:       rgba(0,0,0,0.09);
+            --text:         #1a2e25;
+            --text-sec:     rgba(26,46,37,0.72);
+            --text-muted:   rgba(26,46,37,0.45);
+        }
+
+        html.dark {
+            --green:        #4db88a;
+            --green-dark:   #3da070;
+            --green-dim:    rgba(77,184,138,0.12);
+            --green-border: rgba(77,184,138,0.25);
+            --green-focus:  rgba(77,184,138,0.45);
+            --slate:        #7aab93;
+            --bg:           #0d1410;
+            --surface:      #151c18;
+            --card:         #1c2620;
             --border:       rgba(255,255,255,0.08);
-            --border-focus: rgba(250,204,21,0.5);
-            --text-sec:     rgba(255,255,255,0.72);
-            --text-muted:   rgba(255,255,255,0.40);
+            --text:         #e8f2ed;
+            --text-sec:     rgba(232,242,237,0.72);
+            --text-muted:   rgba(232,242,237,0.40);
         }
 
         body {
             background: var(--bg);
-            color: #fff;
+            color: var(--text);
             font-family: 'DM Sans', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background 0.22s, color 0.22s;
         }
 
         /* ── TOP BAR ── */
         .topbar {
-            background: var(--yellow);
-            color: #0a0a0a;
+            background: var(--green);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             gap: 48px;
@@ -47,19 +68,11 @@
             letter-spacing: 0.04em;
             flex-shrink: 0;
         }
-        .topbar span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .topbar svg { opacity: 0.65; }
+        .topbar span { display: flex; align-items: center; gap: 6px; }
+        .topbar svg { opacity: 0.75; }
 
         /* ── LAYOUT ── */
-        .layout {
-            flex: 1;
-            display: flex;
-            min-height: 0;
-        }
+        .layout { flex: 1; display: flex; min-height: 0; }
 
         /* ── LEFT PANEL ── */
         .left {
@@ -73,6 +86,7 @@
             padding: 60px 48px;
             position: relative;
             overflow: hidden;
+            transition: background 0.22s, border-color 0.22s;
         }
         .left-ghost {
             position: absolute;
@@ -80,7 +94,7 @@
             left: -10px;
             font-family: 'Bebas Neue', sans-serif;
             font-size: clamp(80px, 12vw, 160px);
-            color: rgba(255,255,255,0.025);
+            color: rgba(45,122,95,0.06);
             line-height: 1;
             pointer-events: none;
             user-select: none;
@@ -99,8 +113,8 @@
             height: 96px;
             object-fit: contain;
             border-radius: 18px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(250,204,21,0.2);
+            background: var(--card);
+            border: 1px solid var(--green-border);
             padding: 8px;
             margin-bottom: 24px;
         }
@@ -110,10 +124,11 @@
             letter-spacing: 0.08em;
             line-height: 1;
             margin-bottom: 8px;
+            color: var(--text);
         }
         .brand-tagline {
             font-size: 12px;
-            color: var(--yellow);
+            color: var(--green);
             letter-spacing: 0.1em;
             text-transform: uppercase;
             font-weight: 500;
@@ -122,7 +137,7 @@
         .brand-divider {
             width: 40px;
             height: 2px;
-            background: var(--yellow);
+            background: var(--green);
             border-radius: 2px;
             margin-bottom: 32px;
         }
@@ -137,14 +152,14 @@
         .info-icon {
             width: 32px;
             height: 32px;
-            background: rgba(250,204,21,0.1);
-            border: 1px solid rgba(250,204,21,0.15);
+            background: var(--green-dim);
+            border: 1px solid var(--green-border);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            color: var(--yellow);
+            color: var(--green);
         }
 
         /* ── RIGHT PANEL ── */
@@ -154,17 +169,19 @@
             justify-content: center;
             align-items: center;
             padding: 60px 48px;
+            background: var(--bg);
+            transition: background 0.22s;
         }
 
         /* ── LOGIN CARD ── */
         .login-card { width: 100%; max-width: 380px; }
-
         .login-card h2 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 40px;
             letter-spacing: 0.05em;
             line-height: 0.95;
             margin-bottom: 6px;
+            color: var(--text);
         }
         .login-card .subtitle {
             font-size: 13.5px;
@@ -182,7 +199,7 @@
             border-radius: 8px;
             padding: 12px 14px;
             font-size: 13.5px;
-            color: #fca5a5;
+            color: #ef4444;
             margin-bottom: 24px;
             line-height: 1.5;
         }
@@ -190,7 +207,6 @@
 
         /* ── FORM ── */
         .form-group { margin-bottom: 20px; }
-
         .form-group label {
             display: block;
             font-size: 11px;
@@ -200,7 +216,6 @@
             color: var(--text-muted);
             margin-bottom: 7px;
         }
-
         .input-wrap { position: relative; }
         .input-wrap svg {
             position: absolute;
@@ -210,8 +225,8 @@
             opacity: 0.3;
             pointer-events: none;
             transition: opacity 0.15s;
+            color: var(--text);
         }
-        .input-wrap input:focus + svg,
         .input-wrap:focus-within svg { opacity: 0.7; }
 
         .form-group input {
@@ -222,15 +237,14 @@
             padding: 12px 16px 12px 42px;
             font-size: 14px;
             font-family: 'DM Sans', sans-serif;
-            color: #fff;
+            color: var(--text);
             outline: none;
-            transition: border-color 0.15s;
+            transition: border-color 0.15s, background 0.22s, color 0.22s;
         }
         .form-group input::placeholder { color: var(--text-muted); }
-        .form-group input:focus { border-color: var(--border-focus); }
+        .form-group input:focus { border-color: var(--green-focus); }
         .form-group input.input-error { border-color: rgba(239,68,68,0.5); }
 
-        /* password toggle */
         .pw-wrap { position: relative; }
         .pw-wrap input { padding-right: 44px; }
         .pw-toggle {
@@ -247,7 +261,7 @@
             align-items: center;
             transition: color 0.15s;
         }
-        .pw-toggle:hover { color: var(--yellow); }
+        .pw-toggle:hover { color: var(--green); }
 
         .form-footer {
             display: flex;
@@ -260,13 +274,13 @@
             text-decoration: none;
             transition: color 0.15s;
         }
-        .forgot:hover { color: var(--yellow); }
+        .forgot:hover { color: var(--green); }
 
         .btn-login {
             width: 100%;
             padding: 13px;
-            background: var(--yellow);
-            color: #000;
+            background: var(--green);
+            color: #ffffff;
             border: none;
             border-radius: 8px;
             font-size: 15px;
@@ -276,14 +290,10 @@
             letter-spacing: 0.02em;
             transition: background 0.15s, transform 0.1s;
         }
-        .btn-login:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+        .btn-login:hover { background: var(--green-dark); transform: translateY(-1px); }
         .btn-login:active { transform: translateY(0); }
 
-        .back-link {
-            display: flex;
-            justify-content: center;
-            margin-top: 24px;
-        }
+        .back-link { display: flex; justify-content: center; margin-top: 24px; }
         .back-link a {
             font-size: 13px;
             color: var(--text-muted);
@@ -291,7 +301,7 @@
             transition: color 0.15s;
         }
         .back-link a:hover { color: var(--text-sec); }
-        .back-link a span { color: var(--yellow); }
+        .back-link a span { color: var(--green); }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
@@ -367,7 +377,7 @@
             {% if messages %}
                 {% for message in messages %}
                 <div class="alert-error">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
                     {{ message }}
@@ -437,6 +447,11 @@
 </div>
 
 <script>
+    (function() {
+        var saved = localStorage.getItem('sdims-theme');
+        if (saved === 'dark') document.documentElement.classList.add('dark');
+    })();
+
     const pwToggle = document.getElementById('pwToggle');
     const pwInput  = document.getElementById('id_password');
     const eyeIcon  = document.getElementById('eyeIcon');

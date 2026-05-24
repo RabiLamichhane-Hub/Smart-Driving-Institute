@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Vehicle — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    max-width: 680px;
+  }
+
+  .page-wrapper::before {
+    content: 'DELETE';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(90px, 18vw, 200px);
+    color: rgba(239, 68, 68, 0.04);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Back link ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 28px;
+    transition: color 0.18s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .back-link:hover { color: var(--yellow); }
+
+  /* ── Page header ── */
+  .page-header {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 32px;
+  }
+
+  .page-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #f87171;
+    margin: 0 0 8px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── Warning card ── */
+  .warning-card {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    border-radius: 12px;
+    padding: 24px 26px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+  }
+
+  .warning-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+  }
+
+  .warning-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f87171;
+    flex-shrink: 0;
+  }
+
+  .warning-tag {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #f87171;
+    margin-bottom: 2px;
+  }
+
+  .warning-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin: 0;
+    line-height: 1;
+  }
+
+  /* ── Vehicle summary ── */
+  .vehicle-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+
+  .vehicle-summary-image {
+    width: 72px;
+    height: 54px;
+    border-radius: 7px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.2);
+  }
+
+  .vehicle-summary-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .vehicle-summary-info { flex: 1; min-width: 0; }
+
+  .vehicle-summary-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    line-height: 1;
+    margin: 0 0 5px;
+  }
+
+  .vehicle-summary-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .meta-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.50);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .meta-reg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 5px;
+    padding: 3px 8px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Warning text ── */
+  .warning-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.50);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .warning-text strong {
+    color: #f87171;
+    font-weight: 500;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+    margin-top: 24px;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    border-radius: 8px;
+    padding: 10px 22px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, border-color 0.18s, color 0.18s;
+    font-weight: 600;
+  }
+
+  .btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  .btn-danger:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 400;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(250,204,21,0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title   { font-size: 38px; }
+    .action-bar   { flex-direction: column; }
+    .btn          { justify-content: center; }
+    .vehicle-summary { flex-direction: column; align-items: flex-start; }
+  }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-wrapper">
+
+  <!-- Back link -->
+  <a href="{% url 'vehicles:vehicles_list' %}" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Fleet
+  </a>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <p class="page-label">Admin Action</p>
+    <h1 class="page-title">Delete Vehicle</h1>
+  </div>
+
+  <!-- Warning card -->
+  <div class="warning-card">
+
+    <div class="warning-card-header">
+      <div class="warning-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <span class="warning-tag">Irreversible Action</span>
+        <h2 class="warning-title">Confirm Deletion</h2>
+      </div>
+    </div>
+
+    <!-- Vehicle snapshot -->
+    <div class="vehicle-summary">
+      <div class="vehicle-summary-image">
+        {% if vehicle.image %}
+          <img src="{{ vehicle.image.url }}" alt="{{ vehicle.brand }} {{ vehicle.model }}">
+        {% else %}
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        {% endif %}
+      </div>
+      <div class="vehicle-summary-info">
+        <p class="vehicle-summary-name">{{ vehicle.brand }} {{ vehicle.model }}</p>
+        <div class="vehicle-summary-meta">
+          <span class="meta-reg">{{ vehicle.registration_number }}</span>
+          <span class="meta-badge">{{ vehicle.get_vehicle_type_display }}</span>
+          <span class="meta-badge">{{ vehicle.get_status_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="warning-text">
+      You are about to <strong>permanently delete</strong> this vehicle from the fleet.
+      This action cannot be undone and will remove all associated records.
+      Are you absolutely sure you want to continue?
+    </p>
+
+  </div>
+
+  <!-- Confirm / cancel -->
+  <div class="action-bar">
+    <form method="post" style="display:contents;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Yes, Delete Vehicle
+      </button>
+    </form>
+    <a href="{% url 'vehicles:vehicles_list' %}" class="btn btn-ghost">Cancel</a>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -20,7 +20,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
@@ -32,7 +32,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
 
@@ -75,24 +75,25 @@
   }
 
   .btn-primary {
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
   }
 
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
   .btn-ghost {
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
   }
 
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
+    transform: translateY(-1px);
   }
 
   /* ── Score Summary Card ──────────────────────────────── */
@@ -112,7 +113,7 @@
   }
 
   .score-card:hover {
-    border-color: rgba(250, 204, 21, 0.18);
+    border-color: rgba(45, 122, 95, 0.20);
     transform: translateY(-3px);
   }
 
@@ -131,7 +132,7 @@
     font-size: 52px;
     letter-spacing: 0.03em;
     line-height: 0.95;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0;
     font-variant-numeric: tabular-nums;
   }
@@ -216,7 +217,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
 
@@ -333,8 +334,8 @@
   }
 
   .option-item--default {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.05);
+    background: var(--surface);
+    border-color: var(--border);
   }
 
   .option-item--correct {
@@ -382,9 +383,9 @@
   }
 
   .option-tag--yours {
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
-    color: var(--yellow);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
   }
 
   .option-tag--correct {

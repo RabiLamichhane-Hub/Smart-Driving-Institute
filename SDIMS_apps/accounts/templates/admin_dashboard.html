@@ -16,7 +16,7 @@
     content: 'DASHBOARD';
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     letter-spacing: 0.05em;
     line-height: 1;
     position: absolute;
@@ -26,16 +26,13 @@
     user-select: none;
   }
 
+  :root.dark .page-wrapper::before { color: rgba(232, 242, 237, 0.028); }
+
   /* ── Dashboard Layout ───────────────────────── */
-  .dash-wrapper {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
+  .dash-wrapper { max-width: 1100px; margin: 0 auto; }
 
   /* ── Page Header ────────────────────────────── */
-  .dash-header {
-    margin-bottom: 48px;
-  }
+  .dash-header { margin-bottom: 40px; }
 
   .page-label {
     font-family: 'DM Sans', sans-serif;
@@ -43,7 +40,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 6px;
   }
 
@@ -77,24 +74,241 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
+    white-space: nowrap;
   }
 
-  .section-line {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
 
   /* ── Grids ───────────────────────────────────── */
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-  @media (max-width: 860px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .grid-4, .grid-2 { grid-template-columns: 1fr; } }
-  @media (max-width: 768px) { .page-wrapper { padding: 28px 20px 60px; } }
+  @media (max-width: 860px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .page-wrapper { padding: 28px 20px 60px; }
+  }
 
-  /* ── Stat Cards ──────────────────────────────── */
+  /* ── Financial Summary Cards ─────────────────── */
+  .fin-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 20px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .fin-card:hover { transform: translateY(-3px); }
+
+  .fin-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .fin-card.green::after  { background: #22c55e; }
+  .fin-card.amber::after  { background: #f59e0b; }
+  .fin-card.red::after    { background: #ef4444; }
+  .fin-card.profit::after { background: #22c55e; }
+  .fin-card.loss::after   { background: #ef4444; }
+
+  .fin-card:hover { border-color: var(--green-border); }
+  .fin-card.red:hover, .fin-card.loss:hover { border-color: rgba(239,68,68,0.35); }
+  .fin-card.amber:hover { border-color: rgba(245,158,11,0.35); }
+
+  .fin-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+
+  .fin-icon.green  { background: rgba(34,197,94,0.10);  color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+  .fin-icon.amber  { background: rgba(245,158,11,0.10); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+  .fin-icon.red    { background: rgba(239,68,68,0.10);  color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+  .fin-icon.profit { background: rgba(34,197,94,0.10);  color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+  .fin-icon.loss   { background: rgba(239,68,68,0.10);  color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+
+  .fin-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .fin-value.green  { color: #22c55e; }
+  .fin-value.amber  { color: #f59e0b; }
+  .fin-value.red    { color: #ef4444; }
+  .fin-value.profit { color: #22c55e; }
+  .fin-value.loss   { color: #ef4444; }
+  .fin-value.neutral{ color: var(--text); }
+
+  .fin-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── Chart Cards ─────────────────────────────── */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .chart-card-title {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .chart-wrap { position: relative; }
+  .chart-wrap canvas { width: 100% !important; }
+
+  /* ── Monthly Summary Strip ───────────────────── */
+  .monthly-strip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .monthly-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 24px;
+    border-right: 1px solid var(--border);
+  }
+
+  .monthly-item:first-child { padding-left: 0; }
+  .monthly-item:last-child  { border-right: none; padding-right: 0; }
+
+  .monthly-item-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .monthly-item-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+  }
+
+  .monthly-item-value.income  { color: #22c55e; }
+  .monthly-item-value.expense { color: #f59e0b; }
+  .monthly-item-value.profit  { color: #22c55e; }
+  .monthly-item-value.loss    { color: #ef4444; }
+  .monthly-item-value.neutral { color: var(--text); }
+
+  .monthly-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 99px;
+    margin-top: 2px;
+    width: fit-content;
+  }
+
+  .monthly-badge.up   { background: rgba(34,197,94,0.12);  color: #22c55e; }
+  .monthly-badge.down { background: rgba(239,68,68,0.12);  color: #ef4444; }
+  .monthly-badge.flat { background: rgba(113,113,122,0.12); color: var(--text-muted); }
+
+  @media (max-width: 700px) {
+    .monthly-strip { flex-direction: column; gap: 16px; }
+    .monthly-item  { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 16px; }
+    .monthly-item:last-child { border-bottom: none; padding-bottom: 0; }
+  }
+
+  /* ── Transactions Table ──────────────────────── */
+  .tx-table { width: 100%; border-collapse: collapse; }
+
+  .tx-table th {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 12px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tx-table th:last-child, .tx-table td:last-child { text-align: right; }
+
+  .tx-table td {
+    font-size: 13px;
+    color: var(--text);
+    padding: 13px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .tx-table tr:last-child td { border-bottom: none; }
+  .tx-table tr:hover td { background: var(--surface); }
+
+  .tx-type-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+
+  .tx-type-badge.course  { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+  .tx-type-badge.session { background: rgba(99,102,241,0.10); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+
+  .tx-method {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .tx-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.03em;
+    color: #22c55e;
+  }
+
+  /* ── Stat Cards (user overview) ──────────────── */
   .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -102,43 +316,37 @@
     padding: 22px 20px 20px;
     position: relative;
     overflow: hidden;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: border-color 0.2s, transform 0.2s;
   }
 
-  .stat-card:hover {
-    border-color: var(--yellow-border);
-    transform: translateY(-3px);
-  }
+  .stat-card:hover { border-color: var(--green-border); transform: translateY(-3px); }
 
   .stat-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: var(--yellow);
+    background: var(--green);
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 0.25s ease;
+    transition: transform 0.25s;
   }
 
   .stat-card:hover::before { transform: scaleX(1); }
 
   .stat-icon {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border-radius: 8px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--yellow);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green);
     margin-bottom: 16px;
   }
 
   .stat-value {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
+    font-size: 44px;
     letter-spacing: 0.03em;
     line-height: 1;
     color: var(--text);
@@ -147,7 +355,7 @@
   }
 
   .stat-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -155,19 +363,10 @@
   }
 
   /* ── Generic Card ────────────────────────────── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
 
   /* ── Action Buttons ──────────────────────────── */
-  .action-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+  .action-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 
   .action-btn {
     display: inline-flex;
@@ -186,22 +385,21 @@
   }
 
   .action-btn:hover {
-    border-color: var(--yellow-border);
-    color: var(--yellow);
-    background: var(--yellow-dim);
+    border-color: var(--green-border);
+    color: var(--green);
+    background: var(--green-dim);
     transform: translateY(-1px);
   }
 
   .action-btn:active { transform: translateY(0); }
 
-  /* ── Run Scheduler Button ────────────────────── */
   .btn-run {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: var(--yellow);
-    color: #0a0a0a;
+    background: var(--green);
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     font-size: 13px;
@@ -210,70 +408,77 @@
     transition: background 0.18s, transform 0.15s;
   }
 
-  .btn-run:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+  .btn-run:hover { background: var(--green-dark); transform: translateY(-1px); }
   .btn-run:active { transform: translateY(0); }
 
   /* ── Scheduling Mini-Stats ───────────────────── */
+  .sched-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  @media (max-width: 860px) { .sched-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .sched-grid { grid-template-columns: 1fr; } }
+
   .sched-stat {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 16px 18px;
+    padding: 14px 16px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     transition: border-color 0.18s;
   }
 
-  .sched-stat:hover { border-color: var(--yellow-border); }
+  .sched-stat:hover { border-color: var(--green-border); }
 
   .sched-stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    background: var(--yellow-dim);
-    color: var(--yellow);
+    background: var(--green-dim);
+    color: var(--green);
   }
+
+  .sched-stat-body { flex: 1; min-width: 0; }
 
   .sched-stat-body .val {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 30px;
+    font-size: 26px;
     letter-spacing: 0.03em;
     line-height: 1;
     color: var(--text);
   }
 
   .sched-stat-body .lbl {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-top: 3px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .sched-stat-link {
-    margin-left: auto;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: var(--text-muted);
     text-decoration: none;
     white-space: nowrap;
     transition: color 0.18s;
+    flex-shrink: 0;
   }
 
-  .sched-stat-link:hover { color: var(--yellow); }
+  .sched-stat-link:hover { color: var(--green); }
 
   /* ── Recent Users ────────────────────────────── */
   .user-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 0;
+    padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -281,46 +486,34 @@
   .user-row:last-child  { border-bottom: none; padding-bottom: 0; }
 
   .user-avatar {
-    width: 34px;
-    height: 34px;
+    width: 32px; height: 32px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
+    display: flex; align-items: center; justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     letter-spacing: 0.04em;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
     text-transform: uppercase;
   }
 
-  .user-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    flex: 1;
-  }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
 
   .user-role-badge {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    padding: 3px 10px;
+    padding: 2px 9px;
     border-radius: 99px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
-    color: var(--yellow);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
   }
 
-  .no-data {
-    font-size: 13px;
-    color: var(--text-muted);
-    padding: 8px 0;
-  }
+  .no-data { font-size: 13px; color: var(--text-muted); padding: 8px 0; }
 </style>
 {% endblock %}
 
@@ -335,63 +528,285 @@
     <p class="dash-subtitle">Welcome back, {{ request.user.first_name }} {{ request.user.last_name }}</p>
   </div>
 
-  {# ── Overview Stats ── #}
+
   <div class="section-head">
-    <span class="section-tag">Overview</span>
+    <span class="section-tag">Financial Summary</span>
     <div class="section-line"></div>
   </div>
 
   <div class="grid-4">
 
-    <div class="stat-card">
-      <div class="stat-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    {# Total Income #}
+    <div class="fin-card green">
+      <div class="fin-icon green">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
       </div>
-      <span class="stat-value">{{ total_users }}</span>
-      <span class="stat-label">Total Users</span>
+      <span class="fin-value green">Rs.{{ total_income|floatformat:0 }}</span>
+      <div class="fin-label">Total Income</div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+    {# Total Expenses #}
+    <div class="fin-card amber">
+      <div class="fin-icon amber">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
       </div>
-      <span class="stat-value">{{ total_instructors }}</span>
-      <span class="stat-label">Instructors</span>
+      <span class="fin-value amber">Rs.{{ total_expenses|floatformat:0 }}</span>
+      <div class="fin-label">Total Expenses</div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
+    {# Pending Dues #}
+    <div class="fin-card {% if pending_dues > 0 %}red{% else %}green{% endif %}">
+      <div class="fin-icon {% if pending_dues > 0 %}red{% else %}green{% endif %}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
         </svg>
       </div>
-      <span class="stat-value">{{ total_trainees }}</span>
-      <span class="stat-label">Total Trainees</span>
+      <span class="fin-value {% if pending_dues > 0 %}red{% else %}green{% endif %}">Rs.{{ pending_dues|floatformat:0 }}</span>
+      <div class="fin-label">Pending Dues</div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
+    {# Net Profit / Loss #}
+    <div class="fin-card {% if profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+      <div class="fin-icon {% if profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+        {% if profit_loss >= 0 %}
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15"/>
         </svg>
+        {% else %}
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        {% endif %}
       </div>
-      <span class="stat-value">{{ active_trainees }}</span>
-      <span class="stat-label">Active Trainees</span>
+      <span class="fin-value {% if profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+        {% if profit_loss < 0 %}−{% endif %}Rs.{{ profit_loss|floatformat:0|cut:"-" }}
+      </span>
+      <div class="fin-label">{% if profit_loss >= 0 %}Net Profit{% else %}Net Loss{% endif %} (MTD)</div>
     </div>
 
   </div>
 
-  
-  {# ── Scheduling ── #}
+
+  <div class="dash-section">
+    <div class="section-head">
+      <span class="section-tag">This Month</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="monthly-strip">
+
+      <div class="monthly-item">
+        <div class="monthly-item-label">Income</div>
+        <div class="monthly-item-value income">Rs.{{ monthly_income|floatformat:0 }}</div>
+        <div class="monthly-badge up">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          Collected
+        </div>
+      </div>
+
+      <div class="monthly-item">
+        <div class="monthly-item-label">Expenses</div>
+        <div class="monthly-item-value expense">Rs.{{ monthly_expenses|floatformat:0 }}</div>
+        <div class="monthly-badge {% if monthly_expenses > 0 %}down{% else %}flat{% endif %}">
+          {% if monthly_expenses > 0 %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          Spent
+          {% else %}
+          — No Expenses
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="monthly-item">
+        <div class="monthly-item-label">Walk-in Debt</div>
+        <div class="monthly-item-value {% if public_debt_total > 0 %}loss{% else %}neutral{% endif %}">
+          Rs.{{ public_debt_total|floatformat:0 }}
+        </div>
+        <div class="monthly-badge {% if public_debt_total > 0 %}down{% else %}flat{% endif %}">
+          {{ public_debt_count }} booking{{ public_debt_count|pluralize }} unpaid
+        </div>
+      </div>
+
+      <div class="monthly-item">
+        <div class="monthly-item-label">Net P&amp;L</div>
+        <div class="monthly-item-value {% if profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+          {% if profit_loss < 0 %}−{% endif %}Rs.{{ profit_loss|floatformat:0|cut:"-" }}
+        </div>
+        <div class="monthly-badge {% if profit_loss >= 0 %}up{% else %}down{% endif %}">
+          {% if profit_loss >= 0 %}Profitable{% else %}In the red{% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="dash-section">
+    <div class="section-head">
+      <span class="section-tag">Income vs Expenses — 6-Month Trend</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-wrap" style="height: 260px;">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="grid-2" style="align-items: start;">
+
+      {# Left: Expense Breakdown by Category #}
+      <div>
+        <div class="section-head">
+          <span class="section-tag">Expense Breakdown</span>
+          <div class="section-line"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrap" style="height: 260px; display:flex; align-items:center; justify-content:center;">
+            <canvas id="donutChart" style="max-width:260px; max-height:260px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      {# Right: Payment Method Breakdown #}
+      <div>
+        <div class="section-head">
+          <span class="section-tag">Payment Methods</span>
+          <div class="section-line"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrap" style="height: 260px;">
+            <canvas id="methodChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="section-head">
+      <span class="section-tag">Recent Transactions</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th style="padding-left: 20px;">Trainee / Reference</th>
+            <th>Type</th>
+            <th>Method</th>
+            <th>Date</th>
+            <th style="padding-right: 20px;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent_payments %}
+          <tr>
+            <td style="padding-left: 20px; font-weight: 500;">
+              {% if p.label == 'course' and p.trainee__user__username %}
+                {{ p.trainee__user__first_name }} {{ p.trainee__user__last_name }}
+                <span style="display:block; font-size:11px; color:var(--text-muted); font-weight:400;">
+                  Course Payment #{{ p.id }}
+                </span>
+              {% elif p.label == 'session' %}
+                Session Payment
+                <span style="display:block; font-size:11px; color:var(--text-muted); font-weight:400;">
+                  Ref #{{ p.id }}
+                </span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              <span class="tx-type-badge {{ p.label }}">{{ p.label }}</span>
+            </td>
+            <td>
+              <span class="tx-method">{{ p.method|default:"—" }}</span>
+            </td>
+            <td style="color: var(--text-muted); font-size: 12px;">
+              {{ p.created_at|date:"M d, Y" }}
+            </td>
+            <td class="tx-amount" style="padding-right: 20px;">
+              Rs.{{ p.amount|floatformat:0 }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="padding: 24px 20px; color: var(--text-muted); font-size: 13px;">
+              No transactions recorded yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="section-head">
+      <span class="section-tag">User Overview</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="grid-4">
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <span class="stat-value">{{ total_users }}</span>
+        <span class="stat-label">Total Users</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+          </svg>
+        </div>
+        <span class="stat-value">{{ total_instructors }}</span>
+        <span class="stat-label">Instructors</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <span class="stat-value">{{ total_trainees }}</span>
+        <span class="stat-label">Total Trainees</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <span class="stat-value">{{ active_trainees }}</span>
+        <span class="stat-label">Active Trainees</span>
+      </div>
+
+    </div>
+  </div>
+
   <div class="dash-section">
     <div class="section-head">
       <span class="section-tag">Scheduling</span>
@@ -399,7 +814,8 @@
     </div>
     <div class="card">
 
-      <div class="action-grid" style="margin-bottom: 24px; align-items: center;">
+      {# Action buttons row #}
+      <div class="action-grid" style="margin-bottom: 20px; align-items: center;">
 
         <form method="post" action="{% url 'scheduling:run_scheduler' %}" style="display:inline;">
           {% csrf_token %}
@@ -417,9 +833,9 @@
           {% csrf_token %}
           <input type="number" name="days" value="7" min="1" max="90"
                  style="width:58px; padding:9px 10px; border-radius:8px; border:1px solid var(--border);
-                        background:var(--surface); color:var(--text); font-size:13px; font-weight:500;
+                        background:var(--bg); color:var(--text); font-size:13px; font-weight:500;
                         text-align:center; outline:none; transition:border-color 0.18s;"
-                 onfocus="this.style.borderColor='var(--yellow-border)'"
+                 onfocus="this.style.borderColor='var(--green-focus)'"
                  onblur="this.style.borderColor='var(--border)'"
                  title="Number of days to schedule (1–90)">
           <button type="submit" class="action-btn" style="white-space:nowrap;">
@@ -432,8 +848,6 @@
             Bulk Schedule
           </button>
         </form>
-
-        {# "All Sessions" is the sidebar Schedules link — not repeated here #}
 
         <a href="{% url 'scheduling:approve' %}" class="action-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -493,16 +907,24 @@
           Days Off
         </a>
 
+        <a href="{% url 'scheduling:public_booking_list' %}" class="action-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+          </svg>
+          Walk-in Bookings
+        </a>
+
       </div>
 
       {# Scheduling mini-stats #}
-      <div class="grid-2" style="gap: 12px;">
+      <div class="sched-grid">
 
         <div class="sched-stat">
           <div class="sched-stat-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
           <div class="sched-stat-body">
@@ -514,7 +936,7 @@
 
         <div class="sched-stat">
           <div class="sched-stat-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <line x1="3" y1="10" x2="21" y2="10"/>
               <line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>
@@ -529,21 +951,21 @@
 
         <div class="sched-stat">
           <div class="sched-stat-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="1 4 1 10 7 10"/>
               <path d="M3.51 15a9 9 0 1 0 .49-3.43"/>
             </svg>
           </div>
           <div class="sched-stat-body">
             <div class="val">{{ reschedule_queue_count|default:"—" }}</div>
-            <div class="lbl">In Reschedule Queue</div>
+            <div class="lbl">Reschedule Queue</div>
           </div>
           <a href="{% url 'scheduling:reschedule_queue' %}" class="sched-stat-link">View →</a>
         </div>
 
         <div class="sched-stat">
           <div class="sched-stat-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
               <line x1="4" y1="22" x2="4" y2="15"/>
             </svg>
@@ -557,11 +979,9 @@
 
         <div class="sched-stat">
           <div class="sched-stat-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
           </div>
           <div class="sched-stat-body">
@@ -571,11 +991,40 @@
           <a href="{% url 'scheduling:reschedule_requests' %}" class="sched-stat-link">Review →</a>
         </div>
 
+        <div class="sched-stat">
+          <div class="sched-stat-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="sched-stat-body">
+            <div class="val">{{ pending_public_bookings|default:"—" }}</div>
+            <div class="lbl">Pending Walk-ins</div>
+          </div>
+          <a href="{% url 'scheduling:public_booking_list' %}?status=pending" class="sched-stat-link">View →</a>
+        </div>
+
+        {% if public_debt_count > 0 %}
+        <div class="sched-stat" style="border-color: rgba(239,68,68,0.30); grid-column: span 1;">
+          <div class="sched-stat-icon" style="background: rgba(239,68,68,0.10); color: #ef4444;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="sched-stat-body">
+            <div class="val" style="color: #ef4444;">Rs.{{ public_debt_total }}</div>
+            <div class="lbl">Outstanding Debt ({{ public_debt_count }})</div>
+          </div>
+          <a href="{% url 'scheduling:public_booking_list' %}?debt=yes" class="sched-stat-link" style="color: #ef4444;">Collect →</a>
+        </div>
+        {% endif %}
+
       </div>
     </div>
   </div>
 
-  {# ── Recent Users ── #}
   <div class="dash-section">
     <div class="section-head">
       <span class="section-tag">Recent Users</span>
@@ -598,4 +1047,198 @@
 
 </div><!-- /.dash-wrapper -->
 </div><!-- /.page-wrapper -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  /* ── Resolve CSS variables for chart colours ── */
+  const st    = getComputedStyle(document.documentElement);
+  const isDark = document.documentElement.classList.contains('dark');
+
+  const GREEN       = '#22c55e';
+  const AMBER       = '#f59e0b';
+  const RED         = '#ef4444';
+  const INDIGO      = '#6366f1';
+  const VIOLET      = '#8b5cf6';
+  const TEAL        = '#14b8a6';
+  const PINK        = '#ec4899';
+  const ORANGE      = '#f97316';
+  const CHART_COLORS= [GREEN, AMBER, RED, INDIGO, VIOLET, TEAL, PINK, ORANGE];
+
+  const gridColor   = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const labelColor  = isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.40)';
+  const tooltipBg   = isDark ? '#1e2d24' : '#ffffff';
+  const tooltipText = isDark ? '#e8f2ed' : '#111';
+
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.color       = labelColor;
+
+  /* ── Shared tooltip style ── */
+  const tooltipStyle = {
+    backgroundColor: tooltipBg,
+    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    borderWidth: 1,
+    titleColor: tooltipText,
+    bodyColor: tooltipText,
+    padding: 10,
+    cornerRadius: 8,
+    callbacks: {
+      label: ctx => ` Rs.${Number(ctx.parsed.y ?? ctx.parsed).toLocaleString()}`
+    }
+  };
+
+  const incomeData  = JSON.parse('{{ income_by_month|safe }}');
+  const expenseData = JSON.parse('{{ expense_by_month|safe }}');
+
+  const trendLabels  = incomeData.map(d => {
+    const [y, m] = d.month.split('-');
+    return new Date(y, m - 1).toLocaleString('default', { month: 'short', year: '2-digit' });
+  });
+  const incomeVals   = incomeData.map(d => d.income);
+  const expenseVals  = expenseData.map(d => d.expense);
+
+  const makeGradient = (ctx, color) => {
+    const g = ctx.createLinearGradient(0, 0, 0, 260);
+    g.addColorStop(0, color + '55');
+    g.addColorStop(1, color + '00');
+    return g;
+  };
+
+  const trendCtx = document.getElementById('trendChart').getContext('2d');
+
+  new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [
+        {
+          label: 'Income',
+          data: incomeVals,
+          borderColor: GREEN,
+          backgroundColor: makeGradient(trendCtx, GREEN),
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: GREEN,
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: 'Expenses',
+          data: expenseVals,
+          borderColor: AMBER,
+          backgroundColor: makeGradient(trendCtx, AMBER),
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: AMBER,
+          fill: true,
+          tension: 0.4,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: { boxWidth: 10, boxHeight: 10, borderRadius: 3, useBorderRadius: true, padding: 16 }
+        },
+        tooltip: tooltipStyle,
+      },
+      scales: {
+        x: { grid: { color: gridColor }, border: { display: false } },
+        y: {
+          grid: { color: gridColor },
+          border: { display: false },
+          ticks: { callback: v => 'Rs.' + v.toLocaleString() }
+        }
+      }
+    }
+  });
+
+  const catData = JSON.parse('{{ expense_by_category|safe }}');
+
+  if (catData.length) {
+    new Chart(document.getElementById('donutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: catData.map(d => d.category || 'Uncategorised'),
+        datasets: [{
+          data: catData.map(d => d.total),
+          backgroundColor: CHART_COLORS.slice(0, catData.length),
+          borderWidth: 2,
+          borderColor: isDark ? '#111d16' : '#ffffff',
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { boxWidth: 10, boxHeight: 10, borderRadius: 3, useBorderRadius: true, padding: 12, font: { size: 11 } }
+          },
+          tooltip: {
+            ...tooltipStyle,
+            callbacks: { label: ctx => ` Rs.${Number(ctx.parsed).toLocaleString()} — ${ctx.label}` }
+          }
+        }
+      }
+    });
+  } else {
+    document.getElementById('donutChart').closest('.chart-wrap').innerHTML =
+      '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">No expense data yet.</p>';
+  }
+
+  const methodData = JSON.parse('{{ payment_method_breakdown|safe }}');
+
+  if (methodData.length) {
+    new Chart(document.getElementById('methodChart'), {
+      type: 'bar',
+      data: {
+        labels: methodData.map(d => d.method ? d.method.toUpperCase() : 'UNKNOWN'),
+        datasets: [{
+          label: 'Total Collected',
+          data: methodData.map(d => d.total),
+          backgroundColor: CHART_COLORS.slice(0, methodData.length).map(c => c + 'cc'),
+          borderColor:      CHART_COLORS.slice(0, methodData.length),
+          borderWidth: 1.5,
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...tooltipStyle,
+            callbacks: { label: ctx => ` Rs.${Number(ctx.parsed.x).toLocaleString()}` }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: gridColor },
+            border: { display: false },
+            ticks: { callback: v => 'Rs.' + v.toLocaleString() }
+          },
+          y: { grid: { display: false }, border: { display: false } }
+        }
+      }
+    });
+  } else {
+    document.getElementById('methodChart').closest('.chart-wrap').innerHTML =
+      '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">No payment data yet.</p>';
+  }
+
+})();
+</script>
 {% endblock %}

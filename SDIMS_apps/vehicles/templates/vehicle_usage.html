@@ -8,7 +8,7 @@
   /* ── Page wrapper ── */
   .page-wrapper {
     position: relative;
-    padding: 32px 36px 48px;
+    padding: 40px 48px 80px;
     overflow: hidden;
   }
 
@@ -16,7 +16,7 @@
     content: 'USAGE';
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(80px, 14vw, 160px);
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(232, 242, 237, 0.028);
     position: absolute;
     top: 0;
     right: -8px;
@@ -39,7 +39,7 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 4px;
   }
 
@@ -47,7 +47,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 52px;
     font-weight: 400;
-    color: #ffffff;
+    color: var(--text);
     letter-spacing: 0.05em;
     line-height: 0.95;
     margin: 0;
@@ -73,6 +73,12 @@
     gap: 12px;
     position: relative;
     overflow: hidden;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .summary-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-2px);
   }
 
   .summary-card::before {
@@ -82,9 +88,9 @@
     height: 2px;
   }
 
-  .summary-most::before  { background: #4ade80; }
-  .summary-least::before { background: #f87171; }
-  .summary-total::before { background: var(--yellow); }
+  .summary-most::before  { background: var(--green); }
+  .summary-least::before { background: var(--slate); }
+  .summary-total::before { background: var(--green); opacity: 0.5; }
 
   .summary-icon {
     width: 34px;
@@ -96,9 +102,9 @@
     flex-shrink: 0;
   }
 
-  .summary-most  .summary-icon { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.18); color: #4ade80; }
-  .summary-least .summary-icon { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); color: #f87171; }
-  .summary-total .summary-icon { background: var(--yellow-dim); border: 1px solid var(--yellow-border); color: var(--yellow); }
+  .summary-most  .summary-icon { background: var(--green-dim); border: 1px solid var(--green-border); color: var(--green); }
+  .summary-least .summary-icon { background: rgba(61, 82, 71, 0.12); border: 1px solid rgba(61, 82, 71, 0.22); color: var(--slate); }
+  .summary-total .summary-icon { background: var(--green-dim); border: 1px solid var(--green-border); color: var(--green); }
 
   .summary-body {
     display: flex;
@@ -119,7 +125,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 20px;
     letter-spacing: 0.04em;
-    color: #ffffff;
+    color: var(--text);
     line-height: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -129,7 +135,7 @@
   .summary-sub {
     font-size: 11px;
     font-weight: 300;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-muted);
   }
 
   /* ── Two-column layout for chart + table ── */
@@ -145,9 +151,9 @@
   /* ── Shared card style ── */
   .chart-card,
   .table-card {
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
   }
 
@@ -156,14 +162,15 @@
     align-items: center;
     justify-content: space-between;
     padding: 13px 18px 11px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
   }
 
   .card-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 16px;
     letter-spacing: 0.06em;
-    color: rgba(255, 255, 255, 0.80);
+    color: var(--text-sec);
   }
 
   /* ── Chart ── */
@@ -181,8 +188,8 @@
     margin-right: 4px;
   }
 
-  .legend-completed { background: rgba(250, 204, 21, 0.85); }
-  .legend-booked    { background: rgba(59, 130, 246, 0.65); }
+  .legend-completed { background: var(--green); opacity: 0.85; }
+  .legend-booked    { background: var(--slate); opacity: 0.65; }
 
   .legend-text {
     font-size: 10px;
@@ -210,7 +217,7 @@
   }
 
   .usage-table thead tr {
-    background: var(--surface);
+    background: var(--card);
     border-bottom: 1px solid var(--border);
   }
 
@@ -220,34 +227,34 @@
     text-transform: uppercase;
     letter-spacing: 0.09em;
     color: var(--text-muted);
-    padding: 11px 16px;
+    padding: 14px 20px;
     text-align: left;
     white-space: nowrap;
   }
 
   .usage-table tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s ease;
   }
 
   .usage-table tbody tr:last-child { border-bottom: none; }
-  .usage-table tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  .usage-table tbody tr:hover { background: rgba(45, 122, 95, 0.03); }
 
   .usage-table td {
     font-size: 13px;
     font-weight: 300;
     color: var(--text-sec);
-    padding: 11px 16px;
+    padding: 16px 20px;
     vertical-align: middle;
   }
 
   /* Row highlights */
-  .row-top    { background: rgba(74, 222, 128, 0.04); }
-  .row-top td { color: rgba(255, 255, 255, 0.78); }
-  .row-bottom { background: rgba(248, 113, 113, 0.04); }
+  .row-top    { background: rgba(45, 122, 95, 0.04); }
+  .row-top td { color: var(--text); }
+  .row-bottom { background: rgba(61, 82, 71, 0.04); }
 
   .td-num {
-    color: rgba(255, 255, 255, 0.22) !important;
+    color: var(--text-muted) !important;
     font-size: 11px !important;
     font-weight: 300;
     width: 28px;
@@ -259,21 +266,21 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 15px;
     letter-spacing: 0.04em;
-    color: #ffffff;
+    color: var(--text);
   }
 
   .veh-nick {
     font-size: 10px;
     font-weight: 300;
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--text-muted);
   }
 
   .reg-pill {
     font-size: 11px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.80);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: var(--text-sec);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 5px;
     padding: 2px 7px;
     letter-spacing: 0.04em;
@@ -281,7 +288,7 @@
   }
 
   .td-muted {
-    color: rgba(255, 255, 255, 0.32) !important;
+    color: var(--text-muted) !important;
     font-size: 12px;
   }
 
@@ -289,27 +296,29 @@
     display: inline-block;
     font-size: 11px;
     font-weight: 500;
-    padding: 2px 8px;
+    padding: 3px 9px;
     border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .count-completed {
-    background: rgba(250, 204, 21, 0.10);
-    color: var(--yellow);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green-border);
   }
 
   .count-booked {
-    background: rgba(59, 130, 246, 0.10);
-    color: #93c5fd;
-    border: 1px solid rgba(59, 130, 246, 0.20);
+    background: rgba(61, 82, 71, 0.10);
+    color: var(--slate);
+    border: 1px solid rgba(61, 82, 71, 0.22);
   }
 
   /* ── Utilisation bar ── */
   .td-bar { min-width: 100px; }
 
   .bar-track {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--border);
     border-radius: 3px;
     height: 6px;
     overflow: hidden;
@@ -328,7 +337,7 @@
   }
 
   @media (max-width: 768px) {
-    .page-wrapper { padding: 24px 16px 40px; }
+    .page-wrapper { padding: 28px 20px 60px; }
     .summary-grid { grid-template-columns: 1fr; gap: 8px; }
     .page-title { font-size: 40px; }
 
@@ -475,6 +484,14 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  // Resolve CSS variables to concrete color values for Chart.js
+  const style = getComputedStyle(document.documentElement);
+  const greenColor  = style.getPropertyValue('--green').trim()  || '#2d7a5f';
+  const slateColor  = style.getPropertyValue('--slate').trim()  || '#3d5247';
+  const textMuted   = style.getPropertyValue('--text-muted').trim() || 'rgba(26,46,37,0.45)';
+  const borderColor = style.getPropertyValue('--border').trim() || 'rgba(0,0,0,0.09)';
+  const cardColor   = style.getPropertyValue('--card').trim()   || '#f9fbfa';
+
   // Utilisation bars — max-relative scaling with completed/booked gradient
   (function () {
     const rows = document.querySelectorAll('.bar-fill');
@@ -488,9 +505,10 @@
       const total     = parseInt(r.dataset.total) || 0;
       const pct = total > 0 ? (completed / total * 100).toFixed(1) : 0;
       r.style.width = maxTotal > 0 ? ((total / maxTotal) * 100) + '%' : '0%';
+      // Completed portion in emerald green, booked portion in slate
       r.style.background = `linear-gradient(to right,
-        rgba(250,204,21,0.85) ${pct}%,
-        rgba(59,130,246,0.45) ${pct}%)`;
+        ${greenColor} ${pct}%,
+        ${slateColor}99 ${pct}%)`;
     });
   })();
 
@@ -507,14 +525,14 @@
         {
           label: 'Completed',
           data: completed,
-          backgroundColor: 'rgba(250,204,21,0.80)',
+          backgroundColor: greenColor + 'cc',  // emerald at ~80% opacity
           borderRadius: 3,
           borderSkipped: false,
         },
         {
           label: 'Booked',
           data: booked,
-          backgroundColor: 'rgba(59,130,246,0.45)',
+          backgroundColor: slateColor + '99',  // slate at ~60% opacity
           borderRadius: 3,
           borderSkipped: false,
         },
@@ -526,11 +544,11 @@
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#111111',
-          borderColor: 'rgba(255,255,255,0.10)',
+          backgroundColor: cardColor,
+          borderColor: borderColor,
           borderWidth: 1,
-          titleColor: '#ffffff',
-          bodyColor: 'rgba(255,255,255,0.55)',
+          titleColor: style.getPropertyValue('--text').trim() || '#1a2e25',
+          bodyColor: textMuted,
           padding: 9,
           cornerRadius: 6,
         }
@@ -539,20 +557,20 @@
         x: {
           stacked: false,
           ticks: {
-            color: 'rgba(255,255,255,0.32)',
+            color: textMuted,
             font: { family: "'DM Sans', sans-serif", size: 10 },
             maxRotation: 30,
           },
-          grid: { color: 'rgba(255,255,255,0.04)' },
+          grid: { color: borderColor },
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: 'rgba(255,255,255,0.32)',
+            color: textMuted,
             font: { family: "'DM Sans', sans-serif", size: 10 },
             stepSize: 1,
           },
-          grid: { color: 'rgba(255,255,255,0.06)' },
+          grid: { color: borderColor },
         }
       }
     }

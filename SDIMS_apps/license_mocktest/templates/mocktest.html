@@ -19,7 +19,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 180px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
@@ -31,7 +31,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .page-title {
@@ -56,8 +56,8 @@
     align-items: center;
     gap: 7px;
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
     border-radius: 8px;
     padding: 9px 18px;
     font-size: 13px;
@@ -68,16 +68,16 @@
     transition: border-color 0.18s, color 0.18s, transform 0.18s;
   }
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
     transform: translateY(-1px);
   }
   .btn-primary {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 9px 18px;
@@ -89,16 +89,16 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
   .btn-danger {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: transparent;
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: #ef4444;
+    color: #fff;
+    border: none;
     border-radius: 8px;
     padding: 9px 18px;
     font-size: 13px;
@@ -109,7 +109,7 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-danger:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: #dc2626;
     transform: translateY(-1px);
   }
 
@@ -134,7 +134,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
   }
   .meta-count {
     font-family: 'DM Sans', sans-serif;
@@ -163,7 +163,7 @@
     transition: border-color 0.18s;
   }
   .question-card:has(input:checked) {
-    border-color: rgba(250, 204, 21, 0.2);
+    border-color: rgba(45, 122, 95, 0.20);
   }
 
   .question-header {
@@ -176,9 +176,9 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 13px;
     letter-spacing: 0.06em;
-    color: var(--yellow);
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    color: var(--green);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 2px 9px;
     flex-shrink: 0;
@@ -218,8 +218,8 @@
     line-height: 1.5;
   }
   .option-item label:hover {
-    border-color: rgba(250, 204, 21, 0.3);
-    background: rgba(250, 204, 21, 0.03);
+    border-color: rgba(45, 122, 95, 0.3);
+    background: rgba(45, 122, 95, 0.03);
     color: var(--text);
   }
   .option-item input[type="radio"] {
@@ -228,7 +228,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(45, 122, 95, 0.3);
     background: transparent;
     flex-shrink: 0;
     cursor: pointer;
@@ -236,16 +236,16 @@
     position: relative;
   }
   .option-item input[type="radio"]:checked {
-    border-color: var(--yellow);
-    background: var(--yellow);
+    border-color: var(--green);
+    background: var(--green);
     box-shadow: inset 0 0 0 3px var(--card);
   }
   .option-item input[type="radio"]:checked + .option-key {
-    color: var(--yellow);
+    color: var(--green);
   }
   .option-item:has(input:checked) label {
-    border-color: rgba(250, 204, 21, 0.35);
-    background: rgba(250, 204, 21, 0.05);
+    border-color: var(--green-border);
+    background: var(--green-dim);
     color: var(--text);
   }
   .option-key {
@@ -257,17 +257,19 @@
     transition: color 0.15s;
   }
 
-  /* ── Submit row ── */
-  .submit-row {
+  /* ── Form Footer ── */
+  .form-footer {
     display: flex;
-    justify-content: flex-end;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
   }
   .btn-submit {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 12px 32px;
@@ -278,7 +280,7 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-submit:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
@@ -359,7 +361,8 @@
     </div>
 
     {# ── Submit ── #}
-    <div class="submit-row">
+    <hr class="section-divider">
+    <div class="form-footer">
       <button type="submit" class="btn-submit">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>

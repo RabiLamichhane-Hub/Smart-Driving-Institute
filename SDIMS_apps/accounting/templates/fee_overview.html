@@ -5,35 +5,32 @@
 
 {% block content %}
 
-<section class="fee-section">
+<div class="page-wrapper">
 
-  <!-- Ghost background text -->
-  <span class="ghost-text">FEES</span>
+  <!-- Page header -->
+  <p class="page-label">Accounting</p>
+  <h1 class="page-title">Fee Overview</h1>
 
-  <!-- Section header -->
-  <div class="section-header">
-    <span class="section-tag">Accounting</span>
-    <h1 class="section-title">Fee Overview</h1>
+  <!-- Action bar -->
+  <div class="action-bar">
+    <a href="{% url 'accounting:expense_list' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Expenses
+    </a>
+    <a href="{% url 'accounting:add_expense' %}" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Expense
+    </a>
   </div>
 
-  <!-- Toolbar -->
-  <div class="list-toolbar">
-    <p class="record-count">
-      <span class="count-num">{{ trainees|length }}</span>
-      trainee{{ trainees|length|pluralize }}
-      {% if search_query %}<span class="search-hint"> for "{{ search_query }}"</span>{% endif %}
-    </p>
-    <div class="toolbar-actions">
-      <a href="{% url 'accounting:expense_list' %}" class="btn-ghost">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        Expenses
-      </a>
-      <a href="{% url 'accounting:add_expense' %}" class="btn-primary">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Expense
-      </a>
-    </div>
-  </div>
+  <hr class="section-divider">
+
+  <!-- Record count -->
+  <p class="record-count">
+    <span class="count-num">{{ trainees|length }}</span>
+    trainee{{ trainees|length|pluralize }}
+    {% if search_query %}<span class="search-hint"> for "{{ search_query }}"</span>{% endif %}
+  </p>
 
   <!-- Search bar -->
   <form method="get" action="" class="search-form">
@@ -55,15 +52,6 @@
       <button type="submit" class="search-btn">Search</button>
     </div>
   </form>
-
-  <!-- Django messages -->
-  {% if messages %}
-    <div class="messages-block">
-      {% for message in messages %}
-        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
 
   <!-- Fee Table -->
   {% if fee_records %}
@@ -93,12 +81,10 @@
             </div>
           </td>
 
-          <!-- Course — always present on FeeRecord -->
-          <td>
-            <span class="course-name">{{ record.course }}</span>
-          </td>
+          <!-- Course -->
+          <td><span class="course-name">{{ record.course }}</span></td>
 
-          <!-- Course Fee — always present -->
+          <!-- Course Fee -->
           <td class="col-num">
             <span class="amt-base">Rs. {{ record.final_fee }}</span>
             {% if record.discount_amount %}
@@ -106,7 +92,7 @@
             {% endif %}
           </td>
 
-          <!-- Paid — 0 if no payments yet -->
+          <!-- Paid -->
           <td class="col-num">
             <span class="amt-paid {% if record.total_paid == 0 %}amt-zero{% endif %}">
               Rs. {{ record.total_paid }}
@@ -153,7 +139,7 @@
     </table>
   </div>
 
-  <!-- ── Unpaid / Partial Section ── -->
+  <!-- ── Outstanding Dues Section ── -->
   {% if unpaid_records %}
   <div class="unpaid-section">
 
@@ -186,7 +172,6 @@
           {% for record in unpaid_records %}
           <tr class="fee-row unpaid-row">
 
-            <!-- Trainee -->
             <td>
               <div class="trainee-cell">
                 <div class="avatar avatar-unpaid">{{ record.trainee|truncatechars:1 }}</div>
@@ -194,12 +179,8 @@
               </div>
             </td>
 
-            <!-- Course -->
-            <td>
-              <span class="course-name">{{ record.course }}</span>
-            </td>
+            <td><span class="course-name">{{ record.course }}</span></td>
 
-            <!-- Course Fee -->
             <td class="col-num">
               <span class="amt-base">Rs. {{ record.final_fee }}</span>
               {% if record.discount_amount %}
@@ -207,19 +188,16 @@
               {% endif %}
             </td>
 
-            <!-- Paid -->
             <td class="col-num">
               <span class="amt-paid {% if record.total_paid == 0 %}amt-zero{% endif %}">
                 Rs. {{ record.total_paid }}
               </span>
             </td>
 
-            <!-- Outstanding / Remaining -->
             <td class="col-num">
               <span class="amt-outstanding">Rs. {{ record.remaining }}</span>
             </td>
 
-            <!-- Progress -->
             <td class="col-progress">
               {% if record.final_fee %}
               <div class="progress-track">
@@ -231,14 +209,12 @@
               {% endif %}
             </td>
 
-            <!-- Status -->
             <td>
               <span class="status-pill status-{{ record.get_status_display|lower|slugify }}">
                 {{ record.get_status_display }}
               </span>
             </td>
 
-            <!-- Action -->
             <td class="col-action">
               <a href="{% url 'accounting:add_payment' record.trainee.pk %}" class="btn-payment btn-payment-urgent">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -274,24 +250,27 @@
   </div>
   {% endif %}
 
-</section>
+</div>{# end page-wrapper #}
+
+{% endblock %}
 
 
+{% block extra_css %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
-  /* ── Section ── */
-  .fee-section {
+  /* ── Page wrapper ── */
+  .page-wrapper {
     position: relative;
-    padding: 56px 48px 80px;
+    padding: 40px 48px 80px;
     min-height: 80vh;
     overflow: hidden;
   }
 
-  .ghost-text {
+  .page-wrapper::before {
+    content: 'FEES';
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(100px, 22vw, 260px);
-    color: rgba(255,255,255,0.025);
+    color: rgba(26,46,37,0.025);
     position: absolute;
     top: 6px;
     right: -16px;
@@ -299,65 +278,54 @@
     line-height: 1;
     pointer-events: none;
     user-select: none;
+    z-index: 0;
   }
 
-  /* ── Section header ── */
-  .section-header {
-    margin-bottom: 32px;
-    position: relative;
-    z-index: 1;
+  :root.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
 
-  .section-tag {
-    display: inline-block;
+  /* ── Page header ── */
+  .page-label {
     font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #facc15;
-    margin-bottom: 8px;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 6vw, 72px);
-    font-weight: 400;
-    color: #ffffff;
-    letter-spacing: 0.05em;
-    line-height: 0.95;
-    margin: 0;
-  }
-
-  /* ── Toolbar ── */
-  .list-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
+    color: var(--green);
+    margin: 0 0 8px;
     position: relative;
     z-index: 1;
   }
 
-  .record-count {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 300;
-    color: rgba(255,255,255,0.40);
-    margin: 0;
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    margin: 0 0 32px;
+    position: relative;
+    z-index: 1;
   }
 
-  .count-num {
-    font-size: 22px;
-    font-weight: 500;
-    color: #facc15;
-    margin-right: 4px;
-  }
-
-  .toolbar-actions {
+  /* ── Action bar ── */
+  .action-bar {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Section divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+    position: relative;
+    z-index: 1;
   }
 
   /* ── Buttons ── */
@@ -365,19 +333,19 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #facc15;
-    color: #0a0a0a;
+    background: var(--green);
+    color: #ffffff;
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
     padding: 10px 20px;
     border-radius: 8px;
-    transition: transform 0.18s ease, background 0.18s ease;
+    transition: background 0.22s ease, transform 0.22s ease, color 0.22s ease, border-color 0.22s ease;
   }
 
   .btn-primary:hover {
-    background: #eab308;
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
@@ -386,63 +354,44 @@
     align-items: center;
     gap: 6px;
     background: transparent;
-    color: rgba(255,255,255,0.65);
+    color: var(--slate);
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 400;
     text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1px solid rgba(45,122,95,0.30);
     border-radius: 8px;
     padding: 10px 18px;
-    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+    transition: background 0.22s ease, transform 0.22s ease, color 0.22s ease, border-color 0.22s ease;
   }
 
   .btn-ghost:hover {
-    border-color: rgba(250,204,21,0.4);
-    color: #facc15;
-    transform: translateY(-1px);
+    border-color: rgba(45,122,95,0.50);
+    color: var(--green);
   }
 
-  .btn-payment {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(250,204,21,0.08);
-    color: #facc15;
+  /* ── Record count ── */
+  .record-count {
     font-family: 'DM Sans', sans-serif;
-    font-size: 12.5px;
-    font-weight: 500;
-    text-decoration: none;
-    border: 1px solid rgba(250,204,21,0.22);
-    border-radius: 7px;
-    padding: 8px 16px;
-    transition: background 0.18s, border-color 0.18s, transform 0.18s;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .btn-payment:hover {
-    background: rgba(250,204,21,0.14);
-    border-color: rgba(250,204,21,0.4);
-    transform: translateY(-1px);
-  }
-
-  /* ── Messages ── */
-  .messages-block {
-    margin-bottom: 24px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin: 0 0 20px;
     position: relative;
     z-index: 1;
   }
 
-  .alert-msg {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.75);
+  .count-num {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--green);
+    margin-right: 4px;
+  }
+
+  .search-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
   }
 
   /* ── Search bar ── */
@@ -455,20 +404,19 @@
   .search-wrap {
     display: flex;
     align-items: center;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0 6px 0 14px;
-    transition: border-color 0.18s, background 0.18s;
+    transition: border-color 0.22s ease, background 0.22s ease;
   }
 
   .search-wrap:focus-within {
-    border-color: rgba(250,204,21,0.45);
-    background: rgba(255,255,255,0.055);
+    border-color: var(--green-focus);
   }
 
   .search-icon {
-    color: rgba(255,255,255,0.28);
+    color: var(--text-muted);
     flex-shrink: 0;
     margin-right: 10px;
   }
@@ -481,31 +429,32 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
-    color: #ffffff;
+    color: var(--text);
     padding: 11px 0;
     min-width: 0;
   }
 
-  .search-input::placeholder { color: rgba(255,255,255,0.28); }
+  .search-input::placeholder { color: var(--text-muted); }
 
   .search-clear {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.30);
+    color: var(--text-muted);
     padding: 6px 8px;
     border-radius: 6px;
     text-decoration: none;
-    transition: color 0.15s, background 0.15s;
+    transition: color 0.22s ease, background 0.22s ease;
     flex-shrink: 0;
   }
 
-  .search-clear:hover { color: #f87171; background: rgba(248,113,113,0.08); }
+  .search-clear:hover { color: #dc2626; background: rgba(239,68,68,0.08); }
+  :root.dark .search-clear:hover { color: #f87171; background: rgba(248,113,113,0.08); }
 
   .search-btn {
     flex-shrink: 0;
-    background: #facc15;
-    color: #0a0a0a;
+    background: var(--green);
+    color: #ffffff;
     font-family: 'DM Sans', sans-serif;
     font-size: 12.5px;
     font-weight: 600;
@@ -514,44 +463,22 @@
     padding: 8px 18px;
     cursor: pointer;
     margin-left: 6px;
-    transition: background 0.16s, transform 0.14s;
+    transition: background 0.22s ease, transform 0.22s ease;
   }
 
-  .search-btn:hover { background: #eab308; transform: translateY(-1px); }
+  .search-btn:hover { background: var(--green-dark); transform: translateY(-1px); }
 
-  .search-hint {
-    font-size: 12px;
-    color: rgba(255,255,255,0.28);
-    font-style: italic;
-  }
-
-  /* ── No-record row ── */
-  .row-no-record { opacity: 0.52; }
-  .muted { color: rgba(255,255,255,0.25) !important; }
-
-  .status-no-record {
-    background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.28);
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .empty-reset {
-    color: #facc15;
-    text-decoration: none;
-    font-weight: 500;
-  }
-  .empty-reset:hover { text-decoration: underline; }
-
-  /* ── Fee table ── */
+  /* ── Table wrapper ── */
   .table-wrap {
     position: relative;
     z-index: 1;
     overflow-x: auto;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.09);
-    background: rgba(255,255,255,0.025);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
   }
 
+  /* ── Fee table ── */
   .fee-table {
     width: 100%;
     border-collapse: collapse;
@@ -559,31 +486,50 @@
   }
 
   .fee-table thead tr {
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
   }
 
   .fee-table thead th {
-    padding: 14px 18px;
-    font-size: 10.5px;
+    padding: 14px 20px;
+    font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: rgba(255,255,255,0.30);
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
     white-space: nowrap;
     text-align: left;
   }
 
+  .fee-table thead th.col-num {
+    color: rgba(45,122,95,0.70);
+  }
+
+  :root.dark .fee-table thead th.col-num {
+    color: rgba(77,184,138,0.70);
+  }
+
   .fee-row {
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.16s ease;
   }
 
   .fee-row:last-child { border-bottom: none; }
-  .fee-row:hover { background: rgba(255,255,255,0.03); }
+
+  .fee-row:hover { background: rgba(45,122,95,0.03); }
+  :root.dark .fee-row:hover { background: rgba(77,184,138,0.04); }
 
   .fee-table tbody td {
-    padding: 14px 18px;
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
     vertical-align: middle;
+  }
+
+  .fee-table tbody td:first-child {
+    font-weight: 500;
+    color: var(--text);
   }
 
   .col-num { text-align: right; }
@@ -593,56 +539,52 @@
   .col-num .amt-discount {
     display: block;
     font-size: 11px;
-    color: #4ade80;
+    color: #16a34a;
     margin-top: 2px;
   }
+  :root.dark .col-num .amt-discount { color: #4ade80; }
 
   .col-progress { min-width: 130px; }
   .col-action   { width: 1%; white-space: nowrap; text-align: right; }
 
-  .amt-base      { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.80); }
-  .amt-paid      { font-size: 13px; font-weight: 600; color: #4ade80; }
-  .amt-remaining { font-size: 13px; font-weight: 600; color: #f87171; }
-  .remaining-clear { color: rgba(255,255,255,0.28) !important; }
+  .amt-base      { font-size: 13px; font-weight: 500; color: var(--text); }
+  .amt-paid      { font-size: 13px; font-weight: 600; color: #16a34a; }
+  :root.dark .amt-paid { color: #4ade80; }
+  .amt-remaining { font-size: 13px; font-weight: 600; color: #dc2626; }
+  :root.dark .amt-remaining { color: #f87171; }
+  .remaining-clear { color: var(--text-muted) !important; }
+  .amt-zero { color: var(--text-muted) !important; }
 
+  /* ── Trainee cell ── */
   .trainee-cell {
     display: flex;
     align-items: center;
     gap: 11px;
   }
 
-  /* placeholder so existing selectors below don't break */
-  .card-header, .header-left { display: none; }
-
+  /* ── Avatar — matches spec: green-dim bg, green-border, green initials, Bebas Neue ── */
   .avatar {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: rgba(250,204,21,0.10);
-    border: 1.5px solid rgba(250,204,21,0.28);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
+    font-size: 12px;
     letter-spacing: 0.04em;
-    color: #facc15;
+    color: var(--green);
     flex-shrink: 0;
     text-transform: uppercase;
   }
 
-  .header-identity {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
   .trainee-name {
     font-family: 'DM Sans', sans-serif;
-    font-size: 14.5px;
+    font-size: 14px;
     font-weight: 500;
-    color: #ffffff;
+    color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -650,156 +592,49 @@
 
   .course-name {
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 300;
-    color: rgba(255,255,255,0.38);
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Status pill */
+  /* ── Status pills ── */
   .status-pill {
     font-family: 'DM Sans', sans-serif;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    padding: 4px 9px;
+    padding: 3px 9px;
     border-radius: 5px;
-    flex-shrink: 0;
+    display: inline-block;
   }
 
-  .status-paid        { background: rgba(34,197,94,0.10);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
-  .status-partial     { background: rgba(250,204,21,0.10); color: #facc15; border: 1px solid rgba(250,204,21,0.2); }
-  .status-unpaid      { background: rgba(255,90,90,0.10);  color: #f87171; border: 1px solid rgba(255,90,90,0.2); }
-  .status-overpaid    { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.22); }
-  .status-waived      { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.38); border: 1px solid rgba(255,255,255,0.1); }
+  .status-paid     { background: var(--green-dim);            color: var(--green);  border: 1px solid var(--green-border); }
+  .status-partial  { background: rgba(234,179,8,0.10);        color: #ca8a04;       border: 1px solid rgba(234,179,8,0.22); }
+  .status-unpaid   { background: rgba(239,68,68,0.09);        color: #dc2626;       border: 1px solid rgba(239,68,68,0.2); }
+  .status-overpaid { background: rgba(139,92,246,0.10);       color: #7c3aed;       border: 1px solid rgba(139,92,246,0.2); }
+  .status-waived   { background: var(--bg);                   color: var(--text-muted); border: 1px solid var(--border); }
 
-  /* ── Divider ── */
-  .card-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.07);
-    margin-bottom: 16px;
-  }
+  :root.dark .status-partial  { color: #facc15; background: rgba(250,204,21,0.10); border-color: rgba(250,204,21,0.22); }
+  :root.dark .status-unpaid   { color: #f87171; background: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.22); }
+  :root.dark .status-overpaid { color: #a78bfa; background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.22); }
 
-  /* ── Fee breakdown ── */
-  .fee-breakdown {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .breakdown-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .breakdown-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12.5px;
-    font-weight: 400;
-    color: rgba(255,255,255,0.42);
-  }
-
-  .breakdown-value {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: rgba(255,255,255,0.65);
-  }
-
-  .breakdown-discount .breakdown-label { color: rgba(255,255,255,0.32); }
-  .discount-val { color: #4ade80; font-size: 12.5px; }
-
-  .breakdown-final {
-    padding-top: 8px;
-    border-top: 1px dashed rgba(255,255,255,0.08);
-    margin-top: 2px;
-  }
-
-  .breakdown-final .breakdown-label {
-    font-weight: 500;
-    color: rgba(255,255,255,0.65);
-    font-size: 13px;
-  }
-
-  .final-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 0.04em;
-    color: #ffffff;
-    line-height: 1;
-  }
-
-  /* ── Payment section ── */
-  .payment-section {
-    margin-bottom: 18px;
-  }
-
-  .payment-numbers {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .payment-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .payment-item-right {
-    align-items: flex-end;
-  }
-
-  .payment-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.28);
-  }
-
-  .payment-paid {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 0.04em;
-    color: #4ade80;
-    line-height: 1;
-  }
-
-  .payment-remaining {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 0.04em;
-    color: #f87171;
-    line-height: 1;
-  }
-
-  .remaining-clear {
-    color: rgba(255,255,255,0.25);
-  }
-
-  /* Progress bar */
+  /* ── Progress bar ── */
   .progress-track {
     width: 100%;
     height: 4px;
-    background: rgba(255,255,255,0.08);
+    background: var(--border);
     border-radius: 999px;
     overflow: hidden;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   .progress-fill {
     height: 100%;
-    background: #facc15;
+    background: var(--green);
     border-radius: 999px;
     transition: width 0.4s ease;
     min-width: 2px;
@@ -809,16 +644,34 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 10.5px;
     font-weight: 500;
-    color: rgba(255,255,255,0.28);
-    text-align: right;
+    color: var(--text-muted);
   }
 
-  /* ── Card footer ── */
-  .card-footer {
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+  /* ── Payment button ── */
+  .btn-payment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-dim);
+    color: var(--green);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid var(--green-border);
+    border-radius: 7px;
+    padding: 7px 14px;
+    transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+    white-space: nowrap;
   }
+
+  .btn-payment:hover {
+    background: rgba(45,122,95,0.18);
+    border-color: var(--green-focus);
+    transform: translateY(-1px);
+  }
+
+  :root.dark .btn-payment:hover { background: rgba(77,184,138,0.18); }
 
   /* ── Empty state ── */
   .empty-state {
@@ -835,12 +688,12 @@
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.22);
+    color: var(--green);
     margin-bottom: 20px;
   }
 
@@ -848,7 +701,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 30px;
     letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.55);
+    color: var(--text-muted);
     margin: 0 0 6px;
   }
 
@@ -856,11 +709,18 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 300;
-    color: rgba(255,255,255,0.32);
+    color: var(--text-muted);
     margin: 0;
   }
 
-  /* ── Unpaid / Outstanding section ── */
+  .empty-reset {
+    color: var(--green);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .empty-reset:hover { text-decoration: underline; }
+
+  /* ── Outstanding dues section ── */
   .unpaid-section {
     margin-top: 52px;
     position: relative;
@@ -880,16 +740,18 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #f87171;
+    color: #dc2626;
   }
+  :root.dark .unpaid-header-left { color: #f87171; }
 
   .unpaid-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.06em;
-    color: #f87171;
+    color: #dc2626;
     line-height: 1;
   }
+  :root.dark .unpaid-title { color: #f87171; }
 
   .unpaid-count {
     font-family: 'DM Sans', sans-serif;
@@ -897,77 +759,81 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(248,113,113,0.65);
-    background: rgba(248,113,113,0.08);
-    border: 1px solid rgba(248,113,113,0.2);
+    color: rgba(220,38,38,0.70);
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.20);
     border-radius: 5px;
     padding: 3px 8px;
   }
+  :root.dark .unpaid-count { color: rgba(248,113,113,0.70); background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.20); }
 
   .unpaid-total-badge {
     font-family: 'DM Sans', sans-serif;
     font-size: 12.5px;
     font-weight: 400;
-    color: rgba(255,255,255,0.45);
-    background: rgba(248,113,113,0.07);
-    border: 1px solid rgba(248,113,113,0.18);
+    color: var(--text-sec);
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.16);
     border-radius: 8px;
     padding: 7px 16px;
   }
+  :root.dark .unpaid-total-badge { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.16); }
 
   .unpaid-total-badge strong {
-    color: #f87171;
+    color: #dc2626;
     font-weight: 600;
   }
+  :root.dark .unpaid-total-badge strong { color: #f87171; }
 
   .unpaid-table-wrap {
-    border-color: rgba(248,113,113,0.18) !important;
-    background: rgba(248,113,113,0.025) !important;
+    border-color: rgba(239,68,68,0.16) !important;
   }
+  :root.dark .unpaid-table-wrap { border-color: rgba(248,113,113,0.18) !important; }
 
   .unpaid-row:hover {
-    background: rgba(248,113,113,0.04) !important;
+    background: rgba(239,68,68,0.03) !important;
   }
+  :root.dark .unpaid-row:hover { background: rgba(248,113,113,0.04) !important; }
 
   .avatar-unpaid {
-    background: rgba(248,113,113,0.10) !important;
-    border-color: rgba(248,113,113,0.28) !important;
-    color: #f87171 !important;
+    background: rgba(239,68,68,0.08) !important;
+    border-color: rgba(239,68,68,0.20) !important;
+    color: #dc2626 !important;
   }
+  :root.dark .avatar-unpaid { background: rgba(248,113,113,0.10) !important; border-color: rgba(248,113,113,0.25) !important; color: #f87171 !important; }
 
   .amt-outstanding {
     font-size: 13px;
     font-weight: 700;
-    color: #f87171;
+    color: #dc2626;
   }
+  :root.dark .amt-outstanding { color: #f87171; }
 
   .unpaid-progress-fill {
-    background: #f87171 !important;
+    background: #dc2626 !important;
   }
+  :root.dark .unpaid-progress-fill { background: #f87171 !important; }
 
   .btn-payment-urgent {
-    background: rgba(248,113,113,0.10) !important;
-    color: #f87171 !important;
-    border-color: rgba(248,113,113,0.28) !important;
+    background: rgba(239,68,68,0.08) !important;
+    color: #dc2626 !important;
+    border-color: rgba(239,68,68,0.22) !important;
   }
+  :root.dark .btn-payment-urgent { background: rgba(248,113,113,0.10) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.25) !important; }
 
   .btn-payment-urgent:hover {
-    background: rgba(248,113,113,0.18) !important;
-    border-color: rgba(248,113,113,0.45) !important;
+    background: rgba(239,68,68,0.15) !important;
+    border-color: rgba(239,68,68,0.40) !important;
   }
-
-  .amt-zero {
-    color: rgba(255,255,255,0.25) !important;
-  }
+  :root.dark .btn-payment-urgent:hover { background: rgba(248,113,113,0.18) !important; border-color: rgba(248,113,113,0.42) !important; }
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
-    .fee-section { padding: 36px 20px 60px; }
-    .ghost-text { font-size: 100px; }
-    .list-toolbar { flex-direction: column; align-items: flex-start; gap: 14px; }
-    .toolbar-actions { width: 100%; }
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-wrapper::before { font-size: 100px; }
+    .action-bar { flex-direction: column; }
     .table-wrap { border-radius: 0; }
   }
-</style>
 
+</style>
 {% endblock %}

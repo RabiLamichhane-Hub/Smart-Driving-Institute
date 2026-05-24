@@ -20,10 +20,13 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 180px;
     letter-spacing: 0.04em;
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     pointer-events: none;
     line-height: 1;
     z-index: 0;
+  }
+  :root.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
 
   /* ── Header ── */
@@ -33,7 +36,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -43,7 +46,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--yellow);
+    background: var(--green);
     flex-shrink: 0;
     animation: blink 2.5s ease-in-out infinite;
   }
@@ -61,7 +64,7 @@
     color: var(--text);
     margin-bottom: 0;
   }
-  .page-title .hl { color: var(--yellow); }
+  .page-title .hl { color: var(--green); }
 
   .page-header {
     display: flex;
@@ -101,7 +104,7 @@
     transition: border-color .2s, transform .2s;
   }
   .stat-card:hover {
-    border-color: rgba(250,204,21,0.18);
+    border-color: rgba(45,122,95,0.20);
     transform: translateY(-3px);
   }
   .stat-label {
@@ -147,12 +150,12 @@
   .filter-btn:hover {
     background: var(--surface);
     color: var(--text);
-    border-color: rgba(255,255,255,0.2);
+    border-color: rgba(45,122,95,0.30);
   }
   .filter-btn.active {
-    background: var(--yellow-dim);
-    color: var(--yellow);
-    border-color: var(--yellow-border);
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: var(--green-border);
   }
   .filter-spacer { flex: 1; }
   .session-count {
@@ -199,9 +202,9 @@
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: var(--yellow-dim);
-    color: var(--yellow);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green-border);
     flex-shrink: 0;
   }
   .today-tag::before {
@@ -233,7 +236,7 @@
     transition: background .15s, border-color .2s, transform .2s;
   }
   .session-card:hover {
-    border-color: rgba(250,204,21,0.18);
+    border-color: rgba(45,122,95,0.20);
     transform: translateY(-2px);
   }
   .session-card[hidden] { display: none; }
@@ -245,10 +248,10 @@
     width: 3px;
     background: var(--stripe, var(--border));
   }
-  .session-card.status-scheduled   { --stripe: var(--yellow); }
-  .session-card.status-in_progress { --stripe: rgba(255,255,255,0.5); }
-  .session-card.status-pending     { --stripe: rgba(255,255,255,0.2); }
-  .session-card.status-completed   { --stripe: rgba(255,255,255,0.1); opacity: .55; }
+  .session-card.status-scheduled   { --stripe: var(--green); }
+  .session-card.status-in_progress { --stripe: var(--slate); }
+  .session-card.status-pending     { --stripe: rgba(45,122,95,0.30); }
+  .session-card.status-completed   { --stripe: rgba(45,122,95,0.12); opacity: .55; }
   .session-card.status-absent      { --stripe: rgba(239,68,68,0.5); opacity: .60; }
 
   .session-body { flex: 1; min-width: 0; }
@@ -308,22 +311,22 @@
     border: 1px solid transparent;
   }
   .badge-scheduled {
-    background: var(--yellow-dim);
-    color: var(--yellow);
-    border-color: var(--yellow-border);
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: var(--green-border);
   }
   .badge-in_progress {
-    background: rgba(255,255,255,0.06);
-    color: var(--text);
-    border-color: rgba(255,255,255,0.15);
+    background: rgba(61,82,71,0.12);
+    color: var(--slate);
+    border-color: rgba(61,82,71,0.25);
   }
   .badge-pending {
-    background: rgba(255,255,255,0.04);
+    background: rgba(45,122,95,0.06);
     color: var(--text-muted);
     border-color: var(--border);
   }
   .badge-completed {
-    background: rgba(255,255,255,0.03);
+    background: rgba(45,122,95,0.04);
     color: var(--text-muted);
     border-color: var(--border);
   }
@@ -346,15 +349,15 @@
     text-decoration: none;
     padding: 5px 12px;
     border-radius: 7px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(45,122,95,0.30);
     background: transparent;
-    color: var(--text-sec);
+    color: var(--slate);
     white-space: nowrap;
     transition: border-color .15s, color .15s;
   }
   .btn-reschedule:hover {
-    border-color: rgba(250,204,21,0.4);
-    color: var(--yellow);
+    border-color: rgba(45,122,95,0.50);
+    color: var(--green);
   }
 
   /* ── Reschedule "requested" pill ── */
@@ -369,9 +372,9 @@
     text-transform: uppercase;
     padding: 5px 12px;
     border-radius: 7px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: var(--text-muted);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
     white-space: nowrap;
   }
   .badge-requested svg { opacity: 0.5; }
@@ -403,7 +406,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.05em;
-    color: rgba(255,255,255,0.30);
+    color: var(--text-muted);
     margin-bottom: 10px;
   }
   .empty-card p {
@@ -452,7 +455,7 @@
 
   {# ── Stats ── #}
   <dl class="stats-row" aria-label="Schedule summary">
-    <div class="stat-card" style="--card-accent: var(--yellow);">
+    <div class="stat-card" style="--card-accent: var(--green);">
       <dt class="stat-label">Upcoming</dt>
       <dd class="stat-num">{{ sessions|length }}</dd>
     </div>
@@ -461,7 +464,7 @@
       <dd class="stat-num">{{ today_count }}</dd>
     </div>
     {% if role == 'instructor' %}
-    <div class="stat-card" style="--card-accent: var(--text-sec);">
+    <div class="stat-card" style="--card-accent: var(--slate);">
       <dt class="stat-label">Trainees</dt>
       <dd class="stat-num">{{ trainee_count }}</dd>
     </div>

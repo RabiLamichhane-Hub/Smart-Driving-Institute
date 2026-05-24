@@ -18,7 +18,7 @@
     content: 'VEHICLE';
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(90px, 18vw, 200px);
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     position: absolute;
     top: -10px;
     right: -10px;
@@ -26,6 +26,10 @@
     line-height: 1;
     pointer-events: none;
     user-select: none;
+  }
+
+  :root.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
 
   /* ── Back link ── */
@@ -39,12 +43,12 @@
     color: var(--text-muted);
     text-decoration: none;
     margin-bottom: 28px;
-    transition: color 0.18s;
+    transition: color 0.22s ease, border-color 0.22s ease, background 0.22s ease;
     position: relative;
     z-index: 1;
   }
 
-  .back-link:hover { color: var(--yellow); }
+  .back-link:hover { color: var(--green); }
 
   /* ── Page header ── */
   .page-header {
@@ -59,7 +63,7 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
 
@@ -73,7 +77,7 @@
     margin: 0;
   }
 
-  /* ── Action bar (top — cancel only) ── */
+  /* ── Action bar ── */
   .action-bar {
     display: flex;
     gap: 12px;
@@ -82,6 +86,7 @@
     z-index: 1;
   }
 
+  /* ── Section divider ── */
   .section-divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -102,30 +107,31 @@
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: background 0.18s, transform 0.18s, border-color 0.18s, color 0.18s;
+    transition: background 0.22s ease, transform 0.22s ease, border-color 0.22s ease, color 0.22s ease;
     font-weight: 600;
   }
 
   .btn-primary {
-    background: var(--yellow);
-    color: #0a0a0a;
+    background: var(--green);
+    color: #ffffff;
+    border: none;
   }
 
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
   .btn-ghost {
     background: transparent;
-    color: rgba(255,255,255,0.55);
-    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45,122,95,0.30);
     font-weight: 400;
   }
 
   .btn-ghost:hover {
-    border-color: rgba(250,204,21,0.4);
-    color: var(--yellow);
+    border-color: rgba(45,122,95,0.50);
+    color: var(--green);
   }
 
   /* ── Form layout ── */
@@ -143,11 +149,11 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 24px 26px;
-    transition: border-color 0.2s;
+    transition: border-color 0.22s ease;
   }
 
   .form-card:focus-within {
-    border-color: rgba(250,204,21,0.18);
+    border-color: var(--green-focus);
   }
 
   .form-card-header {
@@ -156,19 +162,19 @@
     gap: 14px;
     margin-bottom: 24px;
     padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--border);
   }
 
   .form-card-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
   }
 
@@ -179,7 +185,8 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(250,204,21,0.7);
+    color: var(--green);
+    opacity: 0.7;
     margin-bottom: 2px;
   }
 
@@ -228,7 +235,7 @@
     width: 100%;
     box-sizing: border-box;
     background: var(--bg);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
     font-family: 'DM Sans', sans-serif;
@@ -236,33 +243,46 @@
     font-weight: 400;
     color: var(--text-sec);
     outline: none;
-    transition: border-color 0.18s;
+    transition: border-color 0.22s ease;
     appearance: none;
     -webkit-appearance: none;
   }
 
   .edit-form select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(26,46,37,0.45)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 36px;
     cursor: pointer;
   }
 
+  :root.dark .edit-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(232,242,237,0.40)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+
   .edit-form input:focus,
   .edit-form select:focus,
   .edit-form textarea:focus {
-    border-color: var(--yellow-focus);
+    border-color: var(--green-focus);
   }
 
   .edit-form input::placeholder,
   .edit-form textarea::placeholder {
-    color: rgba(255,255,255,0.18);
+    color: var(--text-muted);
   }
 
   .edit-form input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.4);
+    opacity: 0.4;
     cursor: pointer;
+  }
+
+  /* ── Hide native file input ── */
+  .edit-form input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
   }
 
   /* ── Checkbox (dual control) ── */
@@ -272,22 +292,22 @@
     gap: 10px;
     padding: 11px 14px;
     background: var(--bg);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid var(--border);
     border-radius: 8px;
     cursor: pointer;
-    transition: border-color 0.18s;
+    transition: border-color 0.22s ease, background 0.22s ease;
     user-select: none;
   }
 
   .checkbox-row:has(input:checked) {
-    border-color: rgba(250,204,21,0.35);
-    background: rgba(250,204,21,0.04);
+    border-color: var(--green-focus);
+    background: var(--green-dim);
   }
 
   .checkbox-row input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    accent-color: var(--yellow);
+    accent-color: var(--green);
     cursor: pointer;
     flex-shrink: 0;
     margin: 0;
@@ -307,8 +327,10 @@
     gap: 5px;
     font-family: 'DM Sans', sans-serif;
     font-size: 11.5px;
-    color: #f87171;
+    color: #dc2626;
   }
+
+  :root.dark .field-error { color: #f87171; }
 
   .field-hint {
     font-family: 'DM Sans', sans-serif;
@@ -316,23 +338,10 @@
     color: var(--text-muted);
   }
 
-  /* ════════════════════════════════
-     ── Photo Upload — redesigned ──
-     ════════════════════════════════ */
-
-  /* Hide the native file input */
-  .edit-form input[type="file"]#id_image {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Drop zone */
+  /* ── Photo drop zone ── */
   .photo-dropzone {
     position: relative;
-    border: 1.5px dashed rgba(255,255,255,0.15);
+    border: 1.5px dashed var(--border);
     border-radius: 12px;
     background: var(--bg);
     padding: 28px 24px;
@@ -340,40 +349,39 @@
     align-items: center;
     gap: 24px;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.22s ease, background 0.22s ease;
     min-height: 130px;
   }
 
   .photo-dropzone:hover,
   .photo-dropzone.drag-over {
-    border-color: rgba(250,204,21,0.45);
-    background: rgba(250,204,21,0.03);
+    border-color: var(--green-focus);
+    background: var(--green-dim);
   }
 
   .photo-dropzone.has-image {
     border-style: solid;
-    border-color: rgba(250,204,21,0.3);
-    background: rgba(250,204,21,0.03);
+    border-color: var(--green-border);
+    background: var(--green-dim);
   }
 
-  /* Left: preview thumbnail */
+  /* Thumbnail */
   .photo-thumb {
     width: 96px;
     height: 96px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--surface);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     overflow: hidden;
-    transition: border-color 0.2s;
-    position: relative;
+    transition: border-color 0.22s ease;
   }
 
   .photo-dropzone.has-image .photo-thumb {
-    border-color: rgba(250,204,21,0.25);
+    border-color: var(--green-border);
   }
 
   .photo-thumb img {
@@ -381,17 +389,17 @@
     height: 100%;
     object-fit: cover;
     border-radius: 9px;
-    display: none;
+    display: block;
   }
 
-  .photo-thumb img.visible { display: block; }
+  .photo-thumb img.hidden { display: none; }
 
   .photo-thumb-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    color: rgba(255,255,255,0.2);
+    color: var(--text-muted);
   }
 
   .photo-thumb-placeholder span {
@@ -402,7 +410,7 @@
     font-weight: 500;
   }
 
-  /* Right: upload instructions */
+  /* Right body */
   .photo-dropzone-body {
     display: flex;
     flex-direction: column;
@@ -415,12 +423,12 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--text-sec);
-    transition: color 0.18s;
+    transition: color 0.22s ease;
   }
 
   .photo-dropzone:hover .photo-dropzone-title,
   .photo-dropzone.drag-over .photo-dropzone-title {
-    color: var(--yellow);
+    color: var(--green);
   }
 
   .photo-dropzone-sub {
@@ -438,17 +446,17 @@
     margin-top: 6px;
     padding: 5px 12px;
     border-radius: 6px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     font-family: 'DM Sans', sans-serif;
     font-size: 11.5px;
     font-weight: 500;
-    color: var(--yellow);
+    color: var(--green);
     width: fit-content;
-    pointer-events: none; /* click handled by dropzone */
+    pointer-events: none;
   }
 
-  /* File name badge */
+  /* Filename badge */
   .photo-filename-badge {
     display: none;
     align-items: center;
@@ -456,11 +464,11 @@
     margin-top: 6px;
     padding: 5px 10px;
     border-radius: 6px;
-    background: rgba(250,204,21,0.08);
-    border: 1px solid rgba(250,204,21,0.2);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     font-family: 'DM Sans', sans-serif;
     font-size: 11.5px;
-    color: var(--yellow);
+    color: var(--green);
     width: fit-content;
     max-width: 260px;
   }
@@ -474,7 +482,7 @@
     max-width: 200px;
   }
 
-  /* Remove button (top-right of dropzone) */
+  /* Remove button */
   .photo-remove-btn {
     position: absolute;
     top: 10px;
@@ -482,22 +490,24 @@
     width: 26px;
     height: 26px;
     border-radius: 6px;
-    background: rgba(248,113,113,0.12);
-    border: 1px solid rgba(248,113,113,0.25);
-    color: #f87171;
+    background: rgba(239,68,68,0.10);
+    border: 1px solid rgba(239,68,68,0.22);
+    color: #dc2626;
     display: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.18s;
+    transition: background 0.18s ease, border-color 0.18s ease;
     z-index: 2;
   }
 
-  .photo-remove-btn:hover { background: rgba(248,113,113,0.22); }
+  :root.dark .photo-remove-btn { color: #f87171; background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.25); }
+  .photo-remove-btn:hover { background: rgba(239,68,68,0.20); }
+  :root.dark .photo-remove-btn:hover { background: rgba(248,113,113,0.22); }
   .photo-dropzone.has-image .photo-remove-btn { display: flex; }
 
-  /* ── Bottom save bar ── */
-  .save-bar {
+  /* ── Form footer (Save bar) ── */
+  .form-footer {
     position: relative;
     z-index: 1;
     margin-top: 8px;
@@ -511,13 +521,13 @@
     gap: 16px;
   }
 
-  .save-bar-hint {
+  .form-footer-hint {
     font-family: 'DM Sans', sans-serif;
     font-size: 12.5px;
     color: var(--text-muted);
   }
 
-  .save-bar-actions {
+  .form-footer-actions {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -533,9 +543,9 @@
     .btn { justify-content: center; }
     .photo-dropzone { flex-direction: column; align-items: flex-start; gap: 16px; }
     .photo-thumb { width: 80px; height: 80px; }
-    .save-bar { flex-direction: column; align-items: stretch; }
-    .save-bar-actions { flex-direction: column; }
-    .save-bar-actions .btn { justify-content: center; }
+    .form-footer { flex-direction: column; align-items: stretch; }
+    .form-footer-actions { flex-direction: column; }
+    .form-footer-actions .btn { justify-content: center; }
   }
 
 </style>
@@ -546,7 +556,10 @@
 <div class="page-wrapper">
 
   <!-- Back link -->
-
+  <a href="{% url 'vehicles:vehicles_list' %}" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Fleet
+  </a>
 
   <!-- Page header -->
   <div class="page-header">
@@ -554,7 +567,7 @@
     <h1 class="page-title">Edit Vehicle</h1>
   </div>
 
-  <!-- Top action bar — cancel only -->
+  <!-- Top action bar — navigation only, no save button -->
   <div class="action-bar">
     <a href="{% url 'vehicles:vehicles_list' %}" class="btn btn-ghost">Cancel</a>
   </div>
@@ -718,10 +731,10 @@
       <div class="field-group">
         <label class="field-label" for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
 
-        <!-- Hidden native file input -->
+        <!-- Native file input (hidden, triggered by JS) -->
         {{ form.image }}
 
-        <!-- Custom drop zone -->
+        <!-- Drop zone -->
         <div class="photo-dropzone {% if vehicle.image %}has-image{% endif %}" id="photo-dropzone" role="button" tabindex="0" aria-label="Upload vehicle photo">
 
           <!-- Remove button -->
@@ -732,7 +745,7 @@
           <!-- Thumbnail -->
           <div class="photo-thumb" id="photo-thumb">
             {% if vehicle.image %}
-              <img id="photo-preview-img" src="{{ vehicle.image.url }}" alt="Current vehicle photo" class="visible">
+              <img id="photo-preview-img" src="{{ vehicle.image.url }}" alt="Current vehicle photo">
             {% else %}
               <div class="photo-thumb-placeholder" id="photo-placeholder">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -749,7 +762,7 @@
             </p>
             <p class="photo-dropzone-sub">JPG, PNG or WEBP &middot; Optional &middot; Max 5 MB</p>
 
-            <span class="photo-browse-pill" id="photo-browse-pill">
+            <span class="photo-browse-pill">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Browse files
             </span>
@@ -757,7 +770,7 @@
             <span class="photo-filename-badge {% if vehicle.image %}visible{% endif %}" id="photo-filename-badge">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               <span class="photo-filename-text" id="photo-filename-text">
-                {% if vehicle.image %}{{ vehicle.image.name|default:"Current photo" }}{% endif %}
+                {% if vehicle.image %}{{ vehicle.image.name }}{% endif %}
               </span>
             </span>
 
@@ -773,15 +786,16 @@
       </div>
     </div>
 
-    <!-- ── Bottom Save Bar ── -->
-    <div class="save-bar">
-      <span class="save-bar-hint">Review all fields before saving.</span>
-      <div class="save-bar-actions">
-        <a href="{% url 'vehicles:vehicles_list' %}" class="btn btn-ghost">Cancel</a>
-        <button type="submit" form="vehicle-edit-form" class="btn btn-primary">
+    <!-- ── Form footer — Save button lives here ── -->
+    <hr class="section-divider">
+    <div class="form-footer">
+      <span class="form-footer-hint">Review all fields before saving.</span>
+      <div class="form-footer-actions">
+        <button type="submit" class="btn btn-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           Save Changes
         </button>
+        <a href="{% url 'vehicles:vehicles_list' %}" class="btn btn-ghost">Cancel</a>
       </div>
     </div>
 
@@ -806,7 +820,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (!dropzone || !imageInput) return;
 
-  /* ── Open file picker when dropzone is clicked (but not remove btn) ── */
+  // ── Open file picker on click (but not remove button) ──
   dropzone.addEventListener('click', function (e) {
     if (removeBtn && removeBtn.contains(e.target)) return;
     imageInput.click();
@@ -816,29 +830,34 @@ document.addEventListener('DOMContentLoaded', function () {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); imageInput.click(); }
   });
 
-  /* ── Drag & drop events ── */
+  // ── Drag & drop ──
   dropzone.addEventListener('dragover', function (e) {
     e.preventDefault();
     dropzone.classList.add('drag-over');
   });
 
-  ['dragleave', 'dragend'].forEach(evt => {
-    dropzone.addEventListener(evt, () => dropzone.classList.remove('drag-over'));
-  });
+  ['dragleave', 'dragend'].forEach(evt =>
+    dropzone.addEventListener(evt, () => dropzone.classList.remove('drag-over'))
+  );
 
   dropzone.addEventListener('drop', function (e) {
     e.preventDefault();
     dropzone.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
-    if (file) applyFile(file);
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      imageInput.files = dt.files;
+      applyFile(file);
+    }
   });
 
-  /* ── Native input change ── */
+  // ── Native input change ──
   imageInput.addEventListener('change', function () {
     if (this.files[0]) applyFile(this.files[0]);
   });
 
-  /* ── Remove button ── */
+  // ── Remove button ──
   if (removeBtn) {
     removeBtn.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -846,7 +865,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ── Helpers ── */
+  // ── Helpers ──
   function applyFile(file) {
     if (!file.type.startsWith('image/')) return;
 
@@ -854,12 +873,10 @@ document.addEventListener('DOMContentLoaded', function () {
     reader.onload = function (e) {
       previewImg.src = e.target.result;
       previewImg.style.display = 'block';
-      previewImg.classList.add('visible');
       if (placeholder) placeholder.style.display = 'none';
 
       dropzone.classList.add('has-image');
       dzTitle.textContent = 'Photo selected — click to replace';
-
       filenameText.textContent = file.name;
       filenameBadge.classList.add('visible');
     };
@@ -870,12 +887,10 @@ document.addEventListener('DOMContentLoaded', function () {
     imageInput.value = '';
     previewImg.src = '';
     previewImg.style.display = 'none';
-    previewImg.classList.remove('visible');
     if (placeholder) placeholder.style.display = 'flex';
 
     dropzone.classList.remove('has-image');
     dzTitle.textContent = 'Drag & drop or click to upload';
-
     filenameBadge.classList.remove('visible');
     filenameText.textContent = '';
   }

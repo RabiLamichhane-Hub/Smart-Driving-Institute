@@ -18,11 +18,14 @@
     right: -10px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26,46,37,0.025);
     pointer-events: none;
     line-height: 1;
     letter-spacing: 0.05em;
     user-select: none;
+  }
+  :root.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
 
   /* ── Page Header ──────────────────────────────────── */
@@ -61,8 +64,8 @@
     align-items: center;
     gap: 6px;
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45,122,95,0.3);
     border-radius: 8px;
     padding: 9px 18px;
     font-family: 'DM Sans', sans-serif;
@@ -73,8 +76,8 @@
     transition: border-color 0.18s, color 0.18s;
   }
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45,122,95,0.5);
+    color: var(--green);
   }
 
   .btn-primary {
@@ -82,8 +85,8 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 9px 18px;
@@ -95,7 +98,7 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
@@ -103,8 +106,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 9px 16px;
@@ -116,14 +119,14 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-assign:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
   /* ── Info Banner ──────────────────────────────────── */
   .flagged-banner {
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 10px;
     padding: 14px 18px;
     font-family: 'DM Sans', sans-serif;
@@ -133,7 +136,7 @@
     margin-bottom: 28px;
   }
   .flagged-banner strong {
-    color: var(--yellow);
+    color: var(--green);
     font-weight: 500;
   }
 
@@ -146,7 +149,7 @@
     transition: border-color 0.2s, transform 0.2s;
   }
   .flagged-card:hover {
-    border-color: rgba(250, 204, 21, 0.18);
+    border-color: rgba(45,122,95,0.20);
     transform: translateY(-3px);
   }
 
@@ -176,7 +179,7 @@
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(239, 68, 68, 0.7);
+    color: rgba(239,68,68,0.7);
     margin-right: 6px;
   }
 
@@ -202,7 +205,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .option-desc {
@@ -229,7 +232,7 @@
     transition: border-color 0.18s;
   }
   .sdims-select:focus {
-    border-color: var(--yellow-focus);
+    border-color: var(--green-focus);
   }
   .assign-row {
     display: flex;
@@ -249,7 +252,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--text-muted);
     margin: 0 0 8px;
   }
   .empty-sub {

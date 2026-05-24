@@ -19,7 +19,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 180px;
     font-weight: 400;
-    color: rgba(255,255,255,0.028);
+    color: color-mix(in srgb, var(--text) 3%, transparent);
     letter-spacing: 0.05em;
     pointer-events: none;
     user-select: none;
@@ -81,9 +81,9 @@
   .btn-ghost {
     background: transparent;
     color: var(--text-sec);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid var(--border);
   }
-  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+  .btn-ghost:hover { border-color: var(--yellow-border); color: var(--yellow); }
 
   /* ── Instructor details card ── */
   .details-card {
@@ -98,7 +98,7 @@
     margin-bottom: 0;
     transition: border-color 0.2s;
   }
-  .details-card:hover { border-color: rgba(250,204,21,0.18); }
+  .details-card:hover { border-color: var(--yellow-border); }
 
   .instructor-avatar {
     width: 56px;
@@ -151,8 +151,8 @@
   /* Status badge */
   .status-badge {
     display: inline-block;
-    background: rgba(250,204,21,0.08);
-    border: 1px solid rgba(250,204,21,0.18);
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
     border-radius: 5px;
     padding: 3px 9px;
     font-size: 11px;
@@ -162,7 +162,7 @@
     color: var(--yellow);
   }
   .status-badge.inactive {
-    background: rgba(255,255,255,0.05);
+    background: color-mix(in srgb, var(--text) 5%, transparent);
     border-color: var(--border);
     color: var(--text-muted);
   }
@@ -211,11 +211,11 @@
     white-space: nowrap;
   }
   .table-card tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
   .table-card tbody tr:last-child { border-bottom: none; }
-  .table-card tbody tr:hover { background: rgba(255,255,255,0.025); }
+  .table-card tbody tr:hover { background: color-mix(in srgb, var(--text) 3%, transparent); }
   .table-card tbody td {
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
@@ -256,8 +256,8 @@
   /* Status badge in table */
   .row-badge {
     display: inline-block;
-    background: rgba(250,204,21,0.08);
-    border: 1px solid rgba(250,204,21,0.18);
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
     border-radius: 5px;
     padding: 3px 9px;
     font-size: 11px;
@@ -267,7 +267,7 @@
     color: var(--yellow);
   }
   .row-badge.neutral {
-    background: rgba(255,255,255,0.05);
+    background: color-mix(in srgb, var(--text) 5%, transparent);
     border-color: var(--border);
     color: var(--text-muted);
   }
@@ -297,7 +297,7 @@
     transition: background 0.15s, border-color 0.15s, transform 0.1s;
   }
   .action-link:hover {
-    background: rgba(250,204,21,0.18);
+    background: color-mix(in srgb, var(--yellow) 18%, transparent);
     border-color: var(--yellow-focus);
     transform: translateY(-1px);
   }
@@ -311,7 +311,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.30);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
   .empty-state p.empty-sub {
@@ -359,9 +359,7 @@
 
   <hr class="section-divider">
 
-  {# ──────────────────────────────────────────────── #}
-  {# INSTRUCTOR DETAILS                               #}
-  {# ──────────────────────────────────────────────── #}
+  {# ── INSTRUCTOR DETAILS ── #}
   <p class="section-tag">Your Profile</p>
   <div class="details-card">
     <div class="instructor-avatar">
@@ -388,9 +386,7 @@
     </div>
   </div>
 
-  {# ──────────────────────────────────────────────── #}
-  {# TRAINEES                                         #}
-  {# ──────────────────────────────────────────────── #}
+  {# ── TRAINEES ── #}
   <div class="section">
     <p class="section-tag">Enrolled</p>
     <p class="section-heading">Trainees</p>
@@ -450,9 +446,7 @@
     </div>
   </div>
 
-  {# ──────────────────────────────────────────────── #}
-  {# SCHEDULE                                         #}
-  {# ──────────────────────────────────────────────── #}
+  {# ── SCHEDULE ── #}
   <div class="section">
     <p class="section-tag">Upcoming</p>
     <p class="section-heading">Schedule</p>

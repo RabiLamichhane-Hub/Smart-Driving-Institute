@@ -19,7 +19,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 160px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
@@ -31,7 +31,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .page-title {
@@ -73,8 +73,8 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 7px 14px;
@@ -85,13 +85,13 @@
     transition: background 0.18s, transform 0.18s;
     white-space: nowrap;
   }
-  .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
 
   /* ── Section Divider ── */
   .section-divider {
     border: none;
     border-top: 1px solid var(--border);
-    margin: 0 0 32px;
+    margin: 32px 0;
   }
 
   /* ── Table Card ── */
@@ -116,22 +116,22 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-muted);
-    padding: 13px 18px;
+    padding: 14px 20px;
     white-space: nowrap;
     text-align: left;
   }
   tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+  tbody tr:hover { background: rgba(45, 122, 95, 0.03); }
   td {
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 300;
     color: var(--text-sec);
-    padding: 15px 18px;
+    padding: 16px 20px;
     vertical-align: middle;
   }
 
@@ -145,14 +145,14 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 12px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
   }
   .trainee-name {
@@ -170,8 +170,8 @@
   /* ── Slot Badge ── */
   .slot-badge {
     display: inline-block;
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 2px 8px;
     font-family: 'DM Sans', sans-serif;
@@ -179,7 +179,7 @@
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
   }
 
   /* ── Cell types ── */
@@ -287,7 +287,7 @@
     transition: border-color 0.15s;
     width: 70px;
   }
-  .priority-select:focus { border-color: var(--yellow-focus); }
+  .priority-select:focus { border-color: var(--green-focus); }
 
   /* ── Empty State ── */
   .empty-card {
@@ -301,7 +301,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 26px;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
   .empty-state-sub {

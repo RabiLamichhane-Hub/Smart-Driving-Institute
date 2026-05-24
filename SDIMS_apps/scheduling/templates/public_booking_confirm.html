@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirm Walk-in Booking — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: "CONFIRM";
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 180px;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Page header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 24px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 11px 24px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Layout ── */
+  .confirm-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 900px;
+    align-items: start;
+  }
+  .confirm-layout .span-full {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Cards ── */
+  .info-card,
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  .card-header-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 2px;
+  }
+  .card-header-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--text);
+    margin: 0;
+  }
+  .card-body {
+    padding: 24px;
+  }
+
+  /* ── Summary rows ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+  }
+  .summary-item {}
+  .summary-key {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .summary-value {
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .summary-value.amount {
+    color: var(--yellow);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .slot-badge {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .summary-notes {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .summary-notes .summary-key {
+    margin-bottom: 6px;
+  }
+  .summary-notes .summary-value {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    font-style: italic;
+    line-height: 1.65;
+  }
+
+  /* ── Form section heading ── */
+  .form-section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 4px;
+  }
+  .form-section-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+
+  /* ── Field grid ── */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .field-grid .span-full {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Form fields ── */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .field-label {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .field-label .required {
+    color: var(--yellow);
+    margin-left: 2px;
+  }
+  .field-label .optional {
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 11px;
+    margin-left: 4px;
+  }
+  .field-group input[type="text"],
+  .field-group select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+  .field-group input:focus,
+  .field-group select:focus {
+    outline: none;
+    border-color: var(--yellow-focus);
+  }
+  .field-hint {
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .field-error {
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #f87171;
+    margin-top: 2px;
+  }
+
+  /* ── Fee checkbox row ── */
+  .fee-check-row {
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .fee-check-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--yellow);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .fee-check-content {}
+  .fee-check-title {
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .fee-check-hint {
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .fee-check-hint strong {
+    color: var(--text-sec);
+    font-weight: 500;
+  }
+
+  /* ── Non-field errors ── */
+  .form-errors {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .form-errors p {
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #f87171;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  /* ── Form footer ── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 900px) {
+    .confirm-layout { grid-template-columns: 1fr; }
+    .confirm-layout .span-full { grid-column: 1; }
+  }
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .field-grid { grid-template-columns: 1fr; }
+    .field-grid .span-full { grid-column: 1; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page header -->
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Confirm Walk-in Booking</h1>
+
+  <!-- Action bar (navigation only) -->
+  <div class="action-bar">
+    <a href="{% url 'scheduling:public_booking_list' %}" class="btn-ghost">← Back to List</a>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="confirm-layout">
+
+    <!-- Booking summary -->
+    <div class="info-card">
+      <div class="card-header">
+        <p class="card-header-label">Pending Booking</p>
+        <h2 class="card-header-title">Booking Details</h2>
+      </div>
+      <div class="card-body">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-key">Guest</div>
+            <div class="summary-value">{{ booking.guest_name }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-key">Phone</div>
+            <div class="summary-value">{{ booking.guest_phone }}</div>
+          </div>
+          {% if booking.guest_address %}
+          <div class="summary-item" style="grid-column: 1 / -1;">
+            <div class="summary-key">Address</div>
+            <div class="summary-value">{{ booking.guest_address }}</div>
+          </div>
+          {% endif %}
+          <div class="summary-item">
+            <div class="summary-key">Date</div>
+            <div class="summary-value">{{ booking.date }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-key">Slot</div>
+            <div class="summary-value"><span class="slot-badge">{{ booking.slot }}</span></div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-key">Vehicle Type</div>
+            <div class="summary-value">{{ booking.get_vehicle_type_display }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-key">Session Type</div>
+            <div class="summary-value">{{ booking.get_session_type_display }}</div>
+          </div>
+          <div class="summary-item" style="grid-column: 1 / -1;">
+            <div class="summary-key">Fee</div>
+            <div class="summary-value amount">Rs.{{ booking.fee_amount }}</div>
+          </div>
+        </div>
+        {% if booking.notes %}
+        <div class="summary-notes">
+          <div class="summary-key">Notes</div>
+          <div class="summary-value">{{ booking.notes }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Resource assignment form -->
+    <div class="form-card">
+      <div class="card-header">
+        <p class="card-header-label">02</p>
+        <h2 class="card-header-title">Assign Resources</h2>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="form-errors">
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="field-grid">
+            <div class="field-group">
+              <label class="field-label">Vehicle <span class="required">*</span></label>
+              {{ form.vehicle }}
+              {% if form.vehicle.errors %}
+                <span class="field-error">{{ form.vehicle.errors.0 }}</span>
+              {% endif %}
+            </div>
+            <div class="field-group">
+              <label class="field-label">Track <span class="required">*</span></label>
+              {{ form.track }}
+              {% if form.track.errors %}
+                <span class="field-error">{{ form.track.errors.0 }}</span>
+              {% endif %}
+            </div>
+            <div class="field-group">
+              <label class="field-label">
+                Instructor
+                {% if booking.session_type == 'guided' %}
+                  <span class="required">*</span>
+                {% else %}
+                  <span class="optional">(optional)</span>
+                {% endif %}
+              </label>
+              {{ form.instructor }}
+              {% if form.instructor.errors %}
+                <span class="field-error">{{ form.instructor.errors.0 }}</span>
+              {% endif %}
+              {% if booking.session_type == 'unguided' %}
+                <span class="field-hint">Not required for unguided sessions.</span>
+              {% endif %}
+            </div>
+            <div class="field-group">
+              <label class="field-label">Supervisor <span class="required">*</span></label>
+              {{ form.supervisor }}
+              {% if form.supervisor.errors %}
+                <span class="field-error">{{ form.supervisor.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Fee collection checkbox -->
+          <div class="fee-check-row">
+            {{ form.fee_paid }}
+            <div class="fee-check-content">
+              <div class="fee-check-title">Fee Collected — Rs.{{ booking.fee_amount }}</div>
+              <div class="fee-check-hint">
+                Leave unchecked if the guest hasn't paid yet — the amount will be recorded as <strong>outstanding debt</strong>.
+              </div>
+            </div>
+          </div>
+
+          <!-- Form footer -->
+          <hr class="section-divider">
+          <div class="form-footer">
+            <button type="submit" class="btn-primary">✅ Confirm Booking</button>
+            <a href="{% url 'scheduling:public_booking_list' %}" class="btn-ghost">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

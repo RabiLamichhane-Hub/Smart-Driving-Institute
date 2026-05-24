@@ -22,14 +22,7 @@
     <h1 class="section-title">Register New Trainee</h1>
   </div>
 
-  <!-- Django messages -->
-  {% if messages %}
-    <div class="messages-block">
-      {% for message in messages %}
-        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
+  <!-- Django messages are rendered automatically by base.html — no manual block needed -->
 
   <form method="POST" class="register-form" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
@@ -111,6 +104,30 @@
             <span class="field-error">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               {{ trainee_form.status.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Instructor Guidance -->
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.instructor_guidance.id_for_label }}">{{ trainee_form.instructor_guidance.label }}</label>
+          {{ trainee_form.instructor_guidance }}
+          {% if trainee_form.instructor_guidance.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.instructor_guidance.errors|join:", " }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Vehicle Type Preference -->
+        <div class="field-group">
+          <label class="field-label" for="{{ trainee_form.vehicle_type_preference.id_for_label }}">{{ trainee_form.vehicle_type_preference.label }}</label>
+          {{ trainee_form.vehicle_type_preference }}
+          {% if trainee_form.vehicle_type_preference.errors %}
+            <span class="field-error">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ trainee_form.vehicle_type_preference.errors|join:", " }}
             </span>
           {% endif %}
         </div>
@@ -234,8 +251,9 @@
       </div>
     </div>
 
-    <!-- ── Form actions ── -->
-    <div class="form-actions">
+    <!-- ── Form footer (Save button at bottom per design spec) ── -->
+    <hr class="section-divider">
+    <div class="form-footer">
       <button type="submit" class="btn-primary btn-lg">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Register Trainee
@@ -246,22 +264,23 @@
   </form>
 </section>
 
+{% endblock %}
 
+{% block extra_css %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
-
   /* ── Section ── */
   .register-section {
     position: relative;
-    padding: 48px 48px 80px;
+    padding: 40px 48px 80px;
     max-width: 860px;
     overflow: hidden;
   }
 
+  /* Ghost text — opacity per design spec for dark mode */
   .ghost-text {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(80px, 16vw, 190px);
-    color: rgba(255,255,255,0.025);
+    color: rgba(232, 242, 237, 0.028);
     position: absolute;
     top: 0;
     right: -20px;
@@ -276,10 +295,9 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: 'DM Sans', sans-serif;
     font-size: 12.5px;
     font-weight: 400;
-    color: rgba(255,255,255,0.38);
+    color: var(--text-muted);
     text-decoration: none;
     margin-bottom: 28px;
     transition: color 0.18s;
@@ -287,7 +305,7 @@
     z-index: 1;
   }
 
-  .back-link:hover { color: #facc15; }
+  .back-link:hover { color: var(--green); }
 
   /* ── Section header ── */
   .section-header {
@@ -298,12 +316,11 @@
 
   .section-tag {
     display: inline-block;
-    font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #facc15;
+    color: var(--green);
     margin-bottom: 8px;
   }
 
@@ -311,24 +328,10 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(40px, 6vw, 68px);
     font-weight: 400;
-    color: #ffffff;
+    color: var(--text);
     letter-spacing: 0.05em;
     line-height: 0.95;
     margin: 0;
-  }
-
-  /* ── Messages ── */
-  .messages-block { margin-bottom: 24px; position: relative; z-index: 1; }
-
-  .alert-msg {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.75);
   }
 
   /* ── Form layout ── */
@@ -342,15 +345,15 @@
 
   /* ── Form cards ── */
   .form-card {
-    background: #1a1a1a;
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 24px 26px;
     transition: border-color 0.2s;
   }
 
   .form-card:focus-within {
-    border-color: rgba(250,204,21,0.18);
+    border-color: var(--green-focus);
   }
 
   .form-card-header {
@@ -359,30 +362,30 @@
     gap: 14px;
     margin-bottom: 24px;
     padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--border);
   }
 
   .form-card-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: rgba(250,204,21,0.08);
-    border: 1px solid rgba(250,204,21,0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #facc15;
+    color: var(--green);
     flex-shrink: 0;
   }
 
   .form-card-tag {
     display: block;
-    font-family: 'DM Sans', sans-serif;
     font-size: 10px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(250,204,21,0.7);
+    color: var(--green);
+    opacity: 0.7;
     margin-bottom: 2px;
   }
 
@@ -391,7 +394,7 @@
     font-size: 20px;
     font-weight: 400;
     letter-spacing: 0.05em;
-    color: #ffffff;
+    color: var(--text);
     margin: 0;
     line-height: 1;
   }
@@ -415,12 +418,11 @@
 
   /* ── Labels ── */
   .field-label {
-    font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: rgba(255,255,255,0.40);
+    color: var(--text-muted);
     display: block;
   }
 
@@ -435,14 +437,13 @@
   .register-form textarea {
     width: 100%;
     box-sizing: border-box;
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
-    font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    color: rgba(255,255,255,0.85);
+    color: var(--text);
     outline: none;
     transition: border-color 0.18s;
     appearance: none;
@@ -450,7 +451,7 @@
   }
 
   .register-form select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(26,46,37,0.45)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 36px;
@@ -460,17 +461,18 @@
   .register-form input:focus,
   .register-form select:focus,
   .register-form textarea:focus {
-    border-color: rgba(250,204,21,0.5);
+    border-color: var(--green-focus);
   }
 
   .register-form input::placeholder,
   .register-form textarea::placeholder {
-    color: rgba(255,255,255,0.2);
+    color: var(--text-muted);
+    opacity: 0.6;
   }
 
   /* Date input calendar icon */
   .register-form input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.4);
+    opacity: 0.4;
     cursor: pointer;
   }
 
@@ -480,8 +482,8 @@
     width: 100%;
     min-height: 140px;
     border-radius: 10px;
-    background: #141414;
-    border: 1.5px dashed rgba(255,255,255,0.15);
+    background: var(--bg);
+    border: 1.5px dashed var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -493,12 +495,12 @@
 
   .drop-zone:hover,
   .drop-zone.drop-zone--hover {
-    border-color: rgba(250,204,21,0.5);
-    background: rgba(250,204,21,0.04);
+    border-color: var(--green-focus);
+    background: var(--green-dim);
   }
 
   .drop-zone.drop-zone--has-file {
-    border-color: rgba(250,204,21,0.35);
+    border-color: var(--green-border);
     border-style: solid;
     min-height: 180px;
   }
@@ -519,39 +521,37 @@
     width: 48px;
     height: 48px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--surface);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.25);
+    color: var(--text-muted);
     margin-bottom: 4px;
     transition: border-color 0.2s, color 0.2s;
   }
 
   .drop-zone:hover .drop-zone-icon,
   .drop-zone.drop-zone--hover .drop-zone-icon {
-    border-color: rgba(250,204,21,0.3);
-    color: rgba(250,204,21,0.6);
+    border-color: var(--green-border);
+    color: var(--green);
   }
 
   .drop-zone-title {
-    font-family: 'DM Sans', sans-serif;
     font-size: 13.5px;
     font-weight: 500;
-    color: rgba(255,255,255,0.65);
+    color: var(--text-sec);
     margin: 0;
   }
 
   .drop-zone-sub {
-    font-family: 'DM Sans', sans-serif;
     font-size: 12.5px;
-    color: rgba(255,255,255,0.35);
+    color: var(--text-muted);
     margin: 0;
   }
 
   .drop-zone-browse {
-    color: #facc15;
+    color: var(--green);
     text-decoration: underline;
     text-underline-offset: 2px;
     pointer-events: auto;
@@ -559,9 +559,9 @@
   }
 
   .drop-zone-hint {
-    font-family: 'DM Sans', sans-serif;
     font-size: 11px;
-    color: rgba(255,255,255,0.22);
+    color: var(--text-muted);
+    opacity: 0.7;
     margin: 0;
   }
 
@@ -591,19 +591,19 @@
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.7);
-    border: 1px solid rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.75);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.18s, color 0.18s;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
     pointer-events: auto;
   }
 
   .drop-zone-remove:hover {
-    background: rgba(248,113,113,0.85);
+    background: #ef4444;
     border-color: transparent;
     color: #fff;
   }
@@ -613,23 +613,21 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-family: 'DM Sans', sans-serif;
     font-size: 11.5px;
     font-weight: 400;
-    color: #f87171;
+    color: #ef4444;
   }
 
   .field-hint {
-    font-family: 'DM Sans', sans-serif;
     font-size: 11.5px;
-    color: rgba(255,255,255,0.28);
+    color: var(--text-muted);
   }
 
   /* ── Fee summary ── */
   .fee-summary {
     margin-top: 20px;
-    background: #141414;
-    border: 1px solid rgba(250,204,21,0.18);
+    background: var(--bg);
+    border: 1px solid var(--green-border);
     border-radius: 10px;
     overflow: hidden;
   }
@@ -639,14 +637,13 @@
     align-items: center;
     gap: 8px;
     padding: 12px 18px;
-    background: rgba(250,204,21,0.06);
-    border-bottom: 1px solid rgba(250,204,21,0.12);
-    font-family: 'DM Sans', sans-serif;
+    background: var(--green-dim);
+    border-bottom: 1px solid var(--green-border);
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #facc15;
+    color: var(--green);
   }
 
   .fee-rows {
@@ -663,17 +660,15 @@
   }
 
   .fee-row-label {
-    font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 400;
-    color: rgba(255,255,255,0.50);
+    color: var(--text-muted);
   }
 
   .fee-row-value {
-    font-family: 'DM Sans', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
-    color: rgba(255,255,255,0.80);
+    color: var(--text-sec);
   }
 
   .fee-row-input {
@@ -684,8 +679,8 @@
     display: flex;
     align-items: center;
     gap: 0;
-    background: #1a1a1a;
-    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 7px;
     overflow: hidden;
     width: 160px;
@@ -693,11 +688,10 @@
 
   .discount-prefix {
     padding: 0 10px;
-    font-family: 'DM Sans', sans-serif;
     font-size: 12px;
-    color: rgba(255,255,255,0.35);
-    background: rgba(255,255,255,0.04);
-    border-right: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-muted);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
     height: 100%;
     display: flex;
     align-items: center;
@@ -719,48 +713,54 @@
 
   .fee-divider {
     height: 1px;
-    background: rgba(255,255,255,0.07);
+    background: var(--border);
     margin: 2px 0;
   }
 
   .fee-row-total .fee-row-label {
     font-weight: 500;
-    color: rgba(255,255,255,0.75);
+    color: var(--text-sec);
   }
 
   .fee-total-value {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.04em;
-    color: #facc15;
+    color: var(--green);
     line-height: 1;
   }
 
-  /* ── Form actions ── */
-  .form-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-top: 4px;
+  /* ── Section divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
   }
 
+  /* ── Form footer ── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* ── Buttons ── */
   .btn-primary {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #facc15;
-    color: #0a0a0a;
-    font-family: 'DM Sans', sans-serif;
+    background: var(--green);
+    color: #ffffff;
     font-weight: 600;
     text-decoration: none;
     border: none;
     cursor: pointer;
     border-radius: 8px;
-    transition: transform 0.18s ease, background 0.18s ease;
+    transition: background 0.18s ease, transform 0.18s ease;
   }
 
   .btn-primary:hover {
-    background: #eab308;
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
 
@@ -769,19 +769,18 @@
     align-items: center;
     gap: 6px;
     background: transparent;
-    color: rgba(255,255,255,0.55);
-    font-family: 'DM Sans', sans-serif;
+    color: var(--slate);
     font-weight: 400;
     text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(45, 122, 95, 0.3);
     border-radius: 8px;
     transition: border-color 0.18s, color 0.18s;
     cursor: pointer;
   }
 
   .btn-ghost:hover {
-    border-color: rgba(255,255,255,0.3);
-    color: rgba(255,255,255,0.80);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
   }
 
   .btn-lg {
@@ -791,17 +790,17 @@
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
-    .register-section { padding: 32px 20px 60px; }
+    .register-section { padding: 28px 20px 60px; }
     .ghost-text { display: none; }
     .fields-grid { grid-template-columns: 1fr; }
     .field-full { grid-column: 1; }
-    .form-actions { flex-direction: column; align-items: stretch; }
+    .form-footer { flex-direction: column; align-items: stretch; }
     .btn-lg { justify-content: center; text-align: center; }
-    .photo-upload-wrap { flex-direction: column; align-items: flex-start; }
   }
 </style>
+{% endblock %}
 
-
+{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -921,7 +920,6 @@ document.addEventListener('DOMContentLoaded', function () {
       dropZone.classList.remove('drop-zone--hover');
       const file = e.dataTransfer.files[0];
       if (file) {
-        // Transfer file to real input via DataTransfer
         const dt = new DataTransfer();
         dt.items.add(file);
         photoInput.files = dt.files;
@@ -932,5 +930,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
-
 {% endblock %}

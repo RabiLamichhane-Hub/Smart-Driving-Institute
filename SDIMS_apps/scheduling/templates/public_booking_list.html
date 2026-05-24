@@ -1,0 +1,709 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Walk-in Bookings — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: "WALK-IN";
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 180px;
+    color: rgba(255, 255, 255, 0.028);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Page header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+
+  /* ── New Walk-in CTA — prominent variant ── */
+  .btn-new-walkin {
+    background: var(--green);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 26px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 20px rgba(45, 122, 95, 0.35);
+    transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+  }
+  .btn-new-walkin:hover {
+    background: var(--green-dark);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(45, 122, 95, 0.45);
+  }
+  .btn-new-walkin svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--yellow);
+  }
+
+  /* ── Debt banner ── */
+  .debt-banner {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .debt-banner-text {
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+  }
+  .debt-banner-text strong {
+    color: #f87171;
+    font-weight: 600;
+  }
+  .debt-banner-text .amount {
+    color: #f87171;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .btn-danger-outline {
+    background: transparent;
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.18s, border-color 0.18s;
+  }
+  .btn-danger-outline:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-label {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .filter-input,
+  .filter-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text);
+    min-width: 140px;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .filter-input:focus,
+  .filter-select:focus {
+    outline: none;
+    border-color: var(--yellow-focus);
+  }
+  .filter-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn-filter {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-filter:hover {
+    background: var(--yellow-dark);
+    transform: translateY(-1px);
+  }
+  .btn-clear {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: color 0.18s, border-color 0.18s;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-clear:hover {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-card thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-card thead th {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    white-space: nowrap;
+  }
+  .table-card thead th.col-amount {
+    color: rgba(250, 204, 21, 0.7);
+  }
+  .table-card tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.14s;
+  }
+  .table-card tbody tr:last-child {
+    border-bottom: none;
+  }
+  .table-card tbody tr:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+  .table-card tbody td {
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+  .table-card tbody td:first-child {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .td-amount {
+    color: var(--yellow) !important;
+    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums;
+  }
+  .td-date {
+    font-size: 13px;
+    color: var(--text-muted) !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Slot badge ── */
+  .slot-badge {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+
+  /* ── Status pills ── */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 5px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .status-pending {
+    background: rgba(250, 204, 21, 0.1);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    color: var(--yellow);
+  }
+  .status-confirmed {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    color: #4ade80;
+  }
+  .status-completed {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.22);
+    color: #a5b4fc;
+  }
+  .status-cancelled {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+  }
+  .status-no_show {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    color: #f87171;
+  }
+
+  /* ── Payment badges ── */
+  .pay-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 5px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .pay-paid {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    color: #4ade80;
+  }
+  .pay-debt {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    color: #f87171;
+  }
+  .pay-none {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* ── Action buttons in table ── */
+  .tbl-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .tbl-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-sec);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .tbl-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text);
+  }
+  .tbl-btn-confirm {
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+  .tbl-btn-confirm:hover {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #4ade80;
+  }
+  .tbl-btn-danger {
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+  .tbl-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #f87171;
+  }
+  .tbl-btn-collect {
+    border-color: rgba(250, 204, 21, 0.3);
+    color: var(--yellow);
+  }
+  .tbl-btn-collect:hover {
+    background: var(--yellow-dim);
+    border-color: rgba(250, 204, 21, 0.5);
+    color: var(--yellow);
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-label {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.3);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Pagination ── */
+  .pagination-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .page-link {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 13px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-sec);
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .page-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text);
+  }
+  .page-link.active {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: #000;
+    font-weight: 600;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .filter-bar { padding: 16px; gap: 12px; }
+    .filter-input,
+    .filter-select { min-width: 120px; }
+    .col-hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page header -->
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">Walk-in Bookings</h1>
+
+  <!-- Action bar (navigation only) -->
+  <div class="action-bar">
+    <a href="{% url 'scheduling:public_booking_create' %}" class="btn-new-walkin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      New Walk-in Booking
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Debt banner -->
+  {% if debt_count > 0 %}
+  <div class="debt-banner">
+    <div class="debt-banner-text">
+      <strong>⚠ Outstanding Debts:</strong>
+      &nbsp;{{ debt_count }} booking{{ debt_count|pluralize }} with unpaid fees totalling
+      <span class="amount">Rs.{{ total_debt }}</span>
+    </div>
+    <a href="?debt=yes" class="btn-danger-outline">Show Debts Only</a>
+  </div>
+  {% endif %}
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <form method="get" style="display:contents;">
+      <div class="filter-group">
+        <label class="filter-label">Date</label>
+        <input type="date" name="date" value="{{ filter_date }}" class="filter-input">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select name="status" class="filter-select">
+          <option value="">All</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Debt Only</label>
+        <select name="debt" class="filter-select">
+          <option value="">No</option>
+          <option value="yes" {% if filter_debt == 'yes' %}selected{% endif %}>Yes — unpaid only</option>
+        </select>
+      </div>
+      <div class="filter-group" style="justify-content: flex-end;">
+        <label class="filter-label" style="visibility:hidden;">Actions</label>
+        <div class="filter-actions">
+          <button type="submit" class="btn-filter">Filter</button>
+          <a href="{% url 'scheduling:public_booking_list' %}" class="btn-clear">Clear</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bookings table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Guest</th>
+          <th class="col-hide-mobile">Phone</th>
+          <th>Date</th>
+          <th>Slot</th>
+          <th class="col-hide-mobile">Vehicle</th>
+          <th class="col-hide-mobile">Type</th>
+          <th>Status</th>
+          <th class="col-amount">Fee</th>
+          <th>Paid?</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in page %}
+        <tr>
+          <td>{{ booking.guest_name }}</td>
+          <td class="col-hide-mobile">{{ booking.guest_phone }}</td>
+          <td class="td-date">{{ booking.date }}</td>
+          <td><span class="slot-badge">{{ booking.slot }}</span></td>
+          <td class="col-hide-mobile">
+            {% if booking.vehicle %}
+              {{ booking.vehicle.brand }} {{ booking.vehicle.model }}
+            {% else %}
+              {{ booking.get_vehicle_type_display }}
+            {% endif %}
+          </td>
+          <td class="col-hide-mobile">{{ booking.get_session_type_display }}</td>
+          <td>
+            <span class="status-pill status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+          </td>
+          <td class="td-amount">Rs.{{ booking.fee_amount }}</td>
+          <td>
+            {% if booking.fee_paid %}
+              <span class="pay-badge pay-paid">Paid</span>
+            {% elif booking.is_debt %}
+              <span class="pay-badge pay-debt">Debt</span>
+            {% else %}
+              <span class="pay-none">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="tbl-actions">
+              {% if booking.status == 'pending' %}
+                <a href="{% url 'scheduling:public_booking_confirm' booking.pk %}"
+                   class="tbl-btn tbl-btn-confirm" title="Confirm & Assign Resources">✅ Confirm</a>
+                <form method="post" action="{% url 'scheduling:public_booking_cancel' booking.pk %}"
+                      class="d-inline" onsubmit="return confirm('Cancel this booking?')">
+                  {% csrf_token %}
+                  <button class="tbl-btn tbl-btn-danger" title="Cancel">✕ Cancel</button>
+                </form>
+
+              {% elif booking.status == 'confirmed' %}
+                <form method="post" action="{% url 'scheduling:public_booking_complete' booking.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="tbl-btn tbl-btn-confirm" title="Mark Completed">✔ Done</button>
+                </form>
+                <form method="post" action="{% url 'scheduling:public_booking_noshow' booking.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="tbl-btn tbl-btn-danger" title="No Show">🚫 No-show</button>
+                </form>
+                {% if not booking.fee_paid %}
+                <form method="post" action="{% url 'scheduling:public_booking_collect_fee' booking.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="tbl-btn tbl-btn-collect" title="Collect Fee">💰 Collect</button>
+                </form>
+                {% endif %}
+
+              {% elif booking.status == 'completed' and not booking.fee_paid %}
+                <form method="post" action="{% url 'scheduling:public_booking_collect_fee' booking.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="tbl-btn tbl-btn-collect" title="Collect Outstanding Fee">💰 Collect</button>
+                </form>
+
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 13px;">—</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10">
+            <div class="empty-state">
+              <div class="empty-state-label">No Bookings Found</div>
+              <div class="empty-state-sub">Try adjusting the filters or create a new walk-in booking.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page.has_other_pages %}
+  <nav class="pagination-wrap" aria-label="Bookings pagination">
+    {% if page.has_previous %}
+      <a class="page-link" href="?page={{ page.previous_page_number }}&status={{ filter_status }}&date={{ filter_date }}&debt={{ filter_debt }}">«</a>
+    {% endif %}
+    {% for num in page.paginator.page_range %}
+      <a class="page-link {% if page.number == num %}active{% endif %}"
+         href="?page={{ num }}&status={{ filter_status }}&date={{ filter_date }}&debt={{ filter_debt }}">{{ num }}</a>
+    {% endfor %}
+    {% if page.has_next %}
+      <a class="page-link" href="?page={{ page.next_page_number }}&status={{ filter_status }}&date={{ filter_date }}&debt={{ filter_debt }}">»</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

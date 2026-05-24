@@ -322,6 +322,22 @@
       </a>
     </li>
 
+    <!-- Walk-in Bookings -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:public_booking_list' %}"
+         class="sidebar-link {% if 'public_booking' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Walk-in Bookings</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
     {% endif %}
     
 
@@ -383,6 +399,22 @@
       </a>
     </li>
 
+    <!-- Walk-in Bookings -->
+    <li class="sidebar-item">
+      <a href="{% url 'scheduling:public_booking_list' %}"
+         class="sidebar-link {% if 'public_booking' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="sidebar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+          </svg>
+        </span>
+        <span class="sidebar-label">Walk-in Bookings</span>
+        <span class="sidebar-active-bar"></span>
+      </a>
+    </li>
+
     <!-- Payments -->
     <li class="sidebar-item">
       <a href="{% url "accounting:fee_overview" %}"
@@ -430,6 +462,12 @@
     </div>
 
     <div class="sidebar-footer-actions">
+      <!-- Theme toggle -->
+      <button id="themeToggleBtn" type="button" class="sidebar-icon-btn sidebar-icon-btn--theme" title="Switch to light mode">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
       <!-- Home -->
       <a href="{% url 'homesandall:index' %}" class="sidebar-icon-btn" title="Public Homepage">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

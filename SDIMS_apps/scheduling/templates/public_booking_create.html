@@ -1,0 +1,695 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}New Walk-in Booking — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: "WALK-IN";
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 180px;
+    color: rgba(26, 46, 37, 0.025);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Page header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 24px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
+    border-radius: 8px;
+    padding: 11px 24px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
+  }
+
+  /* ── Form card ── */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 40px;
+    max-width: 760px;
+  }
+
+  /* ── Fee notice ── */
+  .fee-notice {
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .fee-notice-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .fee-notice-text {
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-sec);
+  }
+  .fee-notice-text strong {
+    color: var(--green);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Form section heading ── */
+  .form-section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin: 0 0 4px;
+  }
+  .form-section-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+
+  /* ── Field grid ── */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .field-grid .span-full {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Form fields ── */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .field-label {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .field-label .required {
+    color: var(--green);
+    margin-left: 2px;
+  }
+
+  /* Override Django widget styles */
+  .field-group input[type="text"],
+  .field-group input[type="date"],
+  .field-group input[type="tel"],
+  .field-group input[type="number"],
+  .field-group select,
+  .field-group textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(45,122,95,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+  .field-group select:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .field-group textarea {
+    resize: vertical;
+    min-height: 88px;
+    line-height: 1.65;
+  }
+  .field-group input:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    outline: none;
+    border-color: var(--green-focus);
+  }
+  .field-hint {
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .field-error {
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #f87171;
+    margin-top: 2px;
+  }
+
+  /* ── Non-field errors ── */
+  .form-errors {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .form-errors p {
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #f87171;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  /* ── Availability status chips ── */
+  .avail-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: 4px;
+    width: fit-content;
+  }
+  .avail-badge.loading {
+    background: var(--green-dim);
+    color: var(--text-muted);
+  }
+  .avail-badge.ok {
+    background: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+  .avail-badge.warn {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+  }
+  .avail-badge.none {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  .avail-badge svg {
+    width: 10px; height: 10px; flex-shrink: 0;
+  }
+
+  /* ── Cutoff notice inline ── */
+  .cutoff-notice {
+    display: none;
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+  .cutoff-notice strong {
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  /* ── Order hint (step 1 reminder) ── */
+  .order-hint {
+    font-family: "DM Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Form footer ── */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .form-card { padding: 24px 20px; }
+    .field-grid { grid-template-columns: 1fr; }
+    .field-grid .span-full { grid-column: 1; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page header -->
+  <p class="page-label">Scheduling</p>
+  <h1 class="page-title">New Walk-in Booking</h1>
+
+  <!-- Action bar (navigation only) -->
+  <div class="action-bar">
+    <a href="{% url 'scheduling:public_booking_list' %}" class="btn-ghost">← Back to List</a>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="form-card">
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Fee notice (moved inside <form> so fee_amount is submitted) -->
+      <div class="fee-notice" style="flex-direction: column; align-items: stretch; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="fee-notice-icon">💰</span>
+          <span class="fee-notice-text">
+            Default fee from Scheduling Config: <strong>Rs.{{ session_fee }}</strong>
+          </span>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="id_fee_amount">
+            Session Fee (Rs.) <span class="required">*</span>
+          </label>
+          {{ form.fee_amount }}
+          {% if form.fee_amount.errors %}
+            <span class="field-error">{{ form.fee_amount.errors.0 }}</span>
+          {% endif %}
+          <span class="field-hint">Pre-filled from config — edit to apply a custom fee for this booking only.</span>
+        </div>
+      </div>
+
+      <!-- Non-field errors -->
+      {% if form.non_field_errors %}
+      <div class="form-errors">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- ── Section 01: Guest Information ── -->
+      <p class="form-section-label">01</p>
+      <h2 class="form-section-title">Guest Information</h2>
+
+      <div class="field-grid">
+        <div class="field-group">
+          <label class="field-label" for="id_guest_name">Full Name <span class="required">*</span></label>
+          {{ form.guest_name }}
+          {% if form.guest_name.errors %}
+            <span class="field-error">{{ form.guest_name.errors.0 }}</span>
+          {% endif %}
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="id_guest_phone">Phone <span class="required">*</span></label>
+          {{ form.guest_phone }}
+          {% if form.guest_phone.errors %}
+            <span class="field-error">{{ form.guest_phone.errors.0 }}</span>
+          {% endif %}
+        </div>
+        <div class="field-group span-full">
+          <label class="field-label" for="id_guest_address">Address</label>
+          {{ form.guest_address }}
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- ── Section 02: Booking Details ── -->
+      <p class="form-section-label">02</p>
+      <h2 class="form-section-title">Booking Details</h2>
+
+      <div class="field-grid">
+
+        {# STEP A: Vehicle Type — must be chosen first #}
+        <div class="field-group">
+          <label class="field-label" for="id_vehicle_type">
+            Vehicle Type <span class="required">*</span>
+          </label>
+          {{ form.vehicle_type }}
+          {% if form.vehicle_type.errors %}
+            <span class="field-error">{{ form.vehicle_type.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        {# STEP B: Date — required alongside vehicle type to compute slots #}
+        <div class="field-group">
+          <label class="field-label" for="id_date">Date <span class="required">*</span></label>
+          {{ form.date }}
+          {% if form.date.errors %}
+            <span class="field-error">{{ form.date.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        {# STEP C: Time Slot — populated dynamically once type + date are set #}
+        <div class="field-group">
+          <label class="field-label" for="id_slot">
+            Time Slot <span class="required">*</span>
+          </label>
+          {{ form.slot }}
+          {% if form.slot.errors %}
+            <span class="field-error">{{ form.slot.errors.0 }}</span>
+          {% endif %}
+          <!-- Shown after API returns cutoff_hours -->
+          <span class="cutoff-notice" id="cutoff-notice">
+            ⏰ Slots close <strong id="cutoff-hours-val">?</strong>h before start time.
+          </span>
+          <span class="order-hint" id="slot-order-hint">← Choose vehicle type &amp; date first</span>
+          <!-- Vacancy badge shown after a slot is selected -->
+          <span class="avail-badge loading" id="slot-avail-badge" style="display:none;"></span>
+        </div>
+
+        {# Session type #}
+        <div class="field-group">
+          <label class="field-label" for="id_session_type">Session Type</label>
+          {{ form.session_type }}
+          <span class="field-hint">Guided = instructor present. Unguided = supervisor only.</span>
+        </div>
+
+        {# STEP D: Specific vehicle — filtered by type once type is chosen #}
+        <div class="field-group span-full">
+          <label class="field-label" for="id_vehicle">Specific Vehicle</label>
+          {{ form.vehicle }}
+          {% if form.vehicle.errors %}
+            <span class="field-error">{{ form.vehicle.errors.0 }}</span>
+          {% endif %}
+          <span class="field-hint" id="vehicle-hint">
+            Optional — filtered by vehicle type once selected. Leave blank to assign on confirmation.
+          </span>
+          <span class="avail-badge" id="vehicle-avail-badge" style="display:none;"></span>
+        </div>
+
+        <div class="field-group span-full">
+          <label class="field-label" for="id_notes">Notes</label>
+          {{ form.notes }}
+        </div>
+      </div>
+
+      <!-- Form footer -->
+      <hr class="section-divider">
+      <div class="form-footer">
+        <button type="submit" class="btn-primary">Create Booking</button>
+        <a href="{% url 'scheduling:public_booking_list' %}" class="btn-ghost">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── Element refs ─────────────────────────────────────────────────────────
+  const vehicleTypeEl   = document.getElementById('id_vehicle_type');
+  const dateEl          = document.getElementById('id_date');
+  const slotEl          = document.getElementById('id_slot');
+  const vehicleEl       = document.getElementById('id_vehicle');
+  const cutoffNotice    = document.getElementById('cutoff-notice');
+  const cutoffHoursVal  = document.getElementById('cutoff-hours-val');
+  const slotOrderHint   = document.getElementById('slot-order-hint');
+  const slotAvailBadge  = document.getElementById('slot-avail-badge');
+  const vehicleAvailBadge = document.getElementById('vehicle-avail-badge');
+
+  // API URL (Django reverse-safe: rendered server-side)
+  const API_URL = "{% url 'scheduling:public_booking_slots_api' %}";
+
+  // Track last known good values to avoid redundant fetches
+  let lastFetchKey = '';
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  /**
+   * Replace a <select>'s options.
+   * Tries to preserve `preserveValue` if it still exists in the new options.
+   */
+  function replaceOptions(selectEl, items, valueFn, labelFn, emptyLabel, preserveValue) {
+    selectEl.innerHTML = '';
+    const blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = emptyLabel;
+    selectEl.appendChild(blank);
+
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = valueFn(item);
+      opt.textContent = labelFn(item);
+      selectEl.appendChild(opt);
+    });
+
+    // Try to restore previously selected value
+    if (preserveValue) {
+      selectEl.value = preserveValue;
+    }
+  }
+
+  function setDisabled(selectEl, disabled, placeholder) {
+    selectEl.disabled = disabled;
+    if (disabled && selectEl.options.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholder;
+      selectEl.appendChild(opt);
+    }
+  }
+
+  function setBadge(badgeEl, type, text) {
+    const icons = {
+      ok:      `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>`,
+      warn:    `<svg viewBox="0 0 10 10"><path d="M5 2v4M5 7.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+      none:    `<svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+      loading: `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3"><animateTransform attributeName="transform" type="rotate" from="0 5 5" to="360 5 5" dur="1s" repeatCount="indefinite"/></circle></svg>`,
+    };
+    badgeEl.className = `avail-badge ${type}`;
+    badgeEl.innerHTML = (icons[type] || '') + text;
+    badgeEl.style.display = 'inline-flex';
+  }
+
+  function hideBadge(badgeEl) {
+    badgeEl.style.display = 'none';
+  }
+
+  // ── Reset state (when vehicle type is cleared) ────────────────────────────
+  function resetSlotAndVehicle() {
+    replaceOptions(slotEl,    [], () => {}, () => {}, '— select vehicle type & date first —');
+    replaceOptions(vehicleEl, [], () => {}, () => {}, '— select vehicle type first —');
+    setDisabled(slotEl,    true, '— select vehicle type & date first —');
+    setDisabled(vehicleEl, true, '— select vehicle type first —');
+    hideBadge(slotAvailBadge);
+    hideBadge(vehicleAvailBadge);
+    cutoffNotice.style.display = 'none';
+    slotOrderHint.style.display = 'inline';
+  }
+
+  // ── Main fetch + update ───────────────────────────────────────────────────
+  async function fetchAndUpdate() {
+    const vehicleType = vehicleTypeEl.value;
+    const dateVal     = dateEl.value;
+
+    if (!vehicleType) {
+      resetSlotAndVehicle();
+      lastFetchKey = '';
+      return;
+    }
+
+    const fetchKey = vehicleType + '|' + dateVal;
+    if (fetchKey === lastFetchKey) return;   // nothing changed
+    lastFetchKey = fetchKey;
+
+    // Remember currently selected values to restore after repopulation
+    const prevSlotId    = slotEl.value;
+    const prevVehicleId = vehicleEl.value;
+
+    // Show loading state
+    setBadge(vehicleAvailBadge, 'loading', 'Loading vehicles…');
+    if (dateVal) setBadge(slotAvailBadge, 'loading', 'Checking slots…');
+
+    // Disable while loading
+    setDisabled(slotEl,    true, 'Loading…');
+    setDisabled(vehicleEl, true, 'Loading…');
+
+    try {
+      const params = new URLSearchParams({ vehicle_type: vehicleType });
+      if (dateVal) params.set('date', dateVal);
+
+      const res  = await fetch(`${API_URL}?${params}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('Slots API error:', data.error);
+        return;
+      }
+
+      // ── Update cutoff notice ───────────────────────────────────────────
+      cutoffHoursVal.textContent = data.cutoff_hours;
+      cutoffNotice.style.display = 'inline';
+
+      // ── Update vehicles ────────────────────────────────────────────────
+      replaceOptions(
+        vehicleEl,
+        data.vehicles,
+        v => v.id,
+        v => v.name,
+        '— optional, assign later —',
+        prevVehicleId,
+      );
+      vehicleEl.disabled = false;
+
+      if (data.vehicles.length === 0) {
+        setBadge(vehicleAvailBadge, 'none', `No ${vehicleType}s available`);
+      } else {
+        setBadge(vehicleAvailBadge, 'ok',
+          `${data.vehicles.length} ${vehicleType}${data.vehicles.length > 1 ? 's' : ''} available`);
+      }
+
+      // ── Update slots ───────────────────────────────────────────────────
+      if (!dateVal) {
+        // Date not yet chosen — keep slot disabled
+        replaceOptions(slotEl, [], () => {}, () => {}, '— select a date first —');
+        setDisabled(slotEl, true);
+        slotOrderHint.style.display = 'inline';
+        hideBadge(slotAvailBadge);
+      } else {
+        slotOrderHint.style.display = 'none';
+
+        replaceOptions(
+          slotEl,
+          data.slots,
+          s => s.id,
+          s => {
+            const spots = s.vacancies;
+            return `${s.label}  (${spots} spot${spots > 1 ? 's' : ''} free)`;
+          },
+          data.slots.length ? '— select a slot —' : 'No slots available for this date & type',
+          prevSlotId,
+        );
+
+        slotEl.disabled = data.slots.length === 0;
+
+        if (data.slots.length === 0) {
+          setBadge(slotAvailBadge, 'none', 'No slots available — try a different date or type');
+        } else if (data.slots.length <= 2) {
+          setBadge(slotAvailBadge, 'warn', `Only ${data.slots.length} slot${data.slots.length > 1 ? 's' : ''} left`);
+        } else {
+          setBadge(slotAvailBadge, 'ok', `${data.slots.length} slots open`);
+        }
+      }
+
+    } catch (err) {
+      console.error('Failed to fetch slots/vehicles:', err);
+      setBadge(slotAvailBadge,    'none', 'Error loading slots');
+      setBadge(vehicleAvailBadge, 'none', 'Error loading vehicles');
+    }
+  }
+
+  // ── Event listeners ──────────────────────────────────────────────────────
+  vehicleTypeEl.addEventListener('change', fetchAndUpdate);
+  dateEl.addEventListener('change', fetchAndUpdate);
+
+  // ── On page load: run if vehicle_type is already set (POST error re-render)
+  if (vehicleTypeEl.value) {
+    fetchAndUpdate();
+  } else {
+    // Initial blank state — disable slot/vehicle and show hints
+    resetSlotAndVehicle();
+  }
+
+})();
+</script>
+{% endblock %}

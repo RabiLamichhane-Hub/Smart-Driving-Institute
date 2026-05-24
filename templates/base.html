@@ -15,22 +15,48 @@
     /* ── Reset & Tokens ─────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Light mode default */
     :root {
-      --yellow:        #facc15;
-      --yellow-dark:   #eab308;
-      --yellow-dim:    rgba(250, 204, 21, 0.12);
-      --yellow-border: rgba(250, 204, 21, 0.25);
-      --yellow-focus:  rgba(250, 204, 21, 0.50);
-      --bg:            #0a0a0a;
-      --surface:       #141414;
-      --card:          #1a1a1a;
-      --border:        rgba(255, 255, 255, 0.08);
-      --text:          #ffffff;
-      --text-sec:      rgba(255, 255, 255, 0.72);
-      --text-muted:    rgba(255, 255, 255, 0.40);
-      --danger:        #ef4444;
-      --sidebar-w:     248px;
-      --topbar-h:      36px;
+      --green:        #2d7a5f;
+      --green-dark:   #235f4a;
+      --green-dim:    rgba(45, 122, 95, 0.10);
+      --green-border: rgba(45, 122, 95, 0.22);
+      --green-focus:  rgba(45, 122, 95, 0.40);
+      --slate:        #3d5247;
+      --bg:           #f4f7f5;
+      --surface:      #ffffff;
+      --card:         #f9fbfa;
+      --border:       rgba(0, 0, 0, 0.09);
+      --text:         #1a2e25;
+      --text-sec:     rgba(26, 46, 37, 0.72);
+      --text-muted:   rgba(26, 46, 37, 0.45);
+      --danger:       #ef4444;
+      --sidebar-w:    248px;
+      --topbar-h:     36px;
+    }
+
+    /* Dark mode overrides */
+    :root.dark {
+      --green:        #4db88a;
+      --green-dark:   #3da070;
+      --green-dim:    rgba(77, 184, 138, 0.12);
+      --green-border: rgba(77, 184, 138, 0.25);
+      --green-focus:  rgba(77, 184, 138, 0.45);
+      --slate:        #7aab93;
+      --bg:           #0d1410;
+      --surface:      #151c18;
+      --card:         #1c2620;
+      --border:       rgba(255, 255, 255, 0.08);
+      --text:         #e8f2ed;
+      --text-sec:     rgba(232, 242, 237, 0.72);
+      --text-muted:   rgba(232, 242, 237, 0.40);
+    }
+
+    /* Smooth theme transition */
+    *, *::before, *::after {
+      transition-property: background, background-color, border-color, color, box-shadow;
+      transition-duration: 0.22s;
+      transition-timing-function: ease;
     }
 
     html, body { height: 100%; }
@@ -51,7 +77,7 @@
     .sdims-topbar {
       width: 100%;
       height: var(--topbar-h);
-      background: var(--yellow);
+      background: var(--green);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -66,19 +92,19 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 12px;
       font-weight: 500;
-      color: #0a0a0a;
+      color: #ffffff;
       letter-spacing: 0.04em;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .sdims-topbar svg { opacity: 0.6; }
+    .sdims-topbar svg { opacity: 0.75; }
 
     .topbar-divider {
       width: 1px;
       height: 14px;
-      background: rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.25);
     }
 
     /* ── Layout Shell ────────────────────────────── */
@@ -109,7 +135,7 @@
     .sidebar-ghost {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 130px;
-      color: rgba(255, 255, 255, 0.028);
+      color: rgba(26, 46, 37, 0.025);
       letter-spacing: 0.05em;
       line-height: 1;
       position: absolute;
@@ -117,6 +143,10 @@
       left: -8px;
       pointer-events: none;
       user-select: none;
+    }
+
+    :root.dark .sidebar-ghost {
+      color: rgba(232, 242, 237, 0.028);
     }
 
     /* Brand */
@@ -134,8 +164,8 @@
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      border: 1px solid rgba(250, 204, 21, 0.2);
-      background: #0f0f0f;
+      border: 1px solid var(--green-border);
+      background: var(--surface);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -213,24 +243,24 @@
     }
 
     .sidebar-link:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--green-dim);
       color: var(--text);
     }
 
     .sidebar-link.active {
-      background: var(--yellow-dim);
-      color: var(--yellow);
+      background: var(--green-dim);
+      color: var(--green);
       font-weight: 500;
     }
 
-    /* Yellow left indicator */
+    /* Green left indicator */
     .sidebar-active-bar {
       position: absolute;
       left: 0; top: 50%;
       transform: translateY(-50%) scaleY(0);
       width: 3px;
       height: 60%;
-      background: var(--yellow);
+      background: var(--green);
       border-radius: 0 3px 3px 0;
       transition: transform 0.2s ease;
     }
@@ -273,15 +303,15 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: var(--yellow-dim);
-      border: 1.5px solid rgba(250, 204, 21, 0.3);
+      background: var(--green-dim);
+      border: 1.5px solid var(--green-border);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Bebas Neue', sans-serif;
       font-size: 13px;
       letter-spacing: 0.04em;
-      color: var(--yellow);
+      color: var(--green);
       line-height: 1;
     }
 
@@ -309,7 +339,7 @@
       color: var(--text-muted);
     }
 
-    /* Footer action buttons (home + logout) */
+    /* Footer action buttons */
     .sidebar-footer-actions {
       display: flex;
       gap: 4px;
@@ -333,15 +363,22 @@
     }
 
     .sidebar-icon-btn:hover {
-      background: var(--yellow-dim);
-      color: var(--yellow);
-      border-color: var(--yellow-border);
+      background: var(--green-dim);
+      color: var(--green);
+      border-color: var(--green-border);
     }
 
     .sidebar-icon-btn--logout:hover {
       background: rgba(239, 68, 68, 0.1);
       color: #f87171;
       border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Theme toggle active state */
+    .sidebar-icon-btn--theme.dark-active {
+      background: var(--green-dim);
+      color: var(--green);
+      border-color: var(--green-border);
     }
 
     /* ── Mobile Toggle ───────────────────────────── */
@@ -365,7 +402,7 @@
       transition: border-color 0.18s;
     }
 
-    .sidebar-toggle:hover { border-color: var(--yellow-border); }
+    .sidebar-toggle:hover { border-color: var(--green-border); }
 
     .sidebar-toggle span {
       display: block;
@@ -376,15 +413,15 @@
       transition: transform 0.25s ease, opacity 0.25s ease, background 0.18s ease;
     }
 
-    .sidebar-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg);  background: var(--yellow); }
+    .sidebar-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg);  background: var(--green); }
     .sidebar-toggle.open span:nth-child(2) { opacity: 0; }
-    .sidebar-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--yellow); }
+    .sidebar-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--green); }
 
     .sidebar-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 190;
       backdrop-filter: blur(2px);
     }
@@ -418,19 +455,19 @@
     }
 
     .sdims-alert.success {
-      background: rgba(250, 204, 21, 0.08);
-      border-color: rgba(250, 204, 21, 0.3);
-      color: var(--yellow);
+      background: var(--green-dim);
+      border-color: var(--green-border);
+      color: var(--green);
     }
 
     .sdims-alert.error {
       background: rgba(239, 68, 68, 0.08);
       border-color: rgba(239, 68, 68, 0.3);
-      color: #f87171;
+      color: #ef4444;
     }
 
     .sdims-alert.info {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(45, 122, 95, 0.05);
       border-color: var(--border);
       color: var(--text-sec);
     }
@@ -501,6 +538,56 @@
   </div><!-- /.sdims-shell -->
 
   <!-- ── Scripts ───────────────────────────────── -->
+  <script>
+  /* ── Theme toggle ──────────────────────────────── */
+  (function () {
+    const root = document.documentElement;
+    const STORAGE_KEY = 'sdims-theme';
+
+    // Apply saved preference immediately (before paint)
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'dark') root.classList.add('dark');
+
+    function toggleTheme() {
+      const isDark = root.classList.toggle('dark');
+      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+      updateBtn(isDark);
+    }
+
+    function updateBtn(isDark) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (!btn) return;
+      btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+      btn.classList.toggle('dark-active', isDark);
+
+      // Swap icon: moon ↔ sun
+      btn.innerHTML = isDark
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+             <circle cx="12" cy="12" r="5"/>
+             <line x1="12" y1="1" x2="12" y2="3"/>
+             <line x1="12" y1="21" x2="12" y2="23"/>
+             <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+             <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+             <line x1="1" y1="12" x2="3" y2="12"/>
+             <line x1="21" y1="12" x2="23" y2="12"/>
+             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+           </svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+           </svg>`;
+    }
+
+    // Wire up after DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+      const btn = document.getElementById('themeToggleBtn');
+      if (!btn) return;
+      btn.addEventListener('click', toggleTheme);
+      updateBtn(root.classList.contains('dark'));
+    });
+  })();
+  </script>
+
   <script>
   (function () {
     const sidebar = document.getElementById('sdimsSidebar');

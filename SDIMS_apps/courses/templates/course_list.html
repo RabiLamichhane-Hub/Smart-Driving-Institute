@@ -3,22 +3,481 @@
 
 {% block title %}Courses{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+    min-height: 80vh;
+  }
+
+  .page-wrapper::before {
+    content: 'COURSES';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 18vw, 210px);
+    color: rgba(26, 46, 37, 0.025);
+    position: absolute;
+    top: 10px;
+    right: -16px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  :root.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
+  }
+
+  /* ── Page header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 32px;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--green);
+    color: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: var(--slate);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid rgba(45, 122, 95, 0.30);
+    border-radius: 8px;
+    padding: 10px 18px;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.50);
+    color: var(--green);
+    transform: translateY(-1px);
+  }
+
+  .btn-sm {
+    font-size: 12px;
+    padding: 7px 14px;
+  }
+
+  /* ── Courses grid ── */
+  .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 18px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Course card ── */
+  .course-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: border-color 0.22s ease, transform 0.22s ease;
+  }
+
+  /* Emerald top-border reveal on hover */
+  .course-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s ease;
+    z-index: 2;
+  }
+
+  .course-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-3px);
+  }
+
+  .course-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .course-inactive {
+    opacity: 0.62;
+  }
+
+  /* ── Vehicle banner ── */
+  .vehicle-banner {
+    position: relative;
+    width: 100%;
+    height: 170px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .vehicle-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .course-card:hover .vehicle-banner-img {
+    transform: scale(1.04);
+  }
+
+  .vehicle-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(26,46,37,0.08) 0%, rgba(26,46,37,0.72) 100%);
+  }
+
+  :root.dark .vehicle-banner-overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.12) 0%, rgba(13,20,16,0.80) 100%);
+  }
+
+  .vehicle-banner-badges {
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* Card body padding */
+  .course-card .card-header,
+  .course-card .course-description,
+  .course-card .card-divider,
+  .course-card .stats-row,
+  .course-card .vehicle-row,
+  .course-card .card-footer {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .course-card .card-header { padding-top: 20px; }
+
+  /* ── Card header ── */
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .card-header-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .course-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .badge-vehicle {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+  }
+
+  .badge-level {
+    background: rgba(61, 82, 71, 0.12);
+    color: var(--slate);
+    border: 1px solid rgba(61, 82, 71, 0.18);
+  }
+
+  :root.dark .badge-level {
+    background: rgba(122, 171, 147, 0.10);
+    color: var(--slate);
+    border: 1px solid rgba(122, 171, 147, 0.18);
+  }
+
+  .course-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── Status pill ── */
+  .status-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .status-active {
+    background: rgba(34, 197, 94, 0.10);
+    color: #16a34a;
+    border: 1px solid rgba(34, 197, 94, 0.22);
+  }
+
+  :root.dark .status-active {
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.25);
+  }
+
+  .status-inactive {
+    background: rgba(26, 46, 37, 0.06);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Description ── */
+  .course-description {
+    font-size: 13.5px;
+    font-weight: 300;
+    line-height: 1.68;
+    color: var(--text-sec);
+    margin: 0 0 18px;
+  }
+
+  /* ── Card divider ── */
+  .card-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 18px;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .stat-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .stat-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  /* Fee value in emerald */
+  .stat-item:last-child .stat-value {
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 36px;
+    background: var(--border);
+  }
+
+  /* ── Vehicle row ── */
+  .vehicle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 18px;
+    color: var(--text-muted);
+  }
+
+  .vehicle-text {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-sec);
+    flex: 1;
+  }
+
+  .vehicle-reg {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .vehicle-none {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Card footer ── */
+  .card-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: auto;
+    padding-bottom: 20px;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green);
+    margin-bottom: 20px;
+  }
+
+  .empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+  }
+
+  .empty-sub {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .courses-grid { grid-template-columns: 1fr; }
+    .action-bar { flex-direction: column; align-items: flex-start; }
+    .vehicle-banner { height: 140px; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="page-wrapper">
 
-<section class="courses-section">
+  <!-- Page header -->
+  <p class="page-label">What We Offer</p>
+  <h1 class="page-title">Available Courses</h1>
 
-  <!-- Ghost background text -->
-  <span class="ghost-text">COURSES</span>
-
-  <!-- Section header -->
-  <div class="section-header">
-    <span class="section-tag">What We Offer</span>
-    <h1 class="section-title">Available Courses</h1>
-  </div>
-
-  <!-- Admin toolbar -->
+  <!-- Action bar (admin only) -->
   {% if user.role == 'admin' %}
-  <div class="admin-toolbar">
+  <div class="action-bar">
     <a href="{% url 'courses:add_course' %}" class="btn-primary">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Add Course
@@ -34,14 +493,7 @@
   </div>
   {% endif %}
 
-  <!-- Django messages -->
-  {% if messages %}
-    <div class="messages-block">
-      {% for message in messages %}
-        <div class="alert-msg alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
+  <hr class="section-divider">
 
   <!-- Course cards -->
   {% if courses %}
@@ -73,7 +525,6 @@
           {% endif %}
           <h2 class="course-name">{{ course.course_name }}</h2>
         </div>
-
         <span class="status-pill {% if course.is_active %}status-active{% else %}status-inactive{% endif %}">
           {% if course.is_active %}Active{% else %}Inactive{% endif %}
         </span>
@@ -148,475 +599,5 @@
   </div>
   {% endif %}
 
-</section>
-
-
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
-
-  /* ── Section wrapper ── */
-  .courses-section {
-    position: relative;
-    padding: 56px 48px 80px;
-    min-height: 80vh;
-    overflow: hidden;
-  }
-
-  /* Ghost text */
-  .ghost-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(80px, 18vw, 210px);
-    color: rgba(255,255,255,0.028);
-    position: absolute;
-    top: 10px;
-    right: -16px;
-    letter-spacing: 0.06em;
-    line-height: 1;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  /* ── Section header ── */
-  .section-header {
-    margin-bottom: 36px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .section-tag {
-    display: inline-block;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #facc15;
-    margin-bottom: 8px;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 6vw, 72px);
-    font-weight: 400;
-    color: #ffffff;
-    letter-spacing: 0.05em;
-    line-height: 0.95;
-    margin: 0;
-  }
-
-  /* ── Admin toolbar ── */
-  .admin-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 36px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── Buttons ── */
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: #facc15;
-    color: #0a0a0a;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    transition: transform 0.18s ease, background 0.18s ease;
-  }
-
-  .btn-primary:hover {
-    background: #eab308;
-    transform: translateY(-1px);
-  }
-
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    color: rgba(255,255,255,0.72);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px;
-    padding: 10px 18px;
-    transition: border-color 0.18s, color 0.18s, transform 0.18s;
-  }
-
-  .btn-ghost:hover {
-    border-color: rgba(250,204,21,0.45);
-    color: #facc15;
-    transform: translateY(-1px);
-  }
-
-  .btn-sm {
-    font-size: 12px;
-    padding: 7px 14px;
-  }
-
-  /* ── Courses grid ── */
-  .courses-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 18px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── Course card ── */
-  .course-card {
-    background: #1a1a1a;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: border-color 0.22s ease, transform 0.22s ease;
-  }
-
-  .course-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: #facc15;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.28s ease;
-  }
-
-  .course-card:hover {
-    border-color: rgba(250,204,21,0.25);
-    transform: translateY(-3px);
-  }
-
-  .course-card:hover::before {
-    transform: scaleX(1);
-  }
-
-  /* Inactive card dimmed */
-  .course-inactive {
-    opacity: 0.62;
-  }
-
-  /* ── Vehicle banner (image at top of card) ── */
-  .vehicle-banner {
-    position: relative;
-    width: 100%;
-    height: 170px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .vehicle-banner-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s ease;
-  }
-
-  .course-card:hover .vehicle-banner-img {
-    transform: scale(1.04);
-  }
-
-  /* dark gradient so card content below reads cleanly */
-  .vehicle-banner-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.08) 0%,
-      rgba(26,26,26,0.72) 100%
-    );
-  }
-
-  /* badges pinned to bottom-left of the banner */
-  .vehicle-banner-badges {
-    position: absolute;
-    bottom: 10px;
-    left: 14px;
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  /* padding wrapper for card body (below banner) */
-  .course-card .card-header,
-  .course-card .course-description,
-  .course-card .card-divider,
-  .course-card .stats-row,
-  .course-card .vehicle-row,
-  .course-card .card-footer {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  /* give card header top breathing room */
-  .course-card .card-header { padding-top: 20px; }
-
-  /* ── Card header ── */
-  .card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .card-header-left {
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* Badges row (shown when no banner) */
-  .course-badges {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
-
-  .badge {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 4px;
-  }
-
-  .badge-vehicle {
-    background: rgba(250,204,21,0.10);
-    color: #facc15;
-    border: 1px solid rgba(250,204,21,0.2);
-  }
-
-  .badge-level {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.55);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .course-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 26px;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    color: #ffffff;
-    margin: 0;
-  }
-
-  /* Status pill */
-  .status-pill {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10.5px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 4px 10px;
-    border-radius: 5px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .status-pill.status-active {
-    background: rgba(34,197,94,0.10);
-    color: #4ade80;
-    border: 1px solid rgba(34,197,94,0.2);
-  }
-
-  .status-pill.status-inactive {
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.38);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  /* ── Description ── */
-  .course-description {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13.5px;
-    font-weight: 300;
-    line-height: 1.68;
-    color: rgba(255,255,255,0.52);
-    margin: 0 0 18px;
-  }
-
-  /* ── Divider ── */
-  .card-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.07);
-    margin-bottom: 18px;
-  }
-
-  /* ── Stats row ── */
-  .stats-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 18px;
-  }
-
-  .stat-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-align: center;
-  }
-
-  .stat-icon {
-    width: 16px;
-    height: 16px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 2px;
-  }
-
-  .stat-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 0.04em;
-    color: #ffffff;
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.35);
-  }
-
-  .stat-divider {
-    width: 1px;
-    height: 36px;
-    background: rgba(255,255,255,0.08);
-  }
-
-  /* ── Vehicle row ── */
-  .vehicle-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    margin-bottom: 18px;
-    color: rgba(255,255,255,0.35);
-  }
-
-  .vehicle-text {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: rgba(255,255,255,0.75);
-    flex: 1;
-  }
-
-  .vehicle-reg {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.35);
-    background: rgba(255,255,255,0.06);
-    padding: 2px 7px;
-    border-radius: 4px;
-  }
-
-  .vehicle-none {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 300;
-    color: rgba(255,255,255,0.28);
-    font-style: italic;
-  }
-
-  /* ── Card footer ── */
-  .card-footer {
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding-top: 14px;
-    margin-top: auto;
-    padding-bottom: 20px;
-  }
-
-  /* ── Messages ── */
-  .messages-block { margin-bottom: 24px; z-index: 1; position: relative; }
-
-  .alert-msg {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.75);
-  }
-
-  /* ── Empty state ── */
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 80px 24px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .empty-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255,255,255,0.22);
-    margin-bottom: 20px;
-  }
-
-  .empty-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 30px;
-    letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.55);
-    margin: 0 0 6px;
-  }
-
-  .empty-sub {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 300;
-    color: rgba(255,255,255,0.32);
-    margin: 0;
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .courses-section { padding: 36px 20px 60px; }
-    .ghost-text { font-size: 80px; }
-    .courses-grid { grid-template-columns: 1fr; }
-    .admin-toolbar { flex-direction: column; align-items: flex-start; }
-    .vehicle-banner { height: 140px; }
-  }
-</style>
-
+</div>
 {% endblock %}

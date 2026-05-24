@@ -1,0 +1,550 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tracks — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'TRACKS';
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    line-height: 1;
+    color: rgba(26, 46, 37, 0.025);
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 0.05em;
+  }
+  html.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
+  }
+
+  /* ── Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin: 0 0 6px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 24px;
+    min-width: 150px;
+    transition: border-color 0.22s, transform 0.22s;
+  }
+  .stat-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-3px);
+  }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--green);
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.22s, transform 0.22s;
+  }
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.22s, color 0.22s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
+  }
+
+  /* ── Section divider ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-group label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .filter-group select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 32px 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233d5247' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color 0.22s;
+  }
+  .filter-group select:focus {
+    outline: none;
+    border-color: var(--green-focus);
+  }
+  .filter-reset {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    align-self: flex-end;
+    padding-bottom: 10px;
+    transition: color 0.22s;
+  }
+  .filter-reset:hover {
+    color: var(--green);
+  }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-card thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-card th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+  }
+  .table-card th.col-sessions {
+    color: rgba(45, 122, 95, 0.70);
+  }
+  html.dark .table-card th.col-sessions {
+    color: rgba(77, 184, 138, 0.70);
+  }
+  .table-card tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .table-card tbody tr:last-child {
+    border-bottom: none;
+  }
+  .table-card tbody tr:hover {
+    background: rgba(45, 122, 95, 0.03);
+  }
+  .table-card td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 16px 20px;
+  }
+  .table-card td.col-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .td-sessions {
+    color: var(--green);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .td-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-active {
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+  }
+  .badge-inactive {
+    background: rgba(26, 46, 37, 0.05);
+    border: 1px solid rgba(26, 46, 37, 0.10);
+    color: var(--text-muted);
+  }
+  html.dark .badge-inactive {
+    background: rgba(232, 242, 237, 0.05);
+    border-color: rgba(232, 242, 237, 0.08);
+  }
+
+  /* Track type badge */
+  .badge-type {
+    background: rgba(61, 82, 71, 0.08);
+    border: 1px solid rgba(61, 82, 71, 0.15);
+    color: var(--slate);
+  }
+  html.dark .badge-type {
+    background: rgba(122, 171, 147, 0.10);
+    border-color: rgba(122, 171, 147, 0.18);
+    color: var(--slate);
+  }
+
+  /* Row actions */
+  .row-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .row-action {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: color 0.18s, border-color 0.18s, background 0.18s;
+  }
+  .row-action:hover {
+    color: var(--green);
+    border-color: var(--green-border);
+    background: var(--green-dim);
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+
+  /* ── Pagination ── */
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .pagination-info {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+  .pagination-links {
+    display: flex;
+    gap: 6px;
+  }
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-sec);
+    transition: border-color 0.18s, color 0.18s, background 0.18s;
+  }
+  .page-link:hover {
+    border-color: var(--green-border);
+    color: var(--green);
+    background: var(--green-dim);
+  }
+  .page-link.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .page-link.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .th-type, .td-type,
+    .th-sessions, .td-sessions-cell { display: none; }
+    .stats-row { gap: 10px; }
+    .stat-card { min-width: 120px; padding: 14px 18px; }
+    .stat-value { font-size: 30px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Page header -->
+  <p class="page-label">Management</p>
+  <h1 class="page-title">Training Tracks</h1>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_tracks }}</div>
+      <div class="stat-label">Total Tracks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ active_count }}</div>
+      <div class="stat-label">Active</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_tracks|add:"-1"|add:"1" }}</div>
+      <div class="stat-label" style="white-space:nowrap;">Sessions This Month</div>
+    </div>
+  </div>
+
+  <!-- Action bar (navigation/secondary actions only) -->
+  <div class="action-bar">
+    <a href="{% url 'homesandall:index' %}" class="btn-ghost">← Home</a>
+    <a href="{% url 'scheduling:track_create' %}" class="btn-primary">+ Add Track</a>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Filter bar -->
+  <form method="get" action="">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="filterStatus">Status</label>
+        <select name="status" id="filterStatus" onchange="this.form.submit()">
+          <option value="">All Statuses</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filterType">Track Type</label>
+        <select name="track_type" id="filterType" onchange="this.form.submit()">
+          <option value="">All Types</option>
+          {% for val, label in type_choices %}
+            <option value="{{ val }}" {% if filter_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if filter_status or filter_type %}
+        <a href="?" class="filter-reset">✕ Clear filters</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th class="th-type">Type</th>
+          <th>Status</th>
+          <th class="col-sessions th-sessions">Sessions This Month</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for track in page %}
+          <tr>
+            <td class="col-name">{{ track.name }}</td>
+            <td class="td-type">
+              <span class="badge badge-type">{{ track.get_track_type_display }}</span>
+            </td>
+            <td>
+              {% if track.status == 'active' %}
+                <span class="badge badge-active">Active</span>
+              {% else %}
+                <span class="badge badge-inactive">{{ track.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td class="td-sessions-cell">
+              <span class="td-sessions">{{ track.sessions_this_month }}</span>
+            </td>
+            <td>
+              <div class="row-actions">
+                <a href="{% url 'scheduling:track_edit' pk=track.pk %}" class="row-action">Edit</a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <div class="empty-state-heading">No Tracks Found</div>
+                <p class="empty-state-sub">
+                  {% if filter_status or filter_type %}
+                    No tracks match the current filters. <a href="?" style="color:var(--green);">Clear filters</a> to see all tracks.
+                  {% else %}
+                    No tracks have been added yet.
+                  {% endif %}
+                </p>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page.paginator.num_pages > 1 %}
+  <div class="pagination-bar">
+    <span class="pagination-info">
+      Page {{ page.number }} of {{ page.paginator.num_pages }}
+      &nbsp;·&nbsp; {{ page.paginator.count }} track{{ page.paginator.count|pluralize }}
+    </span>
+    <div class="pagination-links">
+      {% if page.has_previous %}
+        <a class="page-link"
+           href="?page={{ page.previous_page_number }}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_type %}&track_type={{ filter_type }}{% endif %}">
+          ←
+        </a>
+      {% else %}
+        <span class="page-link disabled">←</span>
+      {% endif %}
+
+      {% for num in page.paginator.page_range %}
+        {% if num == page.number %}
+          <span class="page-link active">{{ num }}</span>
+        {% elif num >= page.number|add:"-2" and num <= page.number|add:"2" %}
+          <a class="page-link"
+             href="?page={{ num }}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_type %}&track_type={{ filter_type }}{% endif %}">
+            {{ num }}
+          </a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page.has_next %}
+        <a class="page-link"
+           href="?page={{ page.next_page_number }}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_type %}&track_type={{ filter_type }}{% endif %}">
+          →
+        </a>
+      {% else %}
+        <span class="page-link disabled">→</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

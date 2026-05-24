@@ -18,11 +18,14 @@
     right: -20px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 160px;
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     letter-spacing: 0.04em;
     pointer-events: none;
     user-select: none;
     line-height: 1;
+  }
+  :root.dark .page-wrapper::before {
+    color: rgba(232,242,237,0.028);
   }
 
   /* ── Page Header ─────────────────────────────────────────────── */
@@ -31,7 +34,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 10px;
   }
   .page-title {
@@ -59,8 +62,8 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 10px 20px;
@@ -72,7 +75,7 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
   .btn-ghost {
@@ -80,8 +83,8 @@
     align-items: center;
     gap: 7px;
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45,122,95,0.3);
     border-radius: 8px;
     padding: 10px 20px;
     font-family: 'DM Sans', sans-serif;
@@ -92,8 +95,8 @@
     transition: border-color 0.18s, color 0.18s;
   }
   .btn-ghost:hover {
-    border-color: rgba(250,204,21,0.4);
-    color: var(--yellow);
+    border-color: rgba(45,122,95,0.5);
+    color: var(--green);
   }
   .btn-danger-sm {
     display: inline-flex;
@@ -121,8 +124,8 @@
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 10px;
     padding: 16px 20px;
     margin-bottom: 36px;
@@ -138,7 +141,7 @@
     line-height: 1.6;
   }
   .info-box-text strong {
-    color: var(--yellow);
+    color: var(--green);
     font-weight: 600;
   }
 
@@ -193,12 +196,11 @@
     box-sizing: border-box;
   }
   .form-input:focus {
-    border-color: var(--yellow-focus);
+    border-color: var(--green-focus);
   }
   .form-input::placeholder {
     color: var(--text-muted);
   }
-  /* date input calendar icon color */
   .form-input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0.5);
     cursor: pointer;
@@ -210,7 +212,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .section-heading {
@@ -252,14 +254,14 @@
     text-align: right;
   }
   .table-card tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
   .table-card tbody tr:last-child {
     border-bottom: none;
   }
   .table-card tbody tr:hover {
-    background: rgba(255,255,255,0.025);
+    background: rgba(45,122,95,0.03);
   }
   .table-card tbody td {
     font-family: 'DM Sans', sans-serif;
@@ -280,13 +282,13 @@
     font-weight: 500;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     display: block;
     margin-top: 3px;
   }
   .td-reason-empty {
     font-size: 13px;
-    color: rgba(255,255,255,0.25);
+    color: var(--text-muted);
     font-style: italic;
   }
   .col-action-cell {
@@ -303,14 +305,14 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--yellow-dim);
-    border: 1.5px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 12px;
-    color: var(--yellow);
+    color: var(--green);
     flex-shrink: 0;
     letter-spacing: 0.04em;
   }
@@ -323,7 +325,7 @@
   .empty-state-label {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
-    color: rgba(255,255,255,0.28);
+    color: var(--text-muted);
     letter-spacing: 0.06em;
     margin: 0 0 8px;
   }
@@ -360,19 +362,20 @@
 
   /* Past table muted */
   .table-card.past thead th {
-    color: rgba(255,255,255,0.28);
+    color: var(--text-muted);
   }
   .table-card.past tbody td.col-date {
     color: var(--text-sec);
     font-weight: 400;
   }
   .table-card.past tbody td {
-    color: rgba(255,255,255,0.35);
+    color: var(--text-muted);
     font-size: 13px;
     padding: 13px 20px;
   }
   .td-dayofweek.past {
-    color: rgba(250,204,21,0.45);
+    color: var(--slate);
+    opacity: 0.55;
   }
 
   /* ── Responsive ───────────────────────────────────────────────── */
@@ -469,7 +472,7 @@
             <span class="td-dayofweek td-hide-inline">{{ entry.date|date:"l" }}</span>
           </td>
           <td class="th-hide">
-            <span style="font-size:13px;color:var(--yellow);font-weight:500;text-transform:uppercase;letter-spacing:0.07em;">
+            <span style="font-size:13px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.07em;">
               {{ entry.date|date:"l" }}
             </span>
           </td>
@@ -541,7 +544,7 @@
           <tr>
             <td class="col-date">{{ entry.date|date:"d M Y" }}</td>
             <td class="th-hide">
-              <span style="font-size:12px;color:rgba(250,204,21,0.45);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">
+              <span class="td-dayofweek past">
                 {{ entry.date|date:"l" }}
               </span>
             </td>
@@ -557,7 +560,7 @@
                 <div class="avatar-initials" style="opacity:0.55;">
                   {{ entry.declared_by.first_name|slice:":1" }}{{ entry.declared_by.last_name|slice:":1" }}
                 </div>
-                <span style="font-size:12px;color:rgba(255,255,255,0.35);">
+                <span style="font-size:12px;color:var(--text-muted);">
                   {{ entry.declared_by.get_full_name }}
                 </span>
               </div>

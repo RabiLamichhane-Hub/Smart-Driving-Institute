@@ -15,7 +15,7 @@
         content: 'TRAINEE';
         font-family: 'Bebas Neue', sans-serif;
         font-size: clamp(120px, 22vw, 220px);
-        color: rgba(255,255,255,0.028);
+        color: rgba(26, 46, 37, 0.025);
         position: absolute;
         top: 20px;
         right: -20px;
@@ -24,6 +24,9 @@
         pointer-events: none;
         user-select: none;
         z-index: 0;
+    }
+    html.dark .page-wrapper::before {
+        color: rgba(232, 242, 237, 0.028);
     }
 
     /* ── PAGE HEADER ── */
@@ -39,14 +42,14 @@
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--yellow-dim);
-        border: 1.5px solid var(--yellow-border);
+        background: var(--green-dim);
+        border: 1.5px solid var(--green-border);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: 'Bebas Neue', sans-serif;
         font-size: 24px;
-        color: var(--yellow);
+        color: var(--green);
         letter-spacing: 0.05em;
         flex-shrink: 0;
     }
@@ -67,7 +70,7 @@
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        color: var(--yellow);
+        color: var(--green);
         margin-bottom: 4px;
     }
     .page-title {
@@ -88,8 +91,8 @@
         z-index: 1;
     }
     .btn-primary {
-        background: var(--yellow);
-        color: #000;
+        background: var(--green);
+        color: #fff;
         border: none;
         border-radius: 8px;
         padding: 10px 22px;
@@ -104,11 +107,12 @@
         align-items: center;
         gap: 7px;
     }
-    .btn-primary:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+
     .btn-ghost {
         background: transparent;
-        color: var(--text);
-        border: 1px solid rgba(255,255,255,0.2);
+        color: var(--slate);
+        border: 1px solid rgba(45, 122, 95, 0.3);
         border-radius: 8px;
         padding: 10px 22px;
         font-family: 'DM Sans', sans-serif;
@@ -121,11 +125,12 @@
         align-items: center;
         gap: 7px;
     }
-    .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); transform: translateY(-1px); }
+    .btn-ghost:hover { border-color: rgba(45, 122, 95, 0.5); color: var(--green); transform: translateY(-1px); }
+
     .btn-danger {
         background: transparent;
-        color: rgba(255,80,80,0.85);
-        border: 1px solid rgba(255,80,80,0.2);
+        color: rgba(239, 68, 68, 0.85);
+        border: 1px solid rgba(239, 68, 68, 0.2);
         border-radius: 8px;
         padding: 10px 22px;
         font-family: 'DM Sans', sans-serif;
@@ -138,7 +143,7 @@
         align-items: center;
         gap: 7px;
     }
-    .btn-danger:hover { border-color: rgba(255,80,80,0.5); color: #ff5050; transform: translateY(-1px); }
+    .btn-danger:hover { border-color: rgba(239, 68, 68, 0.5); color: #ef4444; transform: translateY(-1px); }
 
     .section-divider {
         border: none;
@@ -166,7 +171,7 @@
         padding: 28px 28px 24px;
         transition: border-color 0.2s, transform 0.2s;
     }
-    .card:hover { border-color: var(--yellow-border); transform: translateY(-3px); }
+    .card:hover { border-color: rgba(45, 122, 95, 0.20); transform: translateY(-3px); }
 
     .card-title {
         font-family: 'Bebas Neue', sans-serif;
@@ -182,8 +187,8 @@
         width: 28px;
         height: 28px;
         border-radius: 6px;
-        background: var(--yellow-dim);
-        border: 1px solid var(--yellow-border);
+        background: var(--green-dim);
+        border: 1px solid var(--green-border);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -197,8 +202,9 @@
         align-items: baseline;
         gap: 12px;
         padding: 11px 0;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
+    html.dark .info-row { border-bottom-color: rgba(255, 255, 255, 0.05); }
     .info-row:last-child { border-bottom: none; }
     .info-label {
         font-size: 11px;
@@ -216,7 +222,7 @@
         text-align: right;
     }
     .info-value.primary { color: var(--text); font-weight: 500; }
-    .info-value.amount  { color: var(--yellow); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .info-value.amount  { color: var(--green); font-weight: 500; font-variant-numeric: tabular-nums; }
 
     /* ── BADGES ── */
     .badge {
@@ -227,19 +233,24 @@
         font-weight: 500;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        background: var(--yellow-dim);
-        border: 1px solid var(--yellow-border);
-        color: var(--yellow);
+        background: var(--green-dim);
+        border: 1px solid var(--green-border);
+        color: var(--green);
     }
     .badge.green {
-        background: rgba(34,197,94,0.08);
-        border-color: rgba(34,197,94,0.2);
-        color: #4ade80;
+        background: rgba(45, 122, 95, 0.10);
+        border-color: rgba(45, 122, 95, 0.25);
+        color: var(--green);
+    }
+    html.dark .badge.green {
+        background: rgba(77, 184, 138, 0.12);
+        border-color: rgba(77, 184, 138, 0.28);
+        color: var(--green);
     }
     .badge.red {
-        background: rgba(239,68,68,0.08);
-        border-color: rgba(239,68,68,0.2);
-        color: #f87171;
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
     }
 
     /* ── STAT GRID ── */
@@ -273,10 +284,10 @@
         color: var(--text);
         font-variant-numeric: tabular-nums;
     }
-    .stat-value.yellow { color: var(--yellow); }
-    .stat-value.dim    { color: rgba(255,255,255,0.45); }
-    .stat-value.red    { color: #f87171; }
-    .stat-value.green  { color: #4ade80; }
+    .stat-value.accent { color: var(--green); }
+    .stat-value.dim    { color: var(--text-muted); }
+    .stat-value.red    { color: #ef4444; }
+    .stat-value.green  { color: var(--green); }
 
     /* ── PROGRESS BAR ── */
     .progress-row {
@@ -309,9 +320,9 @@
         border-radius: 99px;
         transition: width 0.4s ease;
     }
-    .progress-fill.yellow { background: var(--yellow); }
-    .progress-fill.green  { background: #4ade80; }
-    .progress-fill.red    { background: #f87171; }
+    .progress-fill.accent { background: var(--green); }
+    .progress-fill.green  { background: var(--green); }
+    .progress-fill.red    { background: #ef4444; }
 
     /* ── TABLE ── */
     .table-wrapper {
@@ -333,10 +344,12 @@
         text-align: left;
         white-space: nowrap;
     }
-    th.col-amount { color: rgba(250,204,21,0.7); }
-    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; }
+    th.col-amount { color: rgba(45, 122, 95, 0.70); }
+    html.dark th.col-amount { color: rgba(77, 184, 138, 0.70); }
+    tbody tr { border-bottom: 1px solid rgba(0, 0, 0, 0.05); transition: background 0.15s; }
+    html.dark tbody tr { border-bottom-color: rgba(255, 255, 255, 0.05); }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(255,255,255,0.025); }
+    tbody tr:hover { background: rgba(45, 122, 95, 0.03); }
     td {
         font-family: 'DM Sans', sans-serif;
         font-size: 14px;
@@ -346,18 +359,18 @@
         vertical-align: middle;
     }
     .td-date   { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .td-amount { color: var(--yellow); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .td-notes  { font-size: 13px; color: rgba(255,255,255,0.35); font-style: italic; }
+    .td-amount { color: var(--green); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .td-notes  { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
     /* ── AVATAR ROW ── */
     .avatar-row { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; color: var(--text-sec); }
     .avatar-sm {
         width: 28px; height: 28px; border-radius: 50%;
-        background: var(--yellow-dim);
-        border: 1.5px solid var(--yellow-border);
+        background: var(--green-dim);
+        border: 1.5px solid var(--green-border);
         display: flex; align-items: center; justify-content: center;
         font-family: 'Bebas Neue', sans-serif;
-        font-size: 12px; color: var(--yellow); flex-shrink: 0;
+        font-size: 12px; color: var(--green); flex-shrink: 0;
     }
 
     /* ── EMPTY STATE ── */
@@ -366,7 +379,7 @@
         font-family: 'Bebas Neue', sans-serif;
         font-size: 22px;
         letter-spacing: 0.06em;
-        color: rgba(255,255,255,0.30);
+        color: var(--text-muted);
         margin-bottom: 8px;
     }
     .empty-state-sub { font-size: 13px; color: var(--text-muted); }
@@ -538,8 +551,7 @@
                 <div style="margin-top: 24px;">
                     <div class="progress-row">
                         <span class="progress-label">Lesson Progress</span>
-                        <span class="progress-value"
-                              style="color: {% if lessons_remaining == 0 %}#4ade80{% else %}var(--yellow){% endif %};">
+                        <span class="progress-value" style="color: var(--green);">
                             {{ lessons_attended }} / {{ total_lessons }}
                             &nbsp;·&nbsp;
                             {% if lessons_remaining == 0 %}
@@ -551,7 +563,7 @@
                     </div>
                     <div class="progress-track">
                         {% if total_lessons %}
-                            <div class="progress-fill {% if lessons_remaining == 0 %}green{% else %}yellow{% endif %}"
+                            <div class="progress-fill green"
                                  style="width: {% widthratio lessons_attended total_lessons 100 %}%;"></div>
                         {% endif %}
                     </div>
@@ -572,7 +584,7 @@
                     </div>
                     <div class="stat-cell">
                         <div class="stat-label">Final Fee</div>
-                        <div class="stat-value yellow">Rs. {{ final_fee }}</div>
+                        <div class="stat-value accent">Rs. {{ final_fee }}</div>
                     </div>
                 </div>
 
@@ -595,7 +607,7 @@
                 <div class="stat-grid stat-grid-3">
                     <div class="stat-cell">
                         <div class="stat-label">Paid Amount</div>
-                        <div class="stat-value yellow">Rs. {{ paid }}</div>
+                        <div class="stat-value accent">Rs. {{ paid }}</div>
                     </div>
                     <div class="stat-cell">
                         <div class="stat-label">Remaining</div>
@@ -693,7 +705,7 @@
                     </div>
                     <div class="stat-cell">
                         <div class="stat-label">Late</div>
-                        <div class="stat-value yellow">{{ late_count }}</div>
+                        <div class="stat-value accent">{{ late_count }}</div>
                     </div>
                     <div class="stat-cell">
                         <div class="stat-label">Absent</div>
@@ -704,13 +716,12 @@
                 <!-- Attendance rate bar -->
                 <div class="progress-row">
                     <span class="progress-label">Attendance Rate</span>
-                    <span class="progress-value"
-                          style="color: {% if attendance_rate >= 80 %}#4ade80{% elif attendance_rate >= 50 %}var(--yellow){% else %}#f87171{% endif %};">
+                    <span class="progress-value" style="color: var(--green);">
                         {{ attendance_rate }}%
                     </span>
                 </div>
                 <div class="progress-track">
-                    <div class="progress-fill {% if attendance_rate >= 80 %}green{% elif attendance_rate >= 50 %}yellow{% else %}red{% endif %}"
+                    <div class="progress-fill {% if attendance_rate >= 50 %}green{% else %}red{% endif %}"
                          style="width: {{ attendance_rate }}%;"></div>
                 </div>
 

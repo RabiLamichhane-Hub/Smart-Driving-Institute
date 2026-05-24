@@ -18,7 +18,7 @@
     right: -20px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 200px;
-    color: rgba(255,255,255,0.028);
+    color: rgba(26,46,37,0.025);
     letter-spacing: 0.04em;
     line-height: 1;
     pointer-events: none;
@@ -31,7 +31,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 8px;
   }
   .page-title {
@@ -39,8 +39,9 @@
     font-size: 52px;
     letter-spacing: 0.05em;
     line-height: 0.95;
+    color: var(--text);
   }
-  .page-title .hl { color: var(--yellow); }
+  .page-title .hl { color: var(--green); }
   .page-subtitle {
     font-size: 13px;
     color: var(--text-muted);
@@ -75,7 +76,7 @@
     padding: 22px 24px;
     transition: border-color 0.2s;
   }
-  .stat-card:hover { border-color: rgba(250,204,21,0.18); }
+  .stat-card:hover { border-color: rgba(45,122,95,0.20); }
   .stat-label {
     font-size: 11px;
     font-weight: 500;
@@ -89,7 +90,7 @@
     font-size: 42px;
     letter-spacing: 0.03em;
     line-height: 1;
-    color: var(--yellow);
+    color: var(--green);
   }
   .stat-value {
     font-size: 15px;
@@ -110,21 +111,21 @@
     gap: 7px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--yellow);
+    color: var(--green);
   }
   .running-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--yellow);
+    background: var(--green);
     animation: blink 1.4s ease-in-out infinite;
   }
   @keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:.2; } }
 
   /* ── Notes banner ── */
   .notes-banner {
-    background: rgba(250,204,21,0.05);
-    border: 1px solid rgba(250,204,21,0.15);
+    background: rgba(45,122,95,0.05);
+    border: 1px solid var(--green-border);
     border-radius: 10px;
     padding: 18px 22px;
     margin-bottom: 28px;
@@ -132,13 +133,13 @@
     gap: 14px;
     align-items: flex-start;
   }
-  .notes-banner svg { flex-shrink: 0; margin-top: 2px; color: var(--yellow); }
+  .notes-banner svg { flex-shrink: 0; margin-top: 2px; color: var(--green); }
   .notes-banner-label {
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin-bottom: 6px;
   }
   .notes-banner pre {
@@ -170,6 +171,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 18px;
     letter-spacing: 0.06em;
+    color: var(--text);
   }
   .table-count {
     font-size: 11px;
@@ -199,22 +201,22 @@
     font-weight: 300;
     color: var(--text-sec);
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     vertical-align: middle;
   }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: rgba(255,255,255,0.025); }
+  tbody tr:hover td { background: rgba(45,122,95,0.03); }
   td:first-child { font-weight: 500; color: var(--text); }
 
   /* slot badge */
   .slot-num {
-    background: rgba(250,204,21,0.08);
-    border: 1px solid rgba(250,204,21,0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 3px 9px;
     font-size: 12px;
     font-weight: 500;
-    color: var(--yellow);
+    color: var(--green);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.04em;
   }
@@ -231,7 +233,7 @@
     white-space: nowrap;
     text-transform: uppercase;
   }
-  .chip-course  { background: rgba(250,204,21,0.08); color: var(--yellow); border-color: rgba(250,204,21,0.18); }
+  .chip-course  { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
   .chip-indep   { background: rgba(255,255,255,0.04); color: var(--text-muted); border-color: var(--border); }
   .chip-guided  { background: rgba(52,211,153,0.08); color: #34d399; border-color: rgba(52,211,153,0.18); }
 
@@ -248,7 +250,7 @@
   }
   .badge-scheduled   { background: rgba(52,211,153,0.08);  color: #34d399; border-color: rgba(52,211,153,0.18); }
   .badge-in_progress { background: rgba(96,165,250,0.08);  color: #60a5fa; border-color: rgba(96,165,250,0.18); }
-  .badge-pending     { background: rgba(250,204,21,0.08);  color: var(--yellow); border-color: rgba(250,204,21,0.18); }
+  .badge-pending     { background: var(--green-dim);        color: var(--green); border-color: var(--green-border); }
   .badge-completed   { background: rgba(255,255,255,0.04); color: var(--text-muted); border-color: var(--border); }
   .badge-cancelled   { background: rgba(239,68,68,0.08);   color: #f87171; border-color: rgba(239,68,68,0.18); }
 
@@ -264,7 +266,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.25);
+    color: var(--text-muted);
     margin-bottom: 6px;
   }
   .empty-sub { font-size: 13px; color: var(--text-muted); }
@@ -272,8 +274,8 @@
   /* back button */
   .btn-ghost {
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45,122,95,0.3);
     border-radius: 8px;
     padding: 11px 24px;
     font-family: 'DM Sans', sans-serif;
@@ -286,7 +288,7 @@
     gap: 8px;
     transition: border-color 0.2s, color 0.2s;
   }
-  .btn-ghost:hover { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+  .btn-ghost:hover { border-color: rgba(45,122,95,0.5); color: var(--green); }
 
   @media (max-width: 768px) {
     .page-wrapper { padding: 28px 20px 60px; }

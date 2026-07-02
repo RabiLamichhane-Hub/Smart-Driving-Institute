@@ -292,6 +292,7 @@
 
   .tx-type-badge.course  { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
   .tx-type-badge.session { background: rgba(99,102,241,0.10); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+  .tx-type-badge.walkin  { background: rgba(245,158,11,0.10); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
 
   .tx-method {
     font-size: 11px;
@@ -712,8 +713,8 @@
           {% for p in recent_payments %}
           <tr>
             <td style="padding-left: 20px; font-weight: 500;">
-              {% if p.label == 'course' and p.trainee__user__username %}
-                {{ p.trainee__user__first_name }} {{ p.trainee__user__last_name }}
+              {% if p.label == 'course' and p.fee_record__trainee__user__username %}
+                {{ p.fee_record__trainee__user__first_name }} {{ p.fee_record__trainee__user__last_name }}
                 <span style="display:block; font-size:11px; color:var(--text-muted); font-weight:400;">
                   Course Payment #{{ p.id }}
                 </span>
@@ -721,6 +722,11 @@
                 Session Payment
                 <span style="display:block; font-size:11px; color:var(--text-muted); font-weight:400;">
                   Ref #{{ p.id }}
+                </span>
+              {% elif p.label == 'walkin' %}
+                {{ p.guest_name }}
+                <span style="display:block; font-size:11px; color:var(--text-muted); font-weight:400;">
+                  Walk-in Booking #{{ p.id }}
                 </span>
               {% else %}
                 —
@@ -730,10 +736,10 @@
               <span class="tx-type-badge {{ p.label }}">{{ p.label }}</span>
             </td>
             <td>
-              <span class="tx-method">{{ p.method|default:"—" }}</span>
+              <span class="tx-method">{% if p.label == 'walkin' %}—{% else %}{{ p.method|default:"—" }}{% endif %}</span>
             </td>
             <td style="color: var(--text-muted); font-size: 12px;">
-              {{ p.created_at|date:"M d, Y" }}
+              {{ p.date|date:"M d, Y" }}
             </td>
             <td class="tx-amount" style="padding-right: 20px;">
               Rs.{{ p.amount|floatformat:0 }}

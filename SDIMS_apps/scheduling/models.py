@@ -556,7 +556,7 @@ class Session(models.Model):
 
     def approve(self, approving_user):
         """Transition: pending → scheduled."""
-        if self.status != 'pending':
+        if self.status not in ('pending', 'scheduled'):
             raise ValidationError(
                 f"Cannot approve a session with status '{self.status}'."
             )

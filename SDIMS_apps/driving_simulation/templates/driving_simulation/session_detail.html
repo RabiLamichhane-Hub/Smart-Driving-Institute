@@ -1,0 +1,675 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ session.scenario.name|default:"Session Detail" }} — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'DETAIL';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    letter-spacing: 0.04em;
+    color: rgba(26, 46, 37, 0.025);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  html.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Buttons ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--green);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
+    transform: translateY(-1px);
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+  .section-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin: 0 0 8px;
+  }
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Score Summary Grid ── */
+  .score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .score-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .score-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-3px);
+  }
+  .score-card__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .score-card__value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    color: var(--green);
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-card__sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Personal Best Badge ── */
+  .pb-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,179,8,0.15));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #f59e0b;
+  }
+
+  /* ── Verdict Card ── */
+  .verdict-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .verdict-card:hover { transform: translateY(-3px); }
+  .verdict-card--pass { border: 1px solid rgba(34, 197, 94, 0.25); }
+  .verdict-card--fail { border: 1px solid rgba(239, 68, 68, 0.25); }
+
+  .verdict-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .verdict-icon--pass {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1.5px solid rgba(34, 197, 94, 0.3);
+  }
+  .verdict-icon--fail {
+    background: rgba(239, 68, 68, 0.10);
+    border: 1.5px solid rgba(239, 68, 68, 0.25);
+  }
+  .verdict-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+  }
+  .verdict-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin: 0;
+  }
+  .verdict-text--pass { color: #22c55e; }
+  .verdict-text--fail { color: #ef4444; }
+
+  /* ── Stat Cards Grid ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-2px);
+  }
+  .stat-card__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+  }
+  .stat-card__value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px;
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-card__value--green { color: var(--green); }
+  .stat-card__value--red { color: #ef4444; }
+  .stat-card__value--warn { color: #f59e0b; }
+  .stat-card__sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Checkpoint Timeline ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(45, 122, 95, 0.03); }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 14px 20px;
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Checkpoint dot */
+  .cp-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cp-dot__circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .cp-dot__circle::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 28px;
+    background: var(--green-border);
+  }
+  tbody tr:last-child .cp-dot__circle::after {
+    display: none;
+  }
+  .cp-dot__num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: var(--green);
+  }
+
+  /* ── Comparison Bar ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .compare-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+  }
+  .compare-card__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .compare-card__score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--green);
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .compare-card__sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .compare-card--highlight {
+    border-color: var(--green-border);
+    background: var(--green-dim);
+  }
+
+  /* ── Parking Grid ── */
+  .parking-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .score-grid { grid-template-columns: 1fr 1fr; }
+    .score-grid .verdict-card { grid-column: 1 / -1; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .compare-grid { grid-template-columns: 1fr; }
+    .parking-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Driving Simulation</p>
+  <h1 class="page-title">{{ session.scenario.name|default:"Session Detail" }}</h1>
+
+  {# ── Action Bar ── #}
+  <div class="action-bar">
+    <a href="{% url 'driving_simulation:trial_history' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to History
+    </a>
+    {% if session.scenario %}
+    <a href="{% url 'driving_simulation:simulator' %}?scenario={{ session.scenario.pk }}" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Try Again
+    </a>
+    {% endif %}
+  </div>
+
+  <hr class="section-divider">
+
+  {# ══════════════════════════════════════════════════
+     SCORE SUMMARY
+     ══════════════════════════════════════════════════ #}
+  <div class="score-grid">
+
+    <div class="score-card">
+      <p class="score-card__label">Score</p>
+      <p class="score-card__value">{{ session.score }}</p>
+      <p class="score-card__sub">out of 100</p>
+      {% if is_personal_best %}
+        <span class="pb-badge">🏆 Personal Best</span>
+      {% endif %}
+    </div>
+
+    <div class="score-card">
+      <p class="score-card__label">Time Taken</p>
+      <p class="score-card__value">{{ session.duration_display }}</p>
+      <p class="score-card__sub">
+        {% if session.scenario %}limit: {{ session.scenario.time_limit_seconds }}s{% endif %}
+      </p>
+    </div>
+
+    <div class="verdict-card {% if session.passed %}verdict-card--pass{% else %}verdict-card--fail{% endif %}">
+      <div class="verdict-icon {% if session.passed %}verdict-icon--pass{% else %}verdict-icon--fail{% endif %}">
+        {% if session.passed %}✔{% else %}✘{% endif %}
+      </div>
+      <div>
+        <p class="verdict-label">Verdict</p>
+        <p class="verdict-text {% if session.passed %}verdict-text--pass{% else %}verdict-text--fail{% endif %}">
+          {% if session.passed %}Passed{% elif session.status == 'abandoned' %}Abandoned{% else %}Failed{% endif %}
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="section-divider">
+
+  {# ══════════════════════════════════════════════════
+     TELEMETRY
+     ══════════════════════════════════════════════════ #}
+  <p class="section-tag">Telemetry</p>
+  <h2 class="section-heading">Driving Stats</h2>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <p class="stat-card__label">Total Distance</p>
+      <p class="stat-card__value stat-card__value--green">{{ session.total_distance|floatformat:0 }}</p>
+      <p class="stat-card__sub">game units</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Max Speed</p>
+      <p class="stat-card__value stat-card__value--green">{{ session.max_speed_reached|floatformat:1 }}</p>
+      <p class="stat-card__sub">peak speed</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Average Speed</p>
+      <p class="stat-card__value stat-card__value--green">{{ session.average_speed|floatformat:1 }}</p>
+      <p class="stat-card__sub">mean speed</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Checkpoints</p>
+      <p class="stat-card__value stat-card__value--green">
+        {{ session.checkpoints_cleared }}{% if session.scenario %} / {{ session.scenario.total_checkpoints }}{% endif %}
+      </p>
+      <p class="stat-card__sub">cleared</p>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ══════════════════════════════════════════════════
+     PENALTIES
+     ══════════════════════════════════════════════════ #}
+  <p class="section-tag">Penalties</p>
+  <h2 class="section-heading">Violation Breakdown</h2>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <p class="stat-card__label">Collisions</p>
+      <p class="stat-card__value {% if session.collision_count > 0 %}stat-card__value--red{% endif %}">
+        {{ session.collision_count }}
+      </p>
+      <p class="stat-card__sub">boundary hits</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Signal Violations</p>
+      <p class="stat-card__value {% if session.signal_violations > 0 %}stat-card__value--red{% endif %}">
+        {{ session.signal_violations }}
+      </p>
+      <p class="stat-card__sub">red light runs</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Lane Violations</p>
+      <p class="stat-card__value {% if session.lane_violations > 0 %}stat-card__value--warn{% endif %}">
+        {{ session.lane_violations }}
+      </p>
+      <p class="stat-card__sub">off-road events</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Speed Violations</p>
+      <p class="stat-card__value {% if session.speed_violations > 0 %}stat-card__value--warn{% endif %}">
+        {{ session.speed_violations }}
+      </p>
+      <p class="stat-card__sub">over-speed events</p>
+    </div>
+  </div>
+
+  <div class="stat-grid" style="grid-template-columns: 1fr; max-width: 280px;">
+    <div class="stat-card">
+      <p class="stat-card__label">Total Penalties</p>
+      <p class="stat-card__value {% if session.penalty_count > 0 %}stat-card__value--red{% endif %}">
+        {{ session.penalty_count }}
+      </p>
+      <p class="stat-card__sub">combined violations</p>
+    </div>
+  </div>
+
+  {% if session.scenario and session.scenario.enable_reverse_parking %}
+  <hr class="section-divider">
+
+  {# ══════════════════════════════════════════════════
+     PARKING
+     ══════════════════════════════════════════════════ #}
+  <p class="section-tag">Parking</p>
+  <h2 class="section-heading">Reverse Parking</h2>
+
+  <div class="parking-grid">
+    <div class="stat-card">
+      <p class="stat-card__label">Completed</p>
+      <p class="stat-card__value {% if session.parking_completed %}stat-card__value--green{% else %}stat-card__value--red{% endif %}">
+        {% if session.parking_completed %}Yes{% else %}No{% endif %}
+      </p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Accuracy</p>
+      <p class="stat-card__value stat-card__value--green">{{ session.parking_accuracy|floatformat:1 }}%</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Attempts</p>
+      <p class="stat-card__value">{{ session.parking_attempts }}</p>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if checkpoints %}
+  <hr class="section-divider">
+
+  {# ══════════════════════════════════════════════════
+     CHECKPOINT TIMELINE
+     ══════════════════════════════════════════════════ #}
+  <p class="section-tag">Progress</p>
+  <h2 class="section-heading">Checkpoint Timeline</h2>
+
+  <div class="table-card">
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Checkpoint</th>
+            <th>Time</th>
+            <th>Speed</th>
+            <th>Cumulative Penalties</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cp in checkpoints %}
+          <tr>
+            <td>
+              <span class="cp-dot">
+                <span class="cp-dot__circle"></span>
+                <span class="cp-dot__num">CP {{ cp.checkpoint_number }}</span>
+              </span>
+            </td>
+            <td>{{ cp.time_at_checkpoint|floatformat:1 }}s</td>
+            <td>{{ cp.speed_at_checkpoint|floatformat:1 }}</td>
+            <td>
+              <span style="{% if cp.penalties_at_checkpoint > 0 %}color: #ef4444;{% endif %}">
+                {{ cp.penalties_at_checkpoint }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if best_session and not is_personal_best %}
+  <hr class="section-divider">
+
+  {# ══════════════════════════════════════════════════
+     COMPARISON WITH PERSONAL BEST
+     ══════════════════════════════════════════════════ #}
+  <p class="section-tag">Comparison</p>
+  <h2 class="section-heading">vs Personal Best</h2>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <p class="compare-card__label">This Attempt</p>
+      <p class="compare-card__score">{{ session.score }}</p>
+      <p class="compare-card__sub">{{ session.duration_display }} · {{ session.penalty_count }} penalties</p>
+    </div>
+    <div class="compare-card compare-card--highlight">
+      <p class="compare-card__label">🏆 Personal Best</p>
+      <p class="compare-card__score">{{ best_session.score }}</p>
+      <p class="compare-card__sub">{{ best_session.duration_display }} · {{ best_session.penalty_count }} penalties</p>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

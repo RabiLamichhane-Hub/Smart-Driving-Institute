@@ -292,7 +292,7 @@ def approve_single_session_view(request, pk):
             return JsonResponse({'status': 'error', 'detail': str(exc)}, status=400)
         messages.error(request, str(exc))
 
-    return redirect('scheduling:approve')
+    return redirect('scheduling:session_list')
 
 
 # 6. Cancel Session  (supervisor / admin)
@@ -320,12 +320,25 @@ def cancel_session_view(request, pk):
 @role_required(['admin', 'supervisor'])
 def attendance_today_view(request):
     """
-    GET  → List today's scheduled/ongoing sessions ready for attendance.
+    GET  → List scheduled/ongoing/completed sessions for the selected date
+           (defaults to today). Accepts ?date=YYYY-MM-DD to mark attendance
+           for past days whose sessions were approved late.
     POST → Save attendance records for submitted sessions.
     """
     today = date.today()
+
+    # Allow a date override so admins can mark attendance for past days.
+    selected_date = today
+    date_param = request.GET.get('date', '').strip() or request.POST.get('date', '').strip()
+    if date_param:
+        try:
+            from datetime import datetime
+            selected_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = today
+
     sessions = Session.objects.filter(
-        date=today,
+        date=selected_date,
         status__in=('scheduled', 'ongoing', 'completed'),
     ).select_related(
         'trainee', 'slot', 'vehicle', 'instructor'
@@ -334,7 +347,7 @@ def attendance_today_view(request):
     existing_attendance = {
         a.session_id: a
         for a in AttendanceRecord.objects.filter(
-            session__date=today
+            session__date=selected_date
         ).select_related('session')
     }
 
@@ -376,7 +389,7 @@ def attendance_today_view(request):
             for e in errors:
                 messages.warning(request, e)
         messages.success(request, f"Attendance saved for {saved} session(s).")
-        return redirect('scheduling:attendance_today')
+        return redirect(f"{request.path}?date={selected_date}")
 
     # Annotate each session with its existing attendance status/notes
     sessions = list(sessions)
@@ -386,8 +399,10 @@ def attendance_today_view(request):
         session.att_notes  = record.notes  if record else ''
 
     return render(request, 'attendance_today.html', {
-        'sessions': sessions,
-        'today':    today,
+        'sessions':      sessions,
+        'today':         today,
+        'selected_date': selected_date,
+        'is_past':       selected_date < today,
     })
 
 

@@ -22,8 +22,13 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
  
         if user is not None:
+            # Superusers default to admin role
+            if user.is_superuser and not user.role:
+                user.role = 'admin'
+                user.save(update_fields=['role'])
+
             login(request, user)
-            if user.role == "admin":
+            if user.role == "admin" or user.is_superuser:
                 return redirect("homesandall:admin_dashboard")
             elif user.role == "supervisor":
                 return redirect("homesandall:supervisor_dashboard")

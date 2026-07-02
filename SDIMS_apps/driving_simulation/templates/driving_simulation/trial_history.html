@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Trial History — SDIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Page Shell ── */
+  .page-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 48px 80px;
+  }
+  .page-wrapper::before {
+    content: 'HISTORY';
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    letter-spacing: 0.04em;
+    color: rgba(26, 46, 37, 0.025);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  html.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
+  }
+
+  /* ── Page Header ── */
+  .page-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin: 0 0 8px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--green);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, transform 0.18s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
+    transform: translateY(-1px);
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover {
+    border-color: rgba(45, 122, 95, 0.20);
+    transform: translateY(-3px);
+  }
+  .stat-card__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+  }
+  .stat-card__value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    color: var(--green);
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-card__sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.col-score {
+    color: rgba(45, 122, 95, 0.7);
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+  tbody tr:hover {
+    background: rgba(45, 122, 95, 0.03);
+  }
+  td {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-sec);
+    padding: 14px 18px;
+    vertical-align: middle;
+  }
+  td.col-id {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  td.col-score {
+    font-weight: 500;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+  td.col-vehicle {
+    white-space: nowrap;
+  }
+
+  /* ── Result Pill ── */
+  .result-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .result-pill::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .pill-passed {
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+  }
+  .pill-passed::before { background: var(--green); }
+  .pill-failed {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+  }
+  .pill-failed::before { background: #ef4444; }
+  .pill-abandoned {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #f59e0b;
+  }
+  .pill-abandoned::before { background: #f59e0b; }
+
+  /* ── View Link ── */
+  .view-link {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--green);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.15s;
+  }
+  .view-link:hover { opacity: 0.75; }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+  .empty-state-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .empty-state-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .page-wrapper { padding: 28px 20px 60px; }
+    .page-title { font-size: 38px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    th.hide-mobile, td.hide-mobile { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  {# ── Page Header ── #}
+  <p class="page-label">Driving Simulation</p>
+  <h1 class="page-title">Trial History</h1>
+
+  {# ── Action Bar ── #}
+  <div class="action-bar">
+    <a href="{% url 'driving_simulation:simulator' %}" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start Simulator
+    </a>
+    <a href="{% url 'driving_simulation:leaderboard' %}" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+      Leaderboard
+    </a>
+  </div>
+
+  <hr class="section-divider">
+
+  {# ── Statistics ── #}
+  {% if stats.total_attempts > 0 %}
+  <p class="section-tag">Overview</p>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <p class="stat-card__label">Total Attempts</p>
+      <p class="stat-card__value">{{ stats.total_attempts }}</p>
+      <p class="stat-card__sub">simulation sessions</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Pass Rate</p>
+      <p class="stat-card__value">{{ stats.pass_rate }}%</p>
+      <p class="stat-card__sub">{{ stats.total_passed }} passed</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Average Score</p>
+      <p class="stat-card__value">{{ stats.avg_score }}</p>
+      <p class="stat-card__sub">out of 100</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Best Score</p>
+      <p class="stat-card__value">{{ stats.best_score }}</p>
+      <p class="stat-card__sub">personal best</p>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+  {% endif %}
+
+  {# ── Sessions Table ── #}
+  <p class="section-tag">Results</p>
+
+  <div class="table-card">
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Scenario</th>
+            <th class="hide-mobile">Vehicle</th>
+            <th class="col-score">Score</th>
+            <th class="hide-mobile">Duration</th>
+            <th class="hide-mobile">Collisions</th>
+            <th>Result</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr>
+            <td class="col-id">{{ forloop.counter }}</td>
+            <td>{{ s.scenario.name|default:"—" }}</td>
+            <td class="col-vehicle hide-mobile">
+              {% if s.scenario.vehicle_type == 'car' %}🚗{% elif s.scenario.vehicle_type == 'bike' %}🏍️{% else %}🛵{% endif %}
+              {{ s.scenario.get_vehicle_type_display|default:"—" }}
+            </td>
+            <td class="col-score">{{ s.score }} / 100</td>
+            <td class="hide-mobile">{{ s.duration_display }}</td>
+            <td class="hide-mobile" style="font-variant-numeric: tabular-nums;">{{ s.collision_count }}</td>
+            <td>
+              {% if s.passed %}
+                <span class="result-pill pill-passed">Passed</span>
+              {% elif s.status == 'abandoned' %}
+                <span class="result-pill pill-abandoned">Abandoned</span>
+              {% else %}
+                <span class="result-pill pill-failed">Failed</span>
+              {% endif %}
+            </td>
+            <td class="col-date">{{ s.started_at|date:"d M Y, H:i" }}</td>
+            <td>
+              <a href="{% url 'driving_simulation:session_detail' s.session_id %}" class="view-link">
+                View
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <p class="empty-state-label">No Trials Yet</p>
+                <p class="empty-state-sub">Complete a driving simulation to see your results here.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

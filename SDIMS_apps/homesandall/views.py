@@ -252,7 +252,7 @@ def index(request):
 @login_required
 @role_required(['admin'])
 def admin_dashboard(request):
-    from django.db.models import Sum, Value, CharField
+    from django.db.models import Sum, Value, CharField, F
     from django.db.models.functions import TruncMonth
     import json
     import decimal
@@ -379,12 +379,16 @@ def admin_dashboard(request):
                                   .order_by('-total')
     ]
 
-    # ── Financial: Recent payments (course + session, last 10 combined) ──────
+    # ── Financial: Recent payments (course + session + walk-in, last 10) ────
+    # FIX: include trainee name fields in values() so the template can display them
     course_payments = list(
         Payment.objects.select_related('fee_record', 'fee_record__trainee',
                                        'fee_record__trainee__user')
                        .order_by('-date')
                        .values('id', 'amount', 'method', 'date',
+                               'fee_record__trainee__user__username',
+                               'fee_record__trainee__user__first_name',
+                               'fee_record__trainee__user__last_name',
                                label=Value('course', output_field=CharField()))
     )[:10]
     session_payments = list(
@@ -394,13 +398,33 @@ def admin_dashboard(request):
                                       label=Value('session', output_field=CharField()))
     )[:10]
 
-    # Normalise to a common key 'date' for sorting
-    for p in course_payments:
-        p['date'] = p.pop('date')
+    # Walk-in (PublicBooking) payments — only fee_paid=True entries
+    walkin_payments_raw = list(
+        PublicBooking.objects.filter(fee_paid=True)
+                             .order_by('-created_at')
+                             .values('id', 'guest_name', 'created_at',
+                                     amount=F('fee_amount'),
+                                     label=Value('walkin', output_field=CharField()))
+    )[:10]
+    # Normalise: map created_at → date, add missing keys for template compatibility
+    walkin_payments = []
+    for p in walkin_payments_raw:
+        walkin_payments.append({
+            'id':         p['id'],
+            'amount':     p['amount'],
+            'method':     None,
+            'date':       p['created_at'].date() if hasattr(p['created_at'], 'date') else p['created_at'],
+            'guest_name': p['guest_name'],
+            'label':      'walkin',
+        })
+
+    def _to_date(val):
+        """Coerce a date or datetime to a plain date for safe cross-type sorting."""
+        return val.date() if hasattr(val, 'date') and callable(val.date) else val
 
     recent_payments = sorted(
-        course_payments + session_payments,
-        key=lambda x: x['date'],
+        course_payments + session_payments + walkin_payments,
+        key=lambda x: _to_date(x['date']),
         reverse=True,
     )[:10]
 

@@ -18,11 +18,14 @@
     right: -20px;
     font-family: "Bebas Neue", sans-serif;
     font-size: 180px;
-    color: rgba(255, 255, 255, 0.028);
+    color: rgba(26, 46, 37, 0.025);
     line-height: 1;
     pointer-events: none;
     user-select: none;
     letter-spacing: 0.04em;
+  }
+  html.dark .page-wrapper::before {
+    color: rgba(232, 242, 237, 0.028);
   }
 
   /* ── Page header ── */
@@ -31,7 +34,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 8px;
   }
   .page-title {
@@ -58,8 +61,8 @@
 
   /* ── Buttons ── */
   .btn-primary {
-    background: var(--yellow);
-    color: #000;
+    background: var(--green);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 11px 24px;
@@ -74,13 +77,13 @@
     transition: background 0.18s, transform 0.18s;
   }
   .btn-primary:hover {
-    background: var(--yellow-dark);
+    background: var(--green-dark);
     transform: translateY(-1px);
   }
   .btn-ghost {
     background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--slate);
+    border: 1px solid rgba(45, 122, 95, 0.3);
     border-radius: 8px;
     padding: 11px 24px;
     font-family: "DM Sans", sans-serif;
@@ -94,8 +97,8 @@
     transition: border-color 0.18s, color 0.18s;
   }
   .btn-ghost:hover {
-    border-color: rgba(250, 204, 21, 0.4);
-    color: var(--yellow);
+    border-color: rgba(45, 122, 95, 0.5);
+    color: var(--green);
   }
 
   /* ── Layout ── */
@@ -149,7 +152,6 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px 24px;
   }
-  .summary-item {}
   .summary-key {
     font-family: "DM Sans", sans-serif;
     font-size: 11px;
@@ -166,20 +168,20 @@
     color: var(--text);
   }
   .summary-value.amount {
-    color: var(--yellow);
+    color: var(--green);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
   .slot-badge {
-    background: rgba(250, 204, 21, 0.08);
-    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 5px;
     padding: 2px 8px;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
   }
   .summary-notes {
     margin-top: 16px;
@@ -191,7 +193,7 @@
   }
   .summary-notes .summary-value {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-muted);
     font-style: italic;
     line-height: 1.65;
   }
@@ -202,7 +204,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--green);
     margin: 0 0 4px;
   }
   .form-section-title {
@@ -240,7 +242,7 @@
     color: var(--text-muted);
   }
   .field-label .required {
-    color: var(--yellow);
+    color: var(--green);
     margin-left: 2px;
   }
   .field-label .optional {
@@ -268,7 +270,7 @@
     -webkit-appearance: none;
   }
   .field-group select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(45,122,95,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 36px;
@@ -277,7 +279,7 @@
   .field-group input:focus,
   .field-group select:focus {
     outline: none;
-    border-color: var(--yellow-focus);
+    border-color: var(--green-focus);
   }
   .field-hint {
     font-family: "DM Sans", sans-serif;
@@ -290,14 +292,14 @@
     font-family: "DM Sans", sans-serif;
     font-size: 12px;
     font-weight: 400;
-    color: #f87171;
+    color: #ef4444;
     margin-top: 2px;
   }
 
   /* ── Fee checkbox row ── */
   .fee-check-row {
-    background: var(--yellow-dim);
-    border: 1px solid var(--yellow-border);
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
     border-radius: 10px;
     padding: 16px 20px;
     display: flex;
@@ -309,11 +311,10 @@
     width: 18px;
     height: 18px;
     margin-top: 2px;
-    accent-color: var(--yellow);
+    accent-color: var(--green);
     flex-shrink: 0;
     cursor: pointer;
   }
-  .fee-check-content {}
   .fee-check-title {
     font-family: "DM Sans", sans-serif;
     font-size: 14px;
@@ -345,7 +346,7 @@
     font-family: "DM Sans", sans-serif;
     font-size: 13px;
     font-weight: 400;
-    color: #f87171;
+    color: #ef4444;
     margin: 0;
     line-height: 1.7;
   }

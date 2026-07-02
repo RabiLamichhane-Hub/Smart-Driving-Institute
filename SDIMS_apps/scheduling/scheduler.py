@@ -436,11 +436,6 @@ def _find_slot(trainee, capacity_map, trainee_type, slots):
         earlier → later → earlier → later …
 
     Returns a TimeSlot instance or None.
-
-    FIX: accepts the authoritative `slots` list built at the start of _execute
-    rather than re-querying TimeSlot from the DB. This ensures _find_slot only
-    ever considers slots that exist in capacity_map, preventing valid slots from
-    being silently treated as full due to a missing capacity_map entry.
     """
     preferences = list(
         trainee.slot_preferences.select_related('slot').order_by('priority')

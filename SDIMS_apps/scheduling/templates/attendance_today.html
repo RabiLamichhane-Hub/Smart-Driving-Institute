@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Attendance — {{ today|date:"d M Y" }} — SDIMS{% endblock %}
+{% block title %}Attendance — {{ selected_date|date:"d M Y" }} — SDIMS{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -429,11 +429,32 @@
 
   {# ── Page Header ── #}
   <p class="page-label">Scheduling</p>
-  <h1 class="page-title">Attendance <span>— {{ today|date:"D, d M Y" }}</span></h1>
+  <h1 class="page-title">Attendance <span>— {{ selected_date|date:"D, d M Y" }}</span></h1>
+
+  {# ── Date Picker ── #}
+  <form method="get" style="display:inline-flex; align-items:center; gap:10px; margin-bottom:16px;">
+    <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
+           max="{{ today|date:'Y-m-d' }}"
+           style="background:var(--bg); border:1px solid var(--border); border-radius:8px;
+                  color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
+                  padding:7px 12px; outline:none;">
+    <button type="submit"
+            style="background:var(--green); color:#fff; border:none; border-radius:8px;
+                   padding:7px 16px; font-family:'DM Sans',sans-serif; font-size:13px;
+                   font-weight:600; cursor:pointer;">Go</button>
+  </form>
+
   <p class="page-sub">Mark each trainee as present, late, or absent.</p>
+
+  {% if is_past %}
+  <div class="live-badge" style="background:rgba(245,158,11,0.08); border-color:rgba(245,158,11,0.25); color:#fbbf24;">
+    <span class="live-dot" style="background:#fbbf24; animation:none;"></span>Past Date
+  </div>
+  {% else %}
   <div class="live-badge">
     <span class="live-dot"></span>Live
   </div>
+  {% endif %}
 
   <hr class="section-divider">
 
@@ -450,6 +471,7 @@
 
   <form method="post" id="att-form">
     {% csrf_token %}
+    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
 
     {% regroup sessions by slot.slot_number as slot_groups %}
 
@@ -565,9 +587,10 @@
   {% else %}
 
   <div class="empty-card">
-    <p class="empty-state-label">No Sessions Today</p>
+    <p class="empty-state-label">No Sessions Found</p>
     <p class="empty-state-sub">
-      No scheduled, ongoing, or completed sessions found for {{ today|date:"d M Y" }}.
+      No scheduled, ongoing, or completed sessions found for {{ selected_date|date:"d M Y" }}.
+      {% if is_past %}Make sure sessions for this date were approved first.{% endif %}
     </p>
   </div>
 

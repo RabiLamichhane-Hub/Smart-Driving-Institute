@@ -511,7 +511,7 @@
   {# ── Action Bar (hidden for instructors) ── #}
   {% if request.user.role == 'admin' or request.user.role == 'supervisor' %}
   <div class="action-bar">
-    <a href="{% url 'scheduling:attendance_today' %}" class="btn-ghost">
+    <a href="{% url 'scheduling:attendance_today' %}{% if filter_date %}?date={{ filter_date }}{% endif %}" class="btn-ghost">
       📋 Mark Attendance
     </a>
 

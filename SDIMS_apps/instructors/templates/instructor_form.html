@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Instructor{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-wrapper::before {
+    content: "INSTRUCTOR";
+  }
+
+  .form-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-top: 24px;
+  }
+
+  .form-section + .form-section {
+    margin-top: 20px;
+  }
+
+  .form-section-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-dark);
+    margin-bottom: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 24px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-field.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-field label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-sec);
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    transition: border-color 0.22s;
+  }
+
+  .form-field input::placeholder,
+  .form-field textarea::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    outline: none;
+    border-color: var(--green-focus);
+  }
+
+  .form-field input[type="file"] {
+    padding: 9px 14px;
+  }
+
+  /* Drag and drop upload */
+  .dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    padding: 32px 20px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: border-color 0.22s, background 0.22s;
+  }
+
+  .dropzone:hover {
+    border-color: rgba(45, 122, 95, 0.4);
+  }
+
+  .dropzone.is-dragover {
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .dropzone.has-file {
+    padding: 20px;
+  }
+
+  .dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .dropzone-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    border: 1.5px solid var(--green-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green);
+  }
+
+  .dropzone-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .dropzone-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sec);
+  }
+
+  .dropzone-text span {
+    color: var(--green-dark);
+    text-decoration: underline;
+  }
+
+  .dropzone-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .dropzone-preview {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .dropzone.has-file .dropzone-preview {
+    display: flex;
+  }
+
+  .dropzone.has-file .dropzone-placeholder {
+    display: none;
+  }
+
+  .dropzone-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--green-border);
+    background: var(--card);
+    flex-shrink: 0;
+  }
+
+  .dropzone-filename {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  .dropzone-filesize {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .dropzone-remove {
+    position: relative;
+    z-index: 2;
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .dropzone-remove:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.55);
+  }
+
+  .form-field .errorlist {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: #ef4444;
+  }
+
+  .action-bar .btn-ghost,
+  .form-footer .btn-primary,
+  .form-footer .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+
+  .form-footer .btn-primary {
+    background: var(--green);
+    color: #ffffff;
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 4px 14px rgba(45, 122, 95, 0.28);
+  }
+
+  .form-footer .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(45, 122, 95, 0.36);
+  }
+
+  .form-footer .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(45, 122, 95, 0.28);
+  }
+
+  .action-bar .btn-ghost,
+  .form-footer .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(45, 122, 95, 0.35);
+    color: var(--slate);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .action-bar .btn-ghost:hover,
+  .form-footer .btn-ghost:hover {
+    border-color: rgba(45, 122, 95, 0.6);
+    color: var(--green-dark);
+    background: var(--green-dim);
+  }
+
+  @media (max-width: 720px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    .form-section {
+      padding: 24px 20px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <p class="page-label">Instructors</p>
+  <h1 class="page-title">Add Instructor</h1>
+
+  <div class="action-bar">
+    <a href="{% url 'homesandall:index' %}" class="btn-ghost">Back</a>
+  </div>
+  <hr class="section-divider">
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <div class="form-section">
+      <p class="form-section-title">Account Details</p>
+      <div class="form-grid">
+        {% for field in user_form %}
+        <div class="form-field {% if field.field.widget.input_type == 'textarea' %}full-width{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+          <ul class="errorlist">
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <p class="form-section-title">Instructor Details</p>
+      <div class="form-grid">
+        {% for field in instructor_form %}
+        <div class="form-field {% if field.field.widget.input_type == 'textarea' or field.field.widget.input_type == 'file' %}full-width{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+          {% if field.field.widget.input_type == 'file' %}
+          <div class="dropzone" data-dropzone>
+            {{ field }}
+            <div class="dropzone-placeholder">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <p class="dropzone-text">Drag &amp; drop photo, or <span>browse</span></p>
+              <p class="dropzone-hint">JPG or PNG, up to 5MB</p>
+            </div>
+            <div class="dropzone-preview">
+              <img class="dropzone-thumb" data-dropzone-thumb src="" alt="Photo preview">
+              <div>
+                <p class="dropzone-filename" data-dropzone-filename></p>
+                <p class="dropzone-filesize" data-dropzone-filesize></p>
+              </div>
+              <button type="button" class="dropzone-remove" data-dropzone-remove>Remove</button>
+            </div>
+          </div>
+          {% else %}
+          {{ field }}
+          {% endif %}
+
+          {% if field.errors %}
+          <ul class="errorlist">
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <hr class="section-divider">
+    <div class="form-footer">
+      <button type="submit" class="btn-primary">Save Changes</button>
+      <a href="{% url 'homesandall:index' %}" class="btn-ghost">Cancel</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll('[data-dropzone]').forEach(function (zone) {
+    var input = zone.querySelector('input[type="file"]');
+    var thumb = zone.querySelector('[data-dropzone-thumb]');
+    var filename = zone.querySelector('[data-dropzone-filename]');
+    var filesize = zone.querySelector('[data-dropzone-filesize]');
+    var removeBtn = zone.querySelector('[data-dropzone-remove]');
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showFile(file) {
+      if (!file) return;
+      filename.textContent = file.name;
+      filesize.textContent = formatSize(file.size);
+      zone.classList.add('has-file');
+
+      if (file.type && file.type.startsWith('image/')) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          thumb.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function clearFile() {
+      input.value = '';
+      thumb.src = '';
+      filename.textContent = '';
+      filesize.textContent = '';
+      zone.classList.remove('has-file');
+    }
+
+    input.addEventListener('change', function () {
+      if (input.files && input.files[0]) {
+        showFile(input.files[0]);
+      }
+    });
+
+    ['dragenter', 'dragover'].forEach(function (evt) {
+      zone.addEventListener(evt, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add('is-dragover');
+      });
+    });
+
+    ['dragleave', 'dragend', 'drop'].forEach(function (evt) {
+      zone.addEventListener(evt, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove('is-dragover');
+      });
+    });
+
+    zone.addEventListener('drop', function (e) {
+      var files = e.dataTransfer.files;
+      if (files && files[0]) {
+        input.files = files;
+        showFile(files[0]);
+      }
+    });
+
+    removeBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      clearFile();
+    });
+  });
+</script>
+{% endblock %}
